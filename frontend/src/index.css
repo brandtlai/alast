@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+:root {
+  --color-background:  #050714;
+  --color-foreground:  #F8FAFC;
+  --color-primary:     #FF8A00;
+  --color-secondary:   #0A0F2D;
+  --color-accent:      #00D1FF;
+  --color-gold:        #FFD700;
+  --color-gold-orange: #FFB800;
+  --color-card:        rgba(10,15,45,0.6);
+  --color-border:      rgba(255,255,255,0.08);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+* {
+  border-color: var(--color-border);
+}
