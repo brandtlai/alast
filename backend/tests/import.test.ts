@@ -82,3 +82,78 @@ describe('POST /api/admin/import/preview', () => {
     expect(body.data.team_a.matched_id).toBeTruthy()
   })
 })
+
+describe('POST /api/admin/import/confirm', () => {
+  it('writes match_maps and player_match_stats to DB', async () => {
+    await resetTables('csdm_imports', 'player_match_stats', 'match_maps',
+                      'matches', 'players', 'teams', 'tournaments', 'admins')
+
+    const token = await getAdminToken()
+    const naviId = await insertTeam({ name: 'NAVI' })
+    const vitalityId = await insertTeam({ name: 'Vitality' })
+    const tournId = await insertTournament()
+
+    const matchRes = await app.request('/api/admin/matches', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tournament_id: tournId, team_a_id: naviId, team_b_id: vitalityId }),
+    })
+    const matchBody = await matchRes.json() as { data: { id: string } }
+    const matchId = matchBody.data.id
+
+    const formData = new FormData()
+    const blob = new Blob([JSON.stringify(SAMPLE_CSDM)], { type: 'application/json' })
+    formData.append('file', blob, 'match.json')
+    const previewRes = await app.request('/api/admin/import/preview', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    })
+    const previewBody = await previewRes.json() as { data: { import_id: string } }
+    const importId = previewBody.data.import_id
+
+    const confirmRes = await app.request('/api/admin/import/confirm', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        import_id: importId,
+        match_id: matchId,
+        team_mappings: { 'NAVI': naviId, 'Vitality': vitalityId },
+      }),
+    })
+    expect(confirmRes.status).toBe(200)
+
+    const { rows: maps } = await query('SELECT * FROM match_maps WHERE match_id = $1', [matchId])
+    expect(maps).toHaveLength(1)
+    expect(maps[0].map_name).toBe('de_dust2')
+
+    const { rows: stats } = await query(
+      'SELECT * FROM player_match_stats WHERE match_map_id = $1', [maps[0].id]
+    )
+    expect(stats).toHaveLength(1)
+    expect(stats[0].kills).toBe(28)
+  })
+
+  it('returns 409 on duplicate confirm', async () => {
+    await resetTables('csdm_imports', 'admins')
+    const token = await getAdminToken()
+    const { rows } = await query<{ id: string }>(
+      `INSERT INTO csdm_imports (raw_json, status) VALUES ($1, 'confirmed') RETURNING id`,
+      [JSON.stringify({})]
+    )
+    const importId = rows[0].id
+
+    const res = await app.request('/api/admin/import/confirm', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ import_id: importId, team_mappings: {} }),
+    })
+    expect(res.status).toBe(409)
+  })
+})
