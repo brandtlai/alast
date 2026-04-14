@@ -16,6 +16,7 @@ import adminMatchesRoutes from './routes/admin/matches.js'
 import adminNewsRoutes from './routes/admin/news.js'
 import adminUploadRoutes from './routes/admin/upload.js'
 import adminImportRoutes from './routes/admin/import.js'
+import { authMiddleware } from './middleware/auth.js'
 
 export const app = new Hono()
 
@@ -28,8 +29,19 @@ app.route('/api/news', newsRoutes)
 app.route('/api/stats', statsRoutes)
 app.route('/api/search', searchRoutes)
 
-// Admin routes
+const adminAuth = authMiddleware()
+
+// Admin routes (login/refresh/logout have no middleware)
 app.route('/api/admin', adminAuthRoutes)
+
+// Protected admin routes
+app.use('/api/admin/teams/*', adminAuth)
+app.use('/api/admin/players/*', adminAuth)
+app.use('/api/admin/matches/*', adminAuth)
+app.use('/api/admin/news/*', adminAuth)
+app.use('/api/admin/upload/*', adminAuth)
+app.use('/api/admin/import/*', adminAuth)
+
 app.route('/api/admin/teams', adminTeamsRoutes)
 app.route('/api/admin/players', adminPlayersRoutes)
 app.route('/api/admin/matches', adminMatchesRoutes)
