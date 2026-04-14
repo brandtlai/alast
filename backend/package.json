@@ -6,6 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "migrate": "tsx src/migrate.ts",
+    "setup-admin": "tsx src/setup-admin.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
