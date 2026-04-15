@@ -1,6 +1,5 @@
 // src/pages/TeamsPage.tsx
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTeams } from '../api/teams'
 import Spinner from '../components/Spinner'
