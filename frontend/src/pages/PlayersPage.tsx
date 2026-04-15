@@ -1,4 +1,6 @@
+// src/pages/PlayersPage.tsx
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { usePlayers } from '../api/players'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
@@ -8,48 +10,64 @@ export default function PlayersPage() {
   const { data: players, isLoading, error } = usePlayers()
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">参赛选手</h1>
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="mb-8">
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">All Players</p>
+        <h1 className="text-4xl font-black italic tracking-tighter text-white/90">参赛选手</h1>
+      </div>
+
       {isLoading && <Spinner />}
       {error && <ErrorBox message={error.message} />}
       {players && (
         players.length === 0
-          ? <p className="opacity-40">暂无选手数据</p>
-          : <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--color-border)' }}>
-              <table className="w-full text-sm">
+          ? <p className="text-sm text-white/40">暂无选手数据</p>
+          : <div className="rounded-2xl overflow-hidden border border-white/[0.08]">
+              <table className="w-full">
                 <thead>
-                  <tr className="text-left text-xs uppercase opacity-50" style={{ background: 'rgba(10,15,45,0.8)' }}>
-                    <th className="px-4 py-3">选手</th>
-                    <th className="px-4 py-3">战队</th>
-                    <th className="px-4 py-3">国家</th>
-                    <th className="px-4 py-3">定位</th>
+                  <tr className="bg-white/[0.02] border-b border-white/[0.06]">
+                    {['选手', '战队', '国家', '定位'].map(h => (
+                      <th key={h} className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-widest text-white/35">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-white/[0.04]">
                   {players.map((p, i) => (
-                    <tr key={p.id} className="border-t transition-colors hover:opacity-80"
-                      style={{ borderColor: 'var(--color-border)', background: i % 2 === 0 ? 'transparent' : 'rgba(10,15,45,0.3)' }}>
-                      <td className="px-4 py-3">
-                        <Link to={`/players/${p.id}`} className="flex items-center gap-2 font-semibold hover:underline" style={{ color: 'var(--color-foreground)' }}>
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: 'var(--color-secondary)' }}>
+                    <motion.tr
+                      key={p.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.03 }}
+                      className="hover:bg-white/[0.03] transition-colors"
+                    >
+                      <td className="px-5 py-3">
+                        <Link to={`/players/${p.id}`} className="flex items-center gap-3 group">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-black text-primary flex-shrink-0">
                             {p.nickname.slice(0, 2).toUpperCase()}
                           </div>
-                          {p.nickname}
+                          <span className="font-black text-sm text-white/90 group-hover:text-primary transition-colors">
+                            {p.nickname}
+                          </span>
                         </Link>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3">
                         {p.team_name
-                          ? <Link to={`/teams/${p.team_id}`} className="flex items-center gap-2 hover:opacity-80">
-                              <TeamLogo url={p.team_logo_url} name={p.team_name} size={20} />
-                              <span className="opacity-70">{p.team_name}</span>
+                          ? <Link to={`/teams/${p.team_id ?? ''}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                              <TeamLogo url={p.team_logo_url} name={p.team_name} size={18} />
+                              <span className="text-sm text-white/60 font-bold">{p.team_name}</span>
                             </Link>
-                          : <span className="opacity-30">—</span>}
+                          : <span className="text-white/25">—</span>}
                       </td>
-                      <td className="px-4 py-3 opacity-60">{p.country ?? '—'}</td>
-                      <td className="px-4 py-3">
-                        {p.role ? <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(0,209,255,0.1)', color: 'var(--color-accent)' }}>{p.role}</span> : '—'}
+                      <td className="px-5 py-3 text-sm text-white/55 font-bold">{p.country ?? '—'}</td>
+                      <td className="px-5 py-3">
+                        {p.role
+                          ? <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-accent/10 border border-accent/20 text-accent">
+                              {p.role}
+                            </span>
+                          : <span className="text-white/25">—</span>}
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>
