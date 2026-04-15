@@ -1,9 +1,11 @@
+// src/pages/NewsPage.tsx
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import dayjs from 'dayjs'
 import { useNewsList } from '../api/news'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
+import Card from '../components/Card'
 
 const CATEGORIES = ['', '战报', '资讯', '专访']
 
@@ -12,18 +14,24 @@ export default function NewsPage() {
   const { data: articles, isLoading, error } = useNewsList({ category: category || undefined })
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">新闻资讯</h1>
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="mb-8">
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Latest News</p>
+        <h1 className="text-4xl font-black italic tracking-tighter text-white/90">战报新闻</h1>
+      </div>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         {CATEGORIES.map(c => (
-          <button key={c} onClick={() => setCategory(c)}
-            className="px-3 py-1.5 rounded-md text-sm transition-all"
+          <button
+            key={c}
+            onClick={() => setCategory(c)}
+            className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest transition-all border"
             style={{
-              background: category === c ? 'var(--color-primary)' : 'var(--color-card)',
-              color: category === c ? '#fff' : 'var(--color-foreground)',
-              border: '1px solid var(--color-border)',
-            }}>
+              background: category === c ? 'var(--color-primary)' : 'rgba(255,255,255,0.05)',
+              color: category === c ? '#fff' : 'rgba(248,250,252,0.5)',
+              borderColor: category === c ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
+            }}
+          >
             {c || '全部'}
           </button>
         ))}
@@ -33,25 +41,42 @@ export default function NewsPage() {
       {error && <ErrorBox message={error.message} />}
       {articles && (
         articles.length === 0
-          ? <p className="opacity-40">暂无文章</p>
+          ? <p className="text-sm text-white/40">暂无文章</p>
           : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {articles.map(a => (
-                <Link key={a.id} to={`/news/${a.slug}`}
-                  className="flex flex-col rounded-lg overflow-hidden transition-all hover:scale-[1.02]"
-                  style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
-                  {a.cover_image_url
-                    ? <img src={a.cover_image_url} alt={a.title} className="w-full h-44 object-cover" />
-                    : <div className="w-full h-44 flex items-center justify-center text-4xl" style={{ background: 'var(--color-secondary)' }}>🏆</div>}
-                  <div className="p-4 flex-1 flex flex-col">
-                    {a.category && <span className="text-xs font-semibold mb-1" style={{ color: 'var(--color-accent)' }}>{a.category}</span>}
-                    <h3 className="font-semibold leading-snug line-clamp-2 flex-1">{a.title}</h3>
-                    {a.summary && <p className="text-sm opacity-60 mt-2 line-clamp-2">{a.summary}</p>}
-                    <div className="flex items-center justify-between mt-3 text-xs opacity-40">
-                      <span>{a.author ?? 'ALAST'}</span>
-                      <span>{dayjs(a.published_at).format('YYYY-MM-DD')}</span>
+              {articles.map((a, i) => (
+                <motion.div
+                  key={a.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <Card href={`/news/${a.slug}`} className="flex flex-col">
+                    <div className="h-44 overflow-hidden bg-secondary flex items-center justify-center flex-shrink-0">
+                      {a.cover_image_url
+                        ? <img
+                            src={a.cover_image_url}
+                            alt={a.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        : <span className="text-5xl opacity-20">🏆</span>}
                     </div>
-                  </div>
-                </Link>
+                    <div className="p-4 flex-1 flex flex-col">
+                      {a.category && (
+                        <span className="inline-flex mb-2 self-start px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-[9px] font-black uppercase tracking-widest text-primary">
+                          {a.category}
+                        </span>
+                      )}
+                      <h3 className="font-black text-sm leading-snug line-clamp-2 flex-1 text-white/90">{a.title}</h3>
+                      {a.summary && (
+                        <p className="text-xs text-white/50 mt-1.5 line-clamp-2">{a.summary}</p>
+                      )}
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-[10px] text-white/35 font-bold">{a.author ?? 'ALAST'}</span>
+                        <span className="text-[10px] text-white/35">{dayjs(a.published_at).format('YYYY-MM-DD')}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
               ))}
             </div>
       )}
