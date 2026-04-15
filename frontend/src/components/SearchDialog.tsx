@@ -33,19 +33,22 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
     if (timerRef.current) clearTimeout(timerRef.current)
     if (!query.trim()) { setResults(null); return }
 
+    let cancelled = false
+
     timerRef.current = setTimeout(async () => {
       setLoading(true)
       try {
         const data = await apiFetch<SearchResults>(`/api/search?q=${encodeURIComponent(query)}`)
-        setResults(data)
+        if (!cancelled) setResults(data)
       } catch {
-        setResults(null)
+        if (!cancelled) setResults(null)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }, 300)
 
     return () => {
+      cancelled = true
       if (timerRef.current) clearTimeout(timerRef.current)
     }
   }, [query])
