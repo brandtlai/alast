@@ -19,6 +19,10 @@ body {
   min-height: 100vh;
 }
 
+*, *::before, *::after {
+  border-color: var(--color-border);
+}
+
 /* ── Gradient text ── */
 .gold-gradient {
   background: linear-gradient(135deg, #FFD700 0%, #FFB800 45%, #FF8A00 100%);
@@ -26,7 +30,7 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   background-size: 200% auto;
-  animation: shimmer 4s infinite linear;
+  animation: shimmer 3s infinite linear;
 }
 
 /* ALAST brand letterform */
@@ -56,6 +60,14 @@ body {
 /* Trophy / brand glow */
 .orange-gold-glow {
   filter: drop-shadow(0 0 15px rgba(255, 184, 0, 0.4));
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
 /* Scrollbar */
