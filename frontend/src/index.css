@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root {
+@theme {
   --color-background:  #050714;
   --color-foreground:  #F8FAFC;
   --color-primary:     #FF8A00;
@@ -8,8 +8,8 @@
   --color-accent:      #00D1FF;
   --color-gold:        #FFD700;
   --color-gold-orange: #FFB800;
-  --color-card:        rgba(10,15,45,0.6);
-  --color-border:      rgba(255,255,255,0.08);
+  --color-card:        rgba(10, 15, 45, 0.6);
+  --color-border:      rgba(255, 255, 255, 0.08);
 }
 
 body {
@@ -19,6 +19,63 @@ body {
   min-height: 100vh;
 }
 
-* {
-  border-color: var(--color-border);
+/* ── Gradient text ── */
+.gold-gradient {
+  background: linear-gradient(135deg, #FFD700 0%, #FFB800 45%, #FF8A00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: shimmer 4s infinite linear;
+}
+
+/* ALAST brand letterform */
+.logo-primary {
+  font-weight: 950;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+  font-style: italic;
+  background: linear-gradient(to bottom, #FFD700 0%, #FFB800 50%, #FF8A00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 4px 12px rgba(255, 138, 0, 0.3));
+}
+
+/* Hero section background */
+.stage-gradient {
+  background: radial-gradient(circle at 50% -20%, #0F172A 0%, #050714 70%);
+}
+
+/* Stat numbers */
+.electric-blue-accent {
+  color: #00D1FF;
+  text-shadow: 0 0 10px rgba(0, 209, 255, 0.4);
+}
+
+/* Trophy / brand glow */
+.orange-gold-glow {
+  filter: drop-shadow(0 0 15px rgba(255, 184, 0, 0.4));
+}
+
+/* Scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 138, 0, 0.3); }
+
+/* ── Keyframes ── */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 10px rgba(255, 138, 0, 0.2); }
+  to   { box-shadow: 0 0 25px rgba(255, 138, 0, 0.5); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
 }
