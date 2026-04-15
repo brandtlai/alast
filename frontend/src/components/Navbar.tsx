@@ -72,7 +72,7 @@ export default function Navbar() {
             </button>
             <button
               onClick={() => setMobileOpen(v => !v)}
-              className="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-white/50"
+              className="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-all"
               aria-label="菜单"
             >
               {mobileOpen ? <X size={14} /> : <Menu size={14} />}
