@@ -193,6 +193,95 @@ export interface TierComparison {
   players: string
 }
 
+// ── Phase B: MatchDetail rich types ──────────────────────────────────────────
+
+export interface MapStatPlayer {
+  id: string
+  player_id: string
+  team_id: string | null
+  nickname: string
+  avatar_url: string | null
+  steam_id: string | null
+  team_name: string | null
+  team_logo_url: string | null
+  kills: number | null
+  deaths: number | null
+  assists: number | null
+  headshots: number | null
+  headshot_pct: number | null
+  adr: number | null
+  kast: number | null
+  rating: number | null
+  first_kills: number | null
+  first_deaths: number | null
+  clutches_won: number | null
+  clutches_played: number | null
+  is_sub: boolean
+}
+
+export interface MatchRound {
+  id: string
+  match_map_id: string
+  round_number: number
+  winner_side: number | null    // 2=T, 3=CT
+  winner_team_id: string | null
+  end_reason: number | null     // 1=TargetBombed 7=TerroristWin 8=CTWin 9=BombDefused 12=TargetSaved
+  duration_ms: number | null
+  team_a_side: number | null
+  team_b_side: number | null
+  team_a_score: number | null
+  team_b_score: number | null
+  team_a_economy_type: string | null
+  team_b_economy_type: string | null
+  team_a_money_spent: number | null
+  team_b_money_spent: number | null
+  team_a_equipment_value: number | null
+  team_b_equipment_value: number | null
+  start_tick: number | null
+  end_tick: number | null
+  kills: Array<{
+    weapon_name: string | null
+    is_headshot: boolean
+    killer_player_id: string | null
+    victim_player_id: string | null
+    tick: number | null
+  }> | null
+}
+
+export interface EconomyRound {
+  round_number: number
+  team_a_side: number | null
+  team_b_side: number | null
+  team_a_economy_type: string | null
+  team_b_economy_type: string | null
+  team_a_money_spent: number | null
+  team_b_money_spent: number | null
+  team_a_equipment_value: number | null
+  team_b_equipment_value: number | null
+  winner_side: number | null
+  end_reason: number | null
+}
+
+export interface MatchHighlights {
+  clutches: Array<{
+    round_number: number
+    opponent_count: number
+    won: boolean
+    kill_count: number
+    has_survived: boolean
+    nickname: string | null
+    avatar_url: string | null
+  }>
+  top_players: Array<{
+    nickname: string
+    avatar_url: string | null
+    rating: number | null
+    kills: number | null
+    deaths: number | null
+    adr: number | null
+  }>
+}
+
 export interface SearchResults {
   teams: Pick<Team, 'id' | 'name' | 'logo_url' | 'region'>[]
   players: Pick<Player, 'id' | 'nickname' | 'avatar_url' | 'team_name'>[]
