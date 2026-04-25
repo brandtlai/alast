@@ -17,6 +17,7 @@ frontend/.env
 logs/
 *.log
 .superpowers/
+.worktrees/
 
 # Uploads (user content — manage separately)
 uploads/
