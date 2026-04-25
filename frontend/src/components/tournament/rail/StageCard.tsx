@@ -1,16 +1,32 @@
 import { RailCard } from './RightRail'
 
-const STAGES = [
-  '报名', '选马',
-  '小组赛 R1', '小组赛 R2', '小组赛 R3',
-  '胜者组', '败者组', '总决赛',
+const STAGES: readonly { label: string; startISO: string }[] = [
+  { label: '报名',       startISO: '2026-03-11' },
+  { label: '选马',       startISO: '2026-04-01' },
+  { label: '小组赛 R1',  startISO: '2026-04-06' },
+  { label: '小组赛 R2',  startISO: '2026-04-13' },
+  { label: '小组赛 R3',  startISO: '2026-04-20' },
+  { label: '胜者组',     startISO: '2026-05-06' },
+  { label: '败者组',     startISO: '2026-05-13' },
+  { label: '总决赛',     startISO: '2026-06-30' },
 ]
 
-const CURRENT_INDEX = 2 // 小组赛 R1
+function getCurrentIndex(): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  let current = 0
+  for (let i = 0; i < STAGES.length; i++) {
+    if (new Date(STAGES[i].startISO) <= today) current = i
+    else break
+  }
+  return current
+}
+
+const CURRENT_INDEX = getCurrentIndex()
 
 export default function StageCard() {
   const total = STAGES.length
-  const current = STAGES[CURRENT_INDEX]
+  const current = STAGES[Math.min(CURRENT_INDEX, total - 1)].label
   const pct = Math.round(((CURRENT_INDEX + 1) / total) * 100)
 
   return (
@@ -22,7 +38,7 @@ export default function StageCard() {
         {current}
       </div>
       <div className="text-[11px] text-white/45 mb-3">
-        阶段 {CURRENT_INDEX + 1} / {total}
+        阶段 {Math.min(CURRENT_INDEX + 1, total)} / {total}
       </div>
       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-data-row)' }}>
         <div

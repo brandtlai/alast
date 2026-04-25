@@ -1,22 +1,59 @@
-import { useState } from 'react'
-import type { MatchRound } from '../../types'
+import { useState, useMemo } from 'react'
+import type { MatchRound, MapStatPlayer } from '../../types'
 
-const END_REASON_EMOJI: Record<number, string> = {
-  1: '💣',   // TargetBombed (bomb exploded)
-  7: '💀',   // TerroristWin (last kill)
-  8: '💀',   // CTWin (last kill)
-  9: '✂️',   // BombDefused
-  12: '⏱',  // TargetSaved (time ran out)
+const ECONOMY_LABEL: Record<string, string> = {
+  semi: '钢枪',
+  full: '全起',
+  eco: 'eco',
+  pistol: '手枪局',
+}
+
+const WEAPON_CN: Record<string, string> = {
+  'Incendiary Grenade': '燃烧弹',
+  'Molotov': '燃烧瓶',
+  'HE Grenade': '手雷',
+  'Flashbang': '闪光弹',
+  'Smoke Grenade': '烟雾弹',
+  'Decoy Grenade': '诱骗弹',
+  'grenade': '手雷',
+}
+
+function fmtEco(v: string | null) {
+  if (!v) return '—'
+  return ECONOMY_LABEL[v.toLowerCase()] ?? v
+}
+
+function fmtWeapon(name: string | null, isHeadshot: boolean) {
+  const w = name ? (WEAPON_CN[name] ?? name) : '?'
+  return isHeadshot ? `${w} 爆头` : w
 }
 
 interface Props {
   rounds: MatchRound[]
   teamAName: string
   teamBName: string
+  teamAId?: string | null
+  teamBId?: string | null
+  players?: MapStatPlayer[]
 }
 
-export default function RoundTimeline({ rounds, teamAName, teamBName }: Props) {
+const CT_COLOR = 'var(--color-accent)'
+const T_COLOR = '#FFD700'
+
+export default function RoundTimeline({ rounds, teamAName, teamBName, teamAId, teamBId, players = [] }: Props) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+
+  const playerTeamMap = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const p of players) if (p.player_id && p.team_id) m.set(p.player_id, p.team_id)
+    return m
+  }, [players])
+
+  const playerNameMap = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const p of players) m.set(p.player_id, p.nickname)
+    return m
+  }, [players])
 
   if (rounds.length === 0) {
     return (
@@ -28,64 +65,142 @@ export default function RoundTimeline({ rounds, teamAName, teamBName }: Props) {
   }
 
   return (
-    <div className="rounded-md border p-4 overflow-hidden"
+    <div className="rounded-md border p-4"
          style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
-      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Round Timeline</p>
-      <div className="relative flex gap-0.5 flex-wrap">
+      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-4">Round Timeline</p>
+
+      <div className="flex items-stretch gap-px">
         {rounds.map((r, idx) => {
-          const isHalf = idx === 11
+          const isHalfGap = idx === 12
+          const ctTeamId = r.team_a_side === 3 ? teamAId : r.team_b_side === 3 ? teamBId : null
+          const tTeamId  = r.team_a_side === 2 ? teamAId : r.team_b_side === 2 ? teamBId : null
+          const kills = r.kills ?? []
+          const ctDeaths = kills.filter(k => k.victim_player_id && playerTeamMap.get(k.victim_player_id) === ctTeamId).length
+          const tDeaths  = kills.filter(k => k.victim_player_id && playerTeamMap.get(k.victim_player_id) === tTeamId).length
+          const ctSurvivors = Math.max(0, 5 - ctDeaths)
+          const tSurvivors  = Math.max(0, 5 - tDeaths)
           const ctWon = r.winner_side === 3
-          const tWon = r.winner_side === 2
-          const bgColor = ctWon
-            ? 'var(--color-accent)'
-            : tWon
-              ? '#FFD700'
-              : 'rgba(255,255,255,0.1)'
-          const emoji = r.end_reason != null ? (END_REASON_EMOJI[r.end_reason] ?? '•') : '•'
+          const tWon  = r.winner_side === 2
+          const isHovered = hoveredIdx === idx
+          const tooltipRight = idx < 14
 
           return (
-            <div key={r.id} className="relative">
-              {isHalf && <div className="inline-block w-3" />}
+            <div key={r.id} className="flex items-stretch gap-px">
+              {/* Half-time divider */}
+              {isHalfGap && (
+                <div className="flex items-center mx-1.5">
+                  <div className="w-px self-stretch" style={{ background: 'var(--color-data-divider)' }} />
+                </div>
+              )}
+
               <div
-                className="relative w-7 h-9 flex flex-col items-center justify-center rounded-sm cursor-default select-none transition-transform hover:scale-110"
-                style={{ background: bgColor + (hoveredIdx === idx ? 'ff' : '99') }}
+                className="relative flex flex-col cursor-default select-none"
+                style={{ width: 28 }}
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
               >
-                <span className="text-[8px] font-black tabular-nums text-white/80">{r.round_number}</span>
-                <span className="text-[10px] leading-none">{emoji}</span>
+                {/* CT survivors (top) */}
+                <div
+                  className="flex flex-wrap content-end justify-center gap-[2px] p-[3px] rounded-t-sm"
+                  style={{
+                    minHeight: 38,
+                    background: ctWon
+                      ? 'rgba(56,189,248,0.22)'
+                      : isHovered
+                        ? 'rgba(56,189,248,0.07)'
+                        : 'rgba(56,189,248,0.04)',
+                  }}
+                >
+                  {Array.from({ length: ctSurvivors }).map((_, ki) => (
+                    <span key={ki} className="block rounded-full flex-shrink-0"
+                          style={{ width: 7, height: 7, background: CT_COLOR, opacity: 0.9 }} />
+                  ))}
+                </div>
 
-                {hoveredIdx === idx && (
+                {/* End reason — center band */}
+                <div className="flex items-center justify-center flex-shrink-0"
+                     style={{ height: 18, background: 'rgba(255,255,255,0.03)' }}>
+                  {r.end_reason === 9  && <span className="text-[11px] leading-none">✂️</span>}
+                  {r.end_reason === 12 && <span className="text-[11px] leading-none">⏱</span>}
+                  {r.end_reason === 1  && <span className="text-[11px] leading-none">💣</span>}
+                </div>
+
+                {/* T survivors (bottom) */}
+                <div
+                  className="flex flex-wrap content-start justify-center gap-[2px] p-[3px] rounded-b-sm"
+                  style={{
+                    minHeight: 38,
+                    background: tWon
+                      ? 'rgba(234,179,8,0.22)'
+                      : isHovered
+                        ? 'rgba(234,179,8,0.07)'
+                        : 'rgba(234,179,8,0.04)',
+                  }}
+                >
+                  {Array.from({ length: tSurvivors }).map((_, ki) => (
+                    <span key={ki} className="block rounded-full flex-shrink-0"
+                          style={{ width: 7, height: 7, background: T_COLOR, opacity: 0.9 }} />
+                  ))}
+                </div>
+
+                {/* Round number */}
+                <div className="text-center text-[8px] tabular-nums mt-1"
+                     style={{ color: ctWon || tWon ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.25)' }}>
+                  {r.round_number}
+                </div>
+
+                {/* Tooltip */}
+                {isHovered && (
                   <div
-                    className="absolute z-50 bottom-full mb-2 left-1/2 -translate-x-1/2 w-56 rounded-md border p-3 shadow-xl pointer-events-none"
+                    className={`absolute z-50 bottom-full mb-2 min-w-[15rem] w-max max-w-xs rounded-md border shadow-xl pointer-events-none ${tooltipRight ? 'left-0' : 'right-0'}`}
                     style={{ background: '#0A0F2D', borderColor: 'var(--color-data-divider)' }}
                   >
-                    <div className="text-[10px] font-black text-white/50 mb-2 uppercase tracking-widest">
-                      Round {r.round_number}
-                    </div>
-                    <div className="text-xs font-bold tabular-nums text-white/90 mb-1">
-                      {r.team_a_score ?? 0} – {r.team_b_score ?? 0}
-                    </div>
-                    {(r.team_a_economy_type || r.team_b_economy_type) && (
-                      <div className="text-[10px] text-white/40 mb-2">
-                        {teamAName}: {r.team_a_economy_type ?? '—'} · {teamBName}: {r.team_b_economy_type ?? '—'}
+                    {/* Header */}
+                    <div className="px-3 pt-3 pb-2 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
+                      <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">
+                        Round {r.round_number}
                       </div>
-                    )}
-                    {r.duration_ms != null && (
-                      <div className="text-[10px] text-white/35 mb-2">
-                        {(r.duration_ms / 1000).toFixed(1)}s
+                      <div className="text-xl font-black tabular-nums text-white">
+                        {r.team_a_score ?? 0} – {r.team_b_score ?? 0}
                       </div>
-                    )}
-                    {r.kills && r.kills.length > 0 && (
-                      <div className="space-y-0.5">
-                        {r.kills.slice(0, 5).map((k, ki) => (
-                          <div key={ki} className="text-[10px] text-white/55 truncate">
-                            {k.weapon_name ?? '?'}{k.is_headshot ? ' HS' : ''}
-                          </div>
-                        ))}
-                        {r.kills.length > 5 && (
-                          <div className="text-[10px] text-white/30">+{r.kills.length - 5} more</div>
-                        )}
+                    </div>
+
+                    {/* Meta */}
+                    <div className="px-3 py-2 border-b space-y-1" style={{ borderColor: 'var(--color-data-divider)' }}>
+                      {(r.team_a_economy_type || r.team_b_economy_type) && (
+                        <div className="text-[10px] text-white/45">
+                          {teamAName}: <span className="text-white/70">{fmtEco(r.team_a_economy_type)}</span>
+                          {'  ·  '}
+                          {teamBName}: <span className="text-white/70">{fmtEco(r.team_b_economy_type)}</span>
+                        </div>
+                      )}
+                      {r.duration_ms != null && (
+                        <div className="text-[10px] text-white/35">
+                          {(r.duration_ms / 1000).toFixed(1)}s
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Kills */}
+                    {kills.length > 0 && (
+                      <div className="px-3 py-2 space-y-1">
+                        {kills.map((k, ki) => {
+                          const killer = k.killer_player_id ? playerNameMap.get(k.killer_player_id) : null
+                          const victim = k.victim_player_id ? playerNameMap.get(k.victim_player_id) : null
+                          const killerTeamId2 = k.killer_player_id ? playerTeamMap.get(k.killer_player_id) : null
+                          const isCtKill = killerTeamId2 === ctTeamId
+                          return (
+                            <div key={ki} className="flex items-baseline gap-1.5 text-[11px]">
+                              <span
+                                className="block w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1"
+                                style={{ background: isCtKill ? CT_COLOR : T_COLOR }}
+                              />
+                              {killer && <span className="text-white/80 font-medium">{killer}</span>}
+                              <span className="text-white/40 flex-shrink-0">{fmtWeapon(k.weapon_name, k.is_headshot)}</span>
+                              {victim && <span className="text-white/50">{victim}</span>}
+                            </div>
+                          )
+                        })}
                       </div>
                     )}
                   </div>
@@ -95,16 +210,18 @@ export default function RoundTimeline({ rounds, teamAName, teamBName }: Props) {
           )
         })}
       </div>
+
+      {/* Legend */}
       <div className="flex items-center gap-4 mt-3 text-[10px] text-white/40">
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'var(--color-accent)' }} />
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full inline-block" style={{ background: CT_COLOR }} />
           CT Win
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#FFD700' }} />
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full inline-block" style={{ background: T_COLOR }} />
           T Win
         </span>
-        <span className="ml-auto">💣=Bomb &nbsp; ✂️=Defuse &nbsp; 💀=Frag &nbsp; ⏱=Time</span>
+        <span className="ml-auto text-white/25">💣=爆破 ✂️=拆除 ⏱=超时</span>
       </div>
     </div>
   )

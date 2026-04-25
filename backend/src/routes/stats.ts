@@ -16,7 +16,7 @@ r.get('/leaderboard', async (c) => {
   const bracketKind = c.req.query('bracket_kind') ?? null
   const map = c.req.query('map') ?? null
   const tier = c.req.query('tier') ?? null
-  const minMaps = parseInt(c.req.query('min_maps') ?? '3')
+  const minMaps = parseInt(c.req.query('min_maps') ?? '1')
 
   const params: unknown[] = []
   const conditions: string[] = ['1=1']

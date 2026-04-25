@@ -1,5 +1,5 @@
 // src/pages/StatsPage.tsx
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useCurrentTournament } from '../api/currentTournament'
 import { useLeaderboard, useTournamentSummary, useTierComparison, useAvailableMaps } from '../api/stats'
@@ -39,9 +39,10 @@ const TIER_FILTER = [
 ]
 
 const MIN_MAPS_FILTER = [
-  { value: 3,  label: '≥3 图' },
-  { value: 5,  label: '≥5 图' },
-  { value: 10, label: '≥10 图' },
+  { value: null, label: '不限' },
+  { value: 3,    label: '≥3 图' },
+  { value: 5,    label: '≥5 图' },
+  { value: 10,   label: '≥10 图' },
 ]
 
 const TIER_COLORS: Record<string, string> = {
@@ -74,6 +75,17 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
   )
 }
 
+function FilterRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-[10px] font-black uppercase tracking-widest text-white/25 w-14 flex-shrink-0">
+        {label}
+      </span>
+      {children}
+    </div>
+  )
+}
+
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg px-5 py-4 flex flex-col gap-1 min-w-[130px]"
@@ -89,7 +101,7 @@ export default function StatsPage() {
   const [bracketKind, setBracketKind] = useState('')
   const [map, setMap] = useState('')
   const [tier, setTier] = useState('')
-  const [minMaps, setMinMaps] = useState(3)
+  const [minMaps, setMinMaps] = useState<number | null>(null)
 
   const { data: tournament } = useCurrentTournament()
   const tournamentId = tournament?.id
@@ -103,7 +115,7 @@ export default function StatsPage() {
     bracket_kind: bracketKind || undefined,
     map: map || undefined,
     tier: tier || undefined,
-    min_maps: minMaps,
+    min_maps: minMaps ?? undefined,
     limit: 20,
   })
 
@@ -130,7 +142,7 @@ export default function StatsPage() {
           <SummaryCard label="总击杀数" value={Number(summary.total_kills).toLocaleString()} />
           <SummaryCard
             label="平均爆头率"
-            value={summary.avg_headshot_pct != null ? parseFloat(summary.avg_headshot_pct).toFixed(1) + '%' : '—'}
+            value={summary.avg_headshot_pct != null ? (parseFloat(summary.avg_headshot_pct) / 100).toFixed(1) + '%' : '—'}
           />
         </div>
       )}
@@ -142,27 +154,33 @@ export default function StatsPage() {
         ))}
       </div>
 
-      {/* Filter bar */}
-      <div className="flex gap-2 flex-wrap mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
-        {BRACKET_FILTER.map(f => (
-          <FilterChip key={f.value} label={f.label} active={bracketKind === f.value} onClick={() => setBracketKind(f.value)} />
-        ))}
+      {/* Filter bar — one row per dimension */}
+      <div className="space-y-2 mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
+        <FilterRow label="赛段">
+          {BRACKET_FILTER.map(f => (
+            <FilterChip key={f.value} label={f.label} active={bracketKind === f.value} onClick={() => setBracketKind(f.value)} />
+          ))}
+        </FilterRow>
+
         {availableMaps.length > 0 && (
-          <>
-            <div className="w-px self-stretch" style={{ background: 'var(--color-data-divider)' }} />
-            {[{ value: '', label: '全部地图' }, ...availableMaps.map(m => ({ value: m, label: m.replace('de_', '') }))].map(f => (
+          <FilterRow label="地图">
+            {[{ value: '', label: '全部' }, ...availableMaps.map(m => ({ value: m, label: m.replace('de_', '').toUpperCase() }))].map(f => (
               <FilterChip key={f.value} label={f.label} active={map === f.value} onClick={() => setMap(f.value)} />
             ))}
-          </>
+          </FilterRow>
         )}
-        <div className="w-px self-stretch" style={{ background: 'var(--color-data-divider)' }} />
-        {TIER_FILTER.map(f => (
-          <FilterChip key={f.value} label={f.label} active={tier === f.value} onClick={() => setTier(f.value)} />
-        ))}
-        <div className="w-px self-stretch" style={{ background: 'var(--color-data-divider)' }} />
-        {MIN_MAPS_FILTER.map(f => (
-          <FilterChip key={f.value} label={f.label} active={minMaps === f.value} onClick={() => setMinMaps(f.value)} />
-        ))}
+
+        <FilterRow label="Tier">
+          {TIER_FILTER.map(f => (
+            <FilterChip key={f.value} label={f.label} active={tier === f.value} onClick={() => setTier(f.value)} />
+          ))}
+        </FilterRow>
+
+        <FilterRow label="最少图数">
+          {MIN_MAPS_FILTER.map(f => (
+            <FilterChip key={String(f.value)} label={f.label} active={minMaps === f.value} onClick={() => setMinMaps(f.value)} />
+          ))}
+        </FilterRow>
       </div>
 
       {/* Leaderboard table */}
@@ -170,7 +188,7 @@ export default function StatsPage() {
       {error && <ErrorBox message={error.message} />}
       {leaderboard && (
         leaderboard.length === 0
-          ? <p className="text-sm text-white/40 py-8 text-center">暂无符合条件的数据（最少 {minMaps} 图）</p>
+          ? <p className="text-sm text-white/40 py-8 text-center">暂无符合条件的数据</p>
           : (
             <div className="rounded-xl overflow-hidden border mb-10" style={{ borderColor: 'var(--color-data-divider)' }}>
               <table className="w-full">

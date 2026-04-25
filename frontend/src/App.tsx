@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import TeamsPage from './pages/TeamsPage'
@@ -28,7 +28,7 @@ export default function App() {
         <Route path="/news/:slug" element={<NewsDetailPage />} />
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/draft" element={<DraftPage />} />
+        <Route path="/draft" element={<Navigate to="/players?tab=draft" replace />} />
       </Route>
     </Routes>
   )

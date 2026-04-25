@@ -1,18 +1,31 @@
 import { Check } from 'lucide-react'
 import { RailCard } from './RightRail'
 
-const STAGES: readonly { label: string; date: string }[] = [
-  { label: '报名',         date: '03-11 → 03-30' },
-  { label: '选马',         date: '04-01 → 04-03' },
-  { label: '小组赛 R1',    date: '04-06' },
-  { label: '小组赛 R2',    date: '04-13' },
-  { label: '小组赛 R3',    date: '04-20' },
-  { label: '胜者组',       date: '05-06 →' },
-  { label: '败者组',       date: '05-13 →' },
-  { label: '总决赛',       date: '06-30' },
+// startISO: first day of this stage in 2026 (used to determine done/current/future)
+const STAGES: readonly { label: string; date: string; startISO: string }[] = [
+  { label: '报名',         date: '03-11 → 03-30', startISO: '2026-03-11' },
+  { label: '选马',         date: '04-01 → 04-03', startISO: '2026-04-01' },
+  { label: '小组赛 R1',    date: '04-06',          startISO: '2026-04-06' },
+  { label: '小组赛 R2',    date: '04-13',          startISO: '2026-04-13' },
+  { label: '小组赛 R3',    date: '04-20',          startISO: '2026-04-20' },
+  { label: '胜者组',       date: '05-06 →',        startISO: '2026-05-06' },
+  { label: '败者组',       date: '05-13 →',        startISO: '2026-05-13' },
+  { label: '总决赛',       date: '06-30',          startISO: '2026-06-30' },
 ]
 
-const CURRENT_INDEX = 2 // matches StageCard
+function getCurrentIndex(): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  // Current = last stage whose start date has already passed
+  let current = 0
+  for (let i = 0; i < STAGES.length; i++) {
+    if (new Date(STAGES[i].startISO) <= today) current = i
+    else break
+  }
+  return current
+}
+
+const CURRENT_INDEX = getCurrentIndex()
 
 export default function StageTimeline() {
   return (

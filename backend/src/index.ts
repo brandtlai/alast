@@ -1,5 +1,8 @@
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
+import { createReadStream, statSync } from 'node:fs'
+import { Readable } from 'node:stream'
+import { extname, join } from 'node:path'
 import 'dotenv/config'
 
 import tournamentsRoutes from './routes/tournaments.js'
@@ -61,6 +64,25 @@ app.route('/api/admin/matches', adminMatchSubstitutesRoutes)
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok' }))
+
+// Static uploads
+const uploadsDir = process.env.UPLOADS_DIR ?? '/opt/alast/uploads'
+const MIME: Record<string, string> = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp' }
+app.get('/uploads/*', (c) => {
+  const rel = c.req.path.replace(/^\/uploads\//, '')
+  const abs = join(uploadsDir, rel)
+  try {
+    const stat = statSync(abs)
+    if (!stat.isFile()) return c.notFound()
+    const mime = MIME[extname(abs).toLowerCase()] ?? 'application/octet-stream'
+    const webStream = Readable.toWeb(createReadStream(abs)) as ReadableStream
+    return new Response(webStream, {
+      headers: { 'content-type': mime, 'content-length': String(stat.size), 'cache-control': 'public, max-age=31536000' },
+    })
+  } catch {
+    return c.notFound()
+  }
+})
 
 // Only start server when not in test
 if (process.env.NODE_ENV !== 'test') {

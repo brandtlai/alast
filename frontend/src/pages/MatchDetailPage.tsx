@@ -124,6 +124,9 @@ export default function MatchDetailPage() {
             rounds={rounds}
             teamAName={match.team_a_name ?? 'Team A'}
             teamBName={match.team_b_name ?? 'Team B'}
+            teamAId={match.team_a_id}
+            teamBId={match.team_b_id}
+            players={stats}
           />
         </section>
       )}

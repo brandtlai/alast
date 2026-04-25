@@ -9,7 +9,6 @@ const LINKS = [
   { to: '/matches', label: '赛程' },
   { to: '/teams',   label: '战队' },
   { to: '/players', label: '选手' },
-  { to: '/draft',   label: '选马' },
   { to: '/news',    label: '新闻' },
   { to: '/stats',   label: '数据' },
   { to: '/about',   label: '关于' },

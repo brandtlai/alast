@@ -63,26 +63,52 @@ export default function MatchesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
                 >
-                  <Card href={`/matches/${m.id}`} className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <TeamLogo url={m.team_a_logo} name={m.team_a_name ?? '?'} size={36} />
-                        <span className="font-black truncate text-white/90">{m.team_a_name ?? 'TBD'}</span>
+                  <Card href={`/matches/${m.id}`} className="px-4 py-3">
+                    {/* Meta row */}
+                    <div className="flex items-center gap-2 mb-2.5">
+                      {m.stage && (
+                        <span className="text-[9px] font-black uppercase tracking-widest text-white/30">{m.stage}</span>
+                      )}
+                      {m.scheduled_at && (
+                        <span className="text-[9px] text-white/25 ml-auto tabular-nums">
+                          {dayjs(m.scheduled_at).format('MM-DD HH:mm')}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Teams + score */}
+                    <div className="flex items-center gap-3">
+                      {/* Team A */}
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <TeamLogo url={m.team_a_logo} name={m.team_a_name ?? '?'} size={28} />
+                        <span className={`font-black text-sm truncate ${m.status === 'finished' && (m.maps_won_a ?? 0) > (m.maps_won_b ?? 0) ? 'text-white/95' : 'text-white/55'}`}>
+                          {m.team_a_name ?? 'TBD'}
+                        </span>
                       </div>
-                      <div className="text-center px-4 flex-shrink-0 space-y-0.5">
-                        {m.status === 'finished'
-                          ? <div className="text-xl font-black italic tabular-nums text-primary">{m.maps_won_a}–{m.maps_won_b}</div>
-                          : <StatusBadge status={m.status} />}
-                        {m.stage && (
-                          <div className="text-[9px] font-black uppercase tracking-widest text-white/30">{m.stage}</div>
-                        )}
-                        {m.scheduled_at && (
-                          <div className="text-xs text-white/30">{dayjs(m.scheduled_at).format('MM-DD HH:mm')}</div>
+
+                      {/* Score / status */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0 px-2">
+                        {m.status === 'finished' ? (
+                          <>
+                            <span className={`text-xl font-black italic tabular-nums ${(m.maps_won_a ?? 0) > (m.maps_won_b ?? 0) ? 'text-primary' : 'text-white/30'}`}>
+                              {m.maps_won_a}
+                            </span>
+                            <span className="text-white/20 text-sm font-bold">:</span>
+                            <span className={`text-xl font-black italic tabular-nums ${(m.maps_won_b ?? 0) > (m.maps_won_a ?? 0) ? 'text-primary' : 'text-white/30'}`}>
+                              {m.maps_won_b}
+                            </span>
+                          </>
+                        ) : (
+                          <StatusBadge status={m.status} />
                         )}
                       </div>
-                      <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
-                        <span className="font-black truncate text-white/90">{m.team_b_name ?? 'TBD'}</span>
-                        <TeamLogo url={m.team_b_logo} name={m.team_b_name ?? '?'} size={36} />
+
+                      {/* Team B */}
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0 justify-end">
+                        <span className={`font-black text-sm truncate text-right ${m.status === 'finished' && (m.maps_won_b ?? 0) > (m.maps_won_a ?? 0) ? 'text-white/95' : 'text-white/55'}`}>
+                          {m.team_b_name ?? 'TBD'}
+                        </span>
+                        <TeamLogo url={m.team_b_logo} name={m.team_b_name ?? '?'} size={28} />
                       </div>
                     </div>
                   </Card>
