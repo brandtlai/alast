@@ -18,6 +18,7 @@ import adminMatchesRoutes from './routes/admin/matches.js'
 import adminNewsRoutes from './routes/admin/news.js'
 import adminUploadRoutes from './routes/admin/upload.js'
 import adminImportRoutes from './routes/admin/import.js'
+import adminImportDemoRoutes from './routes/admin/import-demo.js'
 import { authMiddleware } from './middleware/auth.js'
 
 export const app = new Hono()
@@ -51,6 +52,7 @@ app.route('/api/admin/players', adminPlayersRoutes)
 app.route('/api/admin/matches', adminMatchesRoutes)
 app.route('/api/admin/news', adminNewsRoutes)
 app.route('/api/admin/upload', adminUploadRoutes)
+app.route('/api/admin/import/demo', adminImportDemoRoutes)
 app.route('/api/admin/import', adminImportRoutes)
 
 // Health check

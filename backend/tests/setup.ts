@@ -75,7 +75,7 @@ export async function insertPlayerMatchStats(matchMapId: string, playerId: strin
 }
 
 export async function getAdminToken(): Promise<string> {
-  const bcrypt = await import('bcrypt')
+  const bcrypt = await import('bcryptjs')
   const hash = await bcrypt.hash('testpass', 10)
   await query(
     `INSERT INTO admins (username, password_hash) VALUES ('testadmin', $1)
@@ -87,9 +87,9 @@ export async function getAdminToken(): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: 'testadmin', password: 'testpass' }),
   })
-  const body = await res.json() as { success: boolean; data?: { token: string } }
-  if (!body.success || !body.data?.token) throw new Error('getAdminToken: login failed')
-  return body.data.token
+  const body = await res.json() as { success: boolean; data?: { accessToken: string } }
+  if (!body.success || !body.data?.accessToken) throw new Error('getAdminToken: login failed')
+  return body.data.accessToken
 }
 
 afterAll(async () => {
