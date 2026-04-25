@@ -4,6 +4,7 @@ import TabPills, { useActiveTab } from '../components/tournament/TabPills'
 import OverviewTab from '../components/tournament/tabs/OverviewTab'
 import GroupStageTab from '../components/tournament/tabs/GroupStageTab'
 import BracketTab from '../components/tournament/tabs/BracketTab'
+import ResultsTab from '../components/tournament/tabs/ResultsTab'
 
 export default function HomePage() {
   const [active] = useActiveTab()
@@ -16,7 +17,7 @@ export default function HomePage() {
         {active === 'overview' && <OverviewTab />}
         {active === 'groups'   && <GroupStageTab />}
         {active === 'bracket'  && <BracketTab />}
-        {active === 'results'  && <div className="text-white/40 text-sm">Results — coming in Task 16</div>}
+        {active === 'results'  && <ResultsTab />}
       </div>
     </div>
   )
