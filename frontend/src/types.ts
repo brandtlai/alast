@@ -134,6 +134,7 @@ export interface LeaderboardEntry {
   team_logo_url: string | null
   maps_played: string
   avg_stat: string | null
+  tier?: string | null  // present when tournament_id is supplied
 }
 
 export interface StandingRow {
