@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build output
+backend/dist/
+frontend/dist/
+
+# Environment variables
+.env
+backend/.env
+frontend/.env
+*.env.local
+
+# Logs
+logs/
+*.log
+
+# Uploads (user content — manage separately)
+uploads/
+
+# Backups
+backups/
+
+# OS / editor
+.DS_Store
+.vscode/
+*.swp
