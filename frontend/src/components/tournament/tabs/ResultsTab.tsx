@@ -1,9 +1,7 @@
 import { useState, useMemo } from 'react'
-import dayjs from 'dayjs'
 import { useMatches } from '../../../api/matches.js'
 import { useCurrentTournament } from '../../../api/currentTournament.js'
 import MatchRow from '../MatchRow.js'
-import type { Match } from '../../../types.js'
 
 const FILTERS: readonly { key: string; label: string; test: (s: string | null) => boolean }[] = [
   { key: 'all',     label: '全部',    test: (_s) => true },
@@ -25,7 +23,13 @@ export default function ResultsTab() {
 
   const filtered = useMemo(() => {
     const f = FILTERS.find(f => f.key === filter)!
-    return matches.filter(m => f.test(m.stage))
+    return matches
+      .filter(m => f.test(m.stage))
+      .sort((a, b) => {
+        const ta = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0
+        const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0
+        return tb - ta
+      })
   }, [matches, filter])
 
   return (
@@ -50,38 +54,13 @@ export default function ResultsTab() {
         })}
       </div>
 
-      {/* Flat list grouped by date */}
       {filtered.length === 0
         ? <div className="text-sm text-white/40 py-12 text-center">暂无已结束比赛</div>
-        : <DateGroupedList matches={filtered} />}
-    </div>
-  )
-}
-
-function DateGroupedList({ matches }: { matches: Match[] }) {
-  const buckets = useMemo(() => {
-    const m = new Map<string, Match[]>()
-    for (const item of matches) {
-      const day = item.scheduled_at ? dayjs(item.scheduled_at).format('YYYY-MM-DD') : '未排定'
-      const arr = m.get(day) ?? []
-      arr.push(item)
-      m.set(day, arr)
-    }
-    return Array.from(m.entries())
-  }, [matches])
-
-  return (
-    <div className="space-y-6">
-      {buckets.map(([day, ms]) => (
-        <section key={day}>
-          <div className="text-[10px] font-black uppercase tracking-[0.25em] text-white/35 mb-2 px-1">
-            {day}
-          </div>
+        : (
           <div className="space-y-2">
-            {ms.map(m => <MatchRow key={m.id} match={m} variant="results" />)}
+            {filtered.map(m => <MatchRow key={m.id} match={m} variant="results" />)}
           </div>
-        </section>
-      ))}
+        )}
     </div>
   )
 }
