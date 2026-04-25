@@ -1,15 +1,20 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { useMatches } from '../../../api/matches.js'
+import { useNewsList } from '../../../api/news.js'
 import { useCurrentTournament } from '../../../api/currentTournament.js'
 import { groupByRound } from '../lib/groupByRound.js'
 import MatchRow from '../MatchRow.js'
 import Spinner from '../../Spinner.js'
+import Card from '../../Card.js'
 
 export default function OverviewTab() {
   const { data: tournament } = useCurrentTournament()
   const { data: matches, isLoading } = useMatches({
     tournament_id: tournament?.id,
   })
+  const { data: news } = useNewsList({ limit: 3 })
 
   const groups = useMemo(() => groupByRound(matches ?? []), [matches])
 
@@ -17,7 +22,6 @@ export default function OverviewTab() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-      {/* Center column — match flow */}
       <div className="space-y-8 min-w-0">
         {groups.length === 0 && (
           <div className="text-sm text-white/40 py-12 text-center">
@@ -41,6 +45,34 @@ export default function OverviewTab() {
             </div>
           </section>
         ))}
+
+        {/* News mini-strip — hidden entirely when empty */}
+        {news && news.length > 0 && (
+          <section>
+            <div className="flex items-baseline justify-between mb-3 px-1">
+              <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary">最新资讯</h2>
+              <Link to="/news" className="text-[10px] font-black uppercase tracking-widest text-white/35 hover:text-primary transition-colors">
+                更多 →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {news.map(a => (
+                <Card key={a.id} href={`/news/${a.slug}`}>
+                  {a.cover_image_url && (
+                    <div className="h-28 overflow-hidden">
+                      <img src={a.cover_image_url} alt={a.title}
+                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <h3 className="font-black text-xs leading-snug line-clamp-2 text-white/90">{a.title}</h3>
+                    <p className="text-[10px] text-white/30 mt-1.5">{dayjs(a.published_at).format('YYYY-MM-DD')}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       {/* Right rail placeholder — filled in Task 13 */}
