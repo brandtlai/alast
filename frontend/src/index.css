@@ -10,6 +10,13 @@
   --color-gold-orange: #FFB800;
   --color-card:        rgba(10, 15, 45, 0.6);
   --color-border:      rgba(255, 255, 255, 0.08);
+
+  /* Data layer (BLAST-style information density) */
+  --color-data-surface:    #0E1428;
+  --color-data-row:        rgba(255, 255, 255, 0.02);
+  --color-data-divider:    rgba(255, 255, 255, 0.06);
+  --color-data-chip:       #1A2342;
+  --color-data-text-muted: rgba(255, 255, 255, 0.45);
 }
 
 body {
