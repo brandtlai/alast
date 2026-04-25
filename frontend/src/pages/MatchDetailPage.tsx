@@ -1,96 +1,151 @@
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMatch } from '../api/matches'
+import dayjs from 'dayjs'
+import { useMatch, useMatchMaps, useMapStats, useMapRounds, useMapEconomy, useMapHighlights } from '../api/matches'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
 import StatusBadge from '../components/StatusBadge'
-import type { MapPlayer } from '../types'
+import MapPicker from '../components/match/MapPicker'
+import Scoreboard from '../components/match/Scoreboard'
+import RoundTimeline from '../components/match/RoundTimeline'
+import EconomyChart from '../components/match/EconomyChart'
+import HighlightCards from '../components/match/HighlightCards'
 
-function PlayerStatsTable({ players, teamId, teamName }: { players: MapPlayer[]; teamId: string | null; teamName: string }) {
-  const filtered = players.filter(p => p.team_id === teamId)
-  if (filtered.length === 0) return null
-  return (
-    <div className="mb-4">
-      <h4 className="text-sm font-semibold mb-2 opacity-70">{teamName}</h4>
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="text-left opacity-40">
-            <th className="py-1 pr-3">选手</th>
-            <th className="py-1 pr-3">K</th>
-            <th className="py-1 pr-3">D</th>
-            <th className="py-1 pr-3">A</th>
-            <th className="py-1 pr-3">ADR</th>
-            <th className="py-1 pr-3">KAST</th>
-            <th className="py-1">Rating</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map(p => (
-            <tr key={p.player_id} className="border-t" style={{ borderColor: 'var(--color-border)' }}>
-              <td className="py-1.5 pr-3 font-medium">{p.nickname}</td>
-              <td className="py-1.5 pr-3">{p.kills ?? '—'}</td>
-              <td className="py-1.5 pr-3">{p.deaths ?? '—'}</td>
-              <td className="py-1.5 pr-3">{p.assists ?? '—'}</td>
-              <td className="py-1.5 pr-3 opacity-70">{p.adr?.toFixed(1) ?? '—'}</td>
-              <td className="py-1.5 pr-3 opacity-70">{p.kast?.toFixed(1) ?? '—'}%</td>
-              <td className="py-1.5 font-bold" style={{ color: (p.rating ?? 0) >= 1.0 ? 'var(--color-primary)' : 'inherit' }}>
-                {p.rating?.toFixed(2) ?? '—'}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
+function formatDuration(seconds: number | null | undefined): string {
+  if (!seconds) return ''
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
 }
 
 export default function MatchDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: match, isLoading, error } = useMatch(id!)
+  const { data: maps = [] } = useMatchMaps(id)
+
+  const [selectedMapId, setSelectedMapId] = useState<string>('')
+
+  useEffect(() => {
+    if (!selectedMapId && maps.length > 0) {
+      const first = maps.find(m => m.score_a !== null) ?? maps[0]
+      setSelectedMapId(first.id)
+    }
+  }, [maps, selectedMapId])
+
+  const selectedMap = maps.find(m => m.id === selectedMapId) ?? null
+
+  const { data: stats = [] } = useMapStats(id, selectedMapId || undefined)
+  const { data: rounds = [] } = useMapRounds(id, selectedMapId || undefined)
+  const { data: economy = [] } = useMapEconomy(id, selectedMapId || undefined)
+  const { data: highlights } = useMapHighlights(id, selectedMapId || undefined)
 
   if (isLoading) return <Spinner />
   if (error) return <ErrorBox message={error.message} />
   if (!match) return null
 
+  const totalDurationSec = maps.reduce((acc, m) => acc + (m.duration_seconds ?? 0), 0)
+
+  const teamAWon = match.maps_won_a > match.maps_won_b
+  const teamBWon = match.maps_won_b > match.maps_won_a
+
   return (
-    <div className="space-y-6">
-      {/* Match Header */}
-      <div className="rounded-xl p-6 text-center" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
-        <div className="flex items-center justify-around">
-          <div className="flex flex-col items-center gap-3">
-            <TeamLogo url={match.team_a_logo} name={match.team_a_name ?? '?'} size={64} />
-            <span className="font-bold text-lg">{match.team_a_name ?? 'TBD'}</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+      {/* A. Match Header */}
+      <div className="rounded-xl p-6"
+           style={{ background: 'var(--color-data-surface)', border: '1px solid var(--color-data-divider)' }}>
+        <div className="flex items-center justify-center gap-3 mb-4 text-[10px] font-black uppercase tracking-widest text-white/40">
+          {match.stage && <span>{match.stage}</span>}
+          {match.best_of != null && match.best_of > 0 && <span>· BO{match.best_of}</span>}
+          {totalDurationSec > 0 && <span>· {formatDuration(totalDurationSec)}</span>}
+          {match.scheduled_at && <span>· {dayjs(match.scheduled_at).format('YYYY-MM-DD HH:mm')}</span>}
+        </div>
+
+        <div className="flex items-center justify-around gap-4">
+          <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <TeamLogo url={match.team_a_logo} name={match.team_a_name ?? '?'} size={72} />
+            <span className={`font-black text-xl text-center leading-tight ${teamAWon ? 'text-white' : 'text-white/50'}`}>
+              {match.team_a_name ?? 'TBD'}
+            </span>
           </div>
-          <div className="text-center">
-            {match.status === 'finished'
-              ? <div className="text-4xl font-extrabold" style={{ color: 'var(--color-primary)' }}>{match.maps_won_a} – {match.maps_won_b}</div>
-              : <StatusBadge status={match.status} />}
-            <div className="text-sm opacity-50 mt-2">{match.stage}</div>
+
+          <div className="text-center flex-shrink-0 px-4">
+            {match.status === 'finished' ? (
+              <div className="flex items-center gap-3">
+                <span className={`text-5xl font-black tabular-nums ${teamAWon ? 'gold-gradient' : 'text-white/40'}`}>
+                  {match.maps_won_a}
+                </span>
+                <span className="text-3xl font-black text-white/20">–</span>
+                <span className={`text-5xl font-black tabular-nums ${teamBWon ? 'gold-gradient' : 'text-white/40'}`}>
+                  {match.maps_won_b}
+                </span>
+              </div>
+            ) : (
+              <StatusBadge status={match.status} />
+            )}
           </div>
-          <div className="flex flex-col items-center gap-3">
-            <TeamLogo url={match.team_b_logo} name={match.team_b_name ?? '?'} size={64} />
-            <span className="font-bold text-lg">{match.team_b_name ?? 'TBD'}</span>
+
+          <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <TeamLogo url={match.team_b_logo} name={match.team_b_name ?? '?'} size={72} />
+            <span className={`font-black text-xl text-center leading-tight ${teamBWon ? 'text-white' : 'text-white/50'}`}>
+              {match.team_b_name ?? 'TBD'}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Maps */}
-      {match.maps && match.maps.length > 0 && match.maps.map((map, i) => (
-        <div key={map.id} className="rounded-lg p-5" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold" style={{ color: 'var(--color-accent)' }}>MAP {i + 1} — {map.map_name.toUpperCase()}</h3>
-            {map.score_a !== null && (
-              <span className="text-lg font-bold" style={{ color: 'var(--color-primary)' }}>{map.score_a} – {map.score_b}</span>
-            )}
-          </div>
-          {map.players && map.players.length > 0 && (
-            <div>
-              <PlayerStatsTable players={map.players} teamId={match.team_a_id} teamName={match.team_a_name ?? 'Team A'} />
-              <PlayerStatsTable players={map.players} teamId={match.team_b_id} teamName={match.team_b_name ?? 'Team B'} />
-            </div>
-          )}
-        </div>
-      ))}
+      {/* B. Map Picker */}
+      {maps.length > 0 && (
+        <MapPicker maps={maps} selectedId={selectedMapId} onSelect={setSelectedMapId} />
+      )}
+
+      {/* C. Per-Map Scoreboard */}
+      <section>
+        <h2 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">
+          {selectedMap ? `${selectedMap.map_name.replace('de_', '').toUpperCase()}  ` : ''}
+          Scoreboard
+        </h2>
+        <Scoreboard
+          players={stats}
+          teamAId={match.team_a_id}
+          teamBId={match.team_b_id}
+          teamAName={match.team_a_name ?? 'Team A'}
+          teamBName={match.team_b_name ?? 'Team B'}
+          rounds={rounds}
+        />
+      </section>
+
+      {/* D. Round Timeline */}
+      {(rounds.length > 0 || selectedMap) && (
+        <section>
+          <RoundTimeline
+            rounds={rounds}
+            teamAName={match.team_a_name ?? 'Team A'}
+            teamBName={match.team_b_name ?? 'Team B'}
+          />
+        </section>
+      )}
+
+      {/* E. Economy Chart */}
+      {(economy.length > 0 || selectedMap) && (
+        <section>
+          <EconomyChart
+            rounds={economy}
+            teamAName={match.team_a_name ?? 'Team A'}
+            teamBName={match.team_b_name ?? 'Team B'}
+          />
+        </section>
+      )}
+
+      {/* F. Highlights */}
+      {highlights && (
+        <section>
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Highlights</h2>
+          <HighlightCards highlights={highlights} />
+        </section>
+      )}
     </div>
   )
 }
