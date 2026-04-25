@@ -3,6 +3,7 @@ import { serve } from '@hono/node-server'
 import 'dotenv/config'
 
 import tournamentsRoutes from './routes/tournaments.js'
+import tournamentDetailRoutes from './routes/tournament-detail.js'
 import teamsRoutes from './routes/teams.js'
 import playersRoutes from './routes/players.js'
 import matchesRoutes from './routes/matches.js'
@@ -22,6 +23,7 @@ export const app = new Hono()
 
 // Public routes
 app.route('/api/tournaments', tournamentsRoutes)
+app.route('/api/tournaments', tournamentDetailRoutes)
 app.route('/api/teams', teamsRoutes)
 app.route('/api/players', playersRoutes)
 app.route('/api/matches', matchesRoutes)
