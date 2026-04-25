@@ -11,6 +11,7 @@ import NewsPage from './pages/NewsPage'
 import NewsDetailPage from './pages/NewsDetailPage'
 import StatsPage from './pages/StatsPage'
 import AboutPage from './pages/AboutPage'
+import DraftPage from './pages/DraftPage'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/news/:slug" element={<NewsDetailPage />} />
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/draft" element={<DraftPage />} />
       </Route>
     </Routes>
   )
