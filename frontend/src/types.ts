@@ -60,6 +60,7 @@ export interface Tournament {
   venue: string | null
   start_date: string | null
   end_date: string | null
+  is_current?: boolean
 }
 
 export interface Match {
@@ -73,6 +74,9 @@ export interface Match {
   stage: string | null
   scheduled_at: string | null
   finished_at: string | null
+  bracket_kind?: string | null
+  bracket_round?: number | null
+  best_of?: number
   // joined fields
   team_a_name?: string | null
   team_a_logo?: string | null
@@ -130,6 +134,63 @@ export interface LeaderboardEntry {
   team_logo_url: string | null
   maps_played: string
   avg_stat: string | null
+}
+
+export interface StandingRow {
+  tournament_id: string
+  team_id: string
+  team_name: string
+  team_short_name: string | null
+  team_logo_url: string | null
+  wins: number
+  losses: number
+  buchholz: number
+  round_diff: number
+}
+
+export interface BracketMatch {
+  id: string
+  bracket_kind: 'ub' | 'lb' | 'gf'
+  bracket_round: number
+  stage: string | null
+  status: 'upcoming' | 'live' | 'finished'
+  maps_won_a: number
+  maps_won_b: number
+  best_of: number
+  scheduled_at: string | null
+  finished_at: string | null
+  team_a_id: string | null
+  team_b_id: string | null
+  team_a_name: string | null
+  team_a_logo: string | null
+  team_b_name: string | null
+  team_b_logo: string | null
+}
+
+export interface DraftPlayer {
+  tier: 'S' | 'A' | 'B' | 'C+' | 'D'
+  pick_order: number | null
+  is_captain: boolean
+  player_id: string
+  nickname: string
+  avatar_url: string | null
+  steam_id: string | null
+  team_id: string | null
+  team_name: string | null
+  team_logo_url: string | null
+}
+
+export interface TournamentSummary {
+  matches_played: string
+  total_kills: string
+  avg_headshot_pct: string | null
+}
+
+export interface TierComparison {
+  tier: 'S' | 'A' | 'B' | 'C+' | 'D'
+  avg_rating: string | null
+  avg_adr: string | null
+  players: string
 }
 
 export interface SearchResults {
