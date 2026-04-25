@@ -3,6 +3,7 @@ import TournamentHubHero from '../components/tournament/TournamentHubHero'
 import TabPills, { useActiveTab } from '../components/tournament/TabPills'
 import OverviewTab from '../components/tournament/tabs/OverviewTab'
 import GroupStageTab from '../components/tournament/tabs/GroupStageTab'
+import BracketTab from '../components/tournament/tabs/BracketTab'
 
 export default function HomePage() {
   const [active] = useActiveTab()
@@ -14,7 +15,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-6 py-10">
         {active === 'overview' && <OverviewTab />}
         {active === 'groups'   && <GroupStageTab />}
-        {active === 'bracket'  && <div className="text-white/40 text-sm">Bracket — coming in Task 15</div>}
+        {active === 'bracket'  && <BracketTab />}
         {active === 'results'  && <div className="text-white/40 text-sm">Results — coming in Task 16</div>}
       </div>
     </div>
