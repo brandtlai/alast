@@ -7,6 +7,7 @@ import tournamentDetailRoutes from './routes/tournament-detail.js'
 import teamsRoutes from './routes/teams.js'
 import playersRoutes from './routes/players.js'
 import matchesRoutes from './routes/matches.js'
+import matchMapsRoutes from './routes/match-maps.js'
 import newsRoutes from './routes/news.js'
 import statsRoutes from './routes/stats.js'
 import searchRoutes from './routes/search.js'
@@ -27,6 +28,7 @@ app.route('/api/tournaments', tournamentDetailRoutes)
 app.route('/api/teams', teamsRoutes)
 app.route('/api/players', playersRoutes)
 app.route('/api/matches', matchesRoutes)
+app.route('/api/matches', matchMapsRoutes)
 app.route('/api/news', newsRoutes)
 app.route('/api/stats', statsRoutes)
 app.route('/api/search', searchRoutes)
