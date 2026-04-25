@@ -5,16 +5,15 @@ import { ok } from '../types.js'
 
 const r = new Hono()
 
-const VALID_STATS = ['rating', 'adr', 'kast', 'headshot_pct', 'kills', 'first_kills'] as const
+const VALID_STATS = ['rating', 'adr', 'kast', 'headshot_pct', 'kills', 'first_kills', 'clutches_won', 'kd_diff'] as const
 type StatKey = typeof VALID_STATS[number]
 
 r.get('/leaderboard', async (c) => {
   const tournamentId = c.req.query('tournament_id')
-  const stat = (VALID_STATS.includes(c.req.query('stat') as StatKey)
-    ? c.req.query('stat')!
-    : 'rating') as string
+  const rawStat = c.req.query('stat')
+  const stat = (VALID_STATS.includes(rawStat as StatKey) ? rawStat : 'rating') as StatKey
   const limit = Math.min(parseInt(c.req.query('limit') ?? '20'), 50)
-  const stage = c.req.query('stage') ?? null
+  const bracketKind = c.req.query('bracket_kind') ?? null
   const map = c.req.query('map') ?? null
   const tier = c.req.query('tier') ?? null
   const minMaps = parseInt(c.req.query('min_maps') ?? '3')
@@ -23,33 +22,46 @@ r.get('/leaderboard', async (c) => {
   const conditions: string[] = ['1=1']
 
   if (tournamentId) { params.push(tournamentId); conditions.push(`m.tournament_id = $${params.length}`) }
-  if (stage) { params.push(stage); conditions.push(`m.stage = $${params.length}`) }
-  if (map)   { params.push(map);   conditions.push(`mm.map_name = $${params.length}`) }
+  if (bracketKind)  { params.push(bracketKind);  conditions.push(`m.bracket_kind = $${params.length}`) }
+  if (map)          { params.push(map);           conditions.push(`mm.map_name = $${params.length}`) }
 
-  let tierJoin = ''
+  // Always left-join tpa when tournament specified — needed for tier display + optional filter
+  const tpaJoin = tournamentId
+    ? `LEFT JOIN tournament_player_assignment tpa ON tpa.player_id = p.id AND tpa.tournament_id = m.tournament_id`
+    : ''
+
   if (tier && tournamentId) {
     params.push(tier)
-    tierJoin = `JOIN tournament_player_assignment tpa ON tpa.player_id = p.id AND tpa.tournament_id = m.tournament_id AND tpa.tier = $${params.length}`
+    conditions.push(`tpa.tier = $${params.length}`)
   }
 
   params.push(minMaps)
   const minMapsParam = params.length
-
   params.push(limit)
   const limitParam = params.length
 
+  // kd_diff is synthetic: AVG(kills - deaths)
+  const statExpr = stat === 'kd_diff'
+    ? `ROUND(AVG(pms.kills::float - pms.deaths::float)::numeric, 2)`
+    : `ROUND(AVG(pms.${stat})::numeric, 2)`
+
+  const tierSelect = tournamentId ? ', tpa.tier' : ''
+  const tierGroup  = tournamentId ? ', tpa.tier' : ''
+
   const sql = `
-    SELECT p.id, p.nickname, p.avatar_url, t.name as team_name, t.logo_url as team_logo_url,
-           COUNT(pms.id) as maps_played,
-           ROUND(AVG(pms.${stat})::numeric, 2) as avg_stat
+    SELECT p.id, p.nickname, p.avatar_url,
+           t.name AS team_name, t.logo_url AS team_logo_url,
+           COUNT(pms.id) AS maps_played,
+           ${statExpr} AS avg_stat
+           ${tierSelect}
     FROM player_match_stats pms
     JOIN players p ON p.id = pms.player_id
     LEFT JOIN teams t ON t.id = p.team_id
     JOIN match_maps mm ON mm.id = pms.match_map_id
     JOIN matches m ON m.id = mm.match_id
-    ${tierJoin}
+    ${tpaJoin}
     WHERE ${conditions.join(' AND ')}
-    GROUP BY p.id, p.nickname, p.avatar_url, t.name, t.logo_url
+    GROUP BY p.id, p.nickname, p.avatar_url, t.name, t.logo_url${tierGroup}
     HAVING COUNT(pms.id) >= $${minMapsParam}
     ORDER BY avg_stat DESC NULLS LAST
     LIMIT $${limitParam}
@@ -100,6 +112,23 @@ r.get('/tier-comparison', async (c) => {
     [tournamentId]
   )
   return c.json(ok(rows))
+})
+
+r.get('/maps', async (c) => {
+  const tournamentId = c.req.query('tournament_id')
+  const params: unknown[] = []
+  let condition = ''
+  if (tournamentId) { params.push(tournamentId); condition = 'WHERE m.tournament_id = $1' }
+
+  const { rows } = await query(
+    `SELECT DISTINCT mm.map_name
+     FROM match_maps mm
+     JOIN matches m ON m.id = mm.match_id
+     ${condition}
+     ORDER BY mm.map_name`,
+    params
+  )
+  return c.json(ok(rows.map((r: { map_name: string }) => r.map_name)))
 })
 
 export default r
