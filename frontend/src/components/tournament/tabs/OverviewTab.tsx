@@ -8,6 +8,12 @@ import { groupByRound } from '../lib/groupByRound.js'
 import MatchRow from '../MatchRow.js'
 import Spinner from '../../Spinner.js'
 import Card from '../../Card.js'
+import RightRail from '../rail/RightRail.js'
+import StageCard from '../rail/StageCard.js'
+import StageTimeline from '../rail/StageTimeline.js'
+import MvpMini from '../rail/MvpMini.js'
+import RulesAndResources from '../rail/RulesAndResources.js'
+import FaqWidget from '../rail/FaqWidget.js'
 
 export default function OverviewTab() {
   const { data: tournament } = useCurrentTournament()
@@ -75,9 +81,15 @@ export default function OverviewTab() {
         )}
       </div>
 
-      {/* Right rail placeholder — filled in Task 13 */}
+      {/* Right rail */}
       <div className="hidden lg:block">
-        <div className="text-xs text-white/30">Right rail — Task 13</div>
+        <RightRail>
+          <StageCard />
+          <StageTimeline />
+          <MvpMini />
+          <RulesAndResources />
+          <FaqWidget />
+        </RightRail>
       </div>
     </div>
   )
