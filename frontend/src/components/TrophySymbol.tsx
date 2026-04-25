@@ -15,22 +15,30 @@ const variantStyles: Record<string, React.CSSProperties> = {
 export default function TrophySymbol({ variant = 'full', className = '' }: TrophySymbolProps) {
   if (variant === 'full') {
     return (
-      <div className={`relative ${className}`}>
+      <div className={`relative overflow-hidden ${className}`}>
         <img
           src="/trophy.png"
           alt="ALAST Trophy"
           className="w-full h-full object-contain orange-gold-glow"
         />
-        {/* Shimmer sweep */}
         <motion.div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)',
-            backgroundSize: '200% 100%',
+              'linear-gradient(105deg, transparent 34%, rgba(255,255,255,0.28) 47%, rgba(255,213,94,0.18) 52%, transparent 66%)',
+            backgroundSize: '240% 100%',
+            backgroundPosition: '-160% 0',
+            WebkitMaskImage: 'url(/trophy.png)',
+            maskImage: 'url(/trophy.png)',
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+            WebkitMaskSize: 'contain',
+            maskSize: 'contain',
           }}
-          animate={{ x: ['-100%', '200%'] }}
-          transition={{ duration: 3, repeat: Infinity, repeatDelay: 3, ease: 'linear' }}
+          animate={{ backgroundPosition: ['-160% 0', '180% 0'] }}
+          transition={{ duration: 2.6, repeat: Infinity, repeatDelay: 4, ease: 'easeInOut' }}
         />
       </div>
     )
