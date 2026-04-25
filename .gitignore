@@ -16,6 +16,7 @@ frontend/.env
 # Logs
 logs/
 *.log
+.superpowers/
 
 # Uploads (user content — manage separately)
 uploads/
