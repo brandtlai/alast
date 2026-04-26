@@ -34,6 +34,7 @@ Production process is run via PM2 from `/opt/alast/backend/dist/index.js` (see `
 Backend reads via `dotenv/config`:
 - `DATABASE_URL` (prod/dev) and `TEST_DATABASE_URL` (vitest, selected when `NODE_ENV=test`) — see `backend/src/db.ts`
 - `JWT_SECRET`, `JWT_REFRESH_SECRET` — required for admin auth
+- `ADMIN_IMPORT_KEY` — shared secret for `/api/admin/import-auto/*` (X-Admin-Key header). When unset the endpoint returns 503
 - `UPLOADS_DIR` — defaults to `/opt/alast/uploads`; admin upload endpoint writes files under `teams/`, `players/`, `news/` subfolders
 - `PORT` — defaults to 3001
 

@@ -22,9 +22,11 @@ import adminNewsRoutes from './routes/admin/news.js'
 import adminUploadRoutes from './routes/admin/upload.js'
 import adminImportRoutes from './routes/admin/import.js'
 import adminImportDemoRoutes from './routes/admin/import-demo.js'
+import adminImportAutoRoutes from './routes/admin/import-auto.js'
 import adminPlayerAliasesRoutes from './routes/admin/player-aliases.js'
 import adminMatchSubstitutesRoutes from './routes/admin/match-substitutes.js'
 import { authMiddleware } from './middleware/auth.js'
+import { adminKeyMiddleware } from './middleware/admin-key.js'
 
 export const app = new Hono()
 
@@ -52,6 +54,9 @@ app.use('/api/admin/news/*', adminAuth)
 app.use('/api/admin/upload/*', adminAuth)
 app.use('/api/admin/import/*', adminAuth)
 
+// Shared-key admin import (X-Admin-Key header). Mounted outside JWT path.
+app.use('/api/admin/import-auto/*', adminKeyMiddleware())
+
 app.route('/api/admin/teams', adminTeamsRoutes)
 app.route('/api/admin/players', adminPlayersRoutes)
 app.route('/api/admin/matches', adminMatchesRoutes)
@@ -59,6 +64,7 @@ app.route('/api/admin/news', adminNewsRoutes)
 app.route('/api/admin/upload', adminUploadRoutes)
 app.route('/api/admin/import/demo', adminImportDemoRoutes)
 app.route('/api/admin/import', adminImportRoutes)
+app.route('/api/admin/import-auto', adminImportAutoRoutes)
 app.route('/api/admin/players', adminPlayerAliasesRoutes)
 app.route('/api/admin/matches', adminMatchSubstitutesRoutes)
 

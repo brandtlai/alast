@@ -11,6 +11,7 @@ import NewsPage from './pages/NewsPage'
 import NewsDetailPage from './pages/NewsDetailPage'
 import StatsPage from './pages/StatsPage'
 import AboutPage from './pages/AboutPage'
+import AdminImportPage from './pages/AdminImportPage'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/news/:slug" element={<NewsDetailPage />} />
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/admin/import" element={<AdminImportPage />} />
         <Route path="/draft" element={<Navigate to="/players?tab=draft" replace />} />
       </Route>
     </Routes>
