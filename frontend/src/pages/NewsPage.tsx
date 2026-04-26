@@ -6,7 +6,7 @@ import { useNewsList } from '../api/news'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
 import Card from '../components/Card'
-import { fadeUp, pageReveal, pressTap, softHover, staggerContainer } from '../lib/motion'
+import { fadeUp, headingMask, pageReveal, pressTap, softHover, staggerContainer } from '../lib/motion'
 
 const CATEGORIES = ['', '战报', '资讯', '专访']
 
@@ -18,7 +18,7 @@ export default function NewsPage() {
     <motion.div className="max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
       <motion.div className="mb-8" variants={staggerContainer} initial="hidden" animate="show">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Latest News</p>
-        <motion.h1 variants={fadeUp} className="text-4xl font-black italic tracking-tighter text-white/90">战报新闻</motion.h1>
+        <motion.h1 variants={headingMask} className="text-4xl font-black italic tracking-tighter text-white/90">战报新闻</motion.h1>
       </motion.div>
 
       <motion.div className="flex gap-2 mb-6 flex-wrap" variants={staggerContainer} initial="hidden" animate="show">

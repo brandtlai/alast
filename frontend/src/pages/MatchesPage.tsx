@@ -9,7 +9,7 @@ import TeamLogo from '../components/TeamLogo'
 import StatusBadge from '../components/StatusBadge'
 import Card from '../components/Card'
 import { formatStage } from '../components/tournament/lib/tournamentRounds'
-import { fadeUp, pageReveal, pressTap, rankGradient, staggerContainer } from '../lib/motion'
+import { fadeUp, headingMask, pageReveal, pressTap, rankGradient, staggerContainer } from '../lib/motion'
 
 const STATUSES = [
   { value: '',         label: '全部' },
@@ -45,7 +45,7 @@ export default function MatchesPage() {
     <motion.div className="max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
       <motion.div className="mb-8" variants={staggerContainer} initial="hidden" animate="show">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Match Schedule</p>
-        <motion.h1 variants={fadeUp} className="text-4xl font-black italic tracking-tighter text-white/90">赛程 / 战绩</motion.h1>
+        <motion.h1 variants={headingMask} className="text-4xl font-black italic tracking-tighter text-white/90">赛程 / 战绩</motion.h1>
       </motion.div>
 
       <motion.div className="flex gap-2 mb-6 flex-wrap" variants={staggerContainer} initial="hidden" animate="show">

@@ -9,7 +9,7 @@ import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
 import TrophySymbol from '../components/TrophySymbol'
 import TierChart from '../components/stats/TierChart'
-import { fadeUp, pageReveal, panelReveal, pressTap, rankReveal, staggerContainer } from '../lib/motion'
+import { fadeUp, headingMask, pageReveal, panelReveal, pressTap, rankReveal, staggerContainer } from '../lib/motion'
 
 type StatKey = 'rating' | 'adr' | 'kast' | 'headshot_pct' | 'first_kills' | 'clutches_won' | 'kd_diff'
 
@@ -137,7 +137,7 @@ export default function StatsPage() {
       {/* Page heading */}
       <motion.div className="mb-6" variants={staggerContainer} initial="hidden" animate="show">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Leaderboard</p>
-        <motion.h1 variants={fadeUp} className="text-4xl font-black italic tracking-tighter text-white/90">数据中心</motion.h1>
+        <motion.h1 variants={headingMask} className="text-4xl font-black italic tracking-tighter text-white/90">数据中心</motion.h1>
         {tournament && <p className="text-xs text-white/35 mt-1">{tournament.name}</p>}
       </motion.div>
 

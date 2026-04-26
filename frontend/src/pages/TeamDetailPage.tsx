@@ -11,7 +11,7 @@ import Card from '../components/Card'
 import TrophySymbol from '../components/TrophySymbol'
 import { formatStage } from '../components/tournament/lib/tournamentRounds'
 import AmbientParticles from '../components/AmbientParticles'
-import { fadeUp, pageReveal, pressTap, rankGradient, softHover, staggerContainer } from '../lib/motion'
+import { fadeUp, headingMask, pageReveal, pressTap, rankGradient, softHover, staggerContainer } from '../lib/motion'
 
 export default function TeamDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -40,7 +40,14 @@ export default function TeamDetailPage() {
       >
         <TeamLogo url={team.logo_url} name={team.name} size={88} />
         <div>
-          <h1 className="text-4xl font-black italic tracking-tighter text-white/90">{team.name}</h1>
+          <motion.h1
+            variants={headingMask}
+            initial="hidden"
+            animate="show"
+            className="text-4xl font-black italic tracking-tighter text-white/90"
+          >
+            {team.name}
+          </motion.h1>
           {team.short_name && (
             <p className="text-sm font-black uppercase tracking-widest text-white/40 mt-0.5">{team.short_name}</p>
           )}

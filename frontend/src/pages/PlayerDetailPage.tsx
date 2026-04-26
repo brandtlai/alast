@@ -6,7 +6,7 @@ import { usePlayer } from '../api/players'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
-import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
+import { fadeUp, headingMask, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
 
 const TIER_COLORS: Record<string, string> = {
   S:    'var(--color-gold)',
@@ -74,7 +74,14 @@ export default function PlayerDetailPage() {
         </div>
         <div>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold">{player.nickname}</h1>
+            <motion.h1
+              variants={headingMask}
+              initial="hidden"
+              animate="show"
+              className="text-3xl font-bold"
+            >
+              {player.nickname}
+            </motion.h1>
             {player.tier && (
               <span
                 className="inline-flex items-center justify-center w-9 h-9 rounded-md text-base font-black"
