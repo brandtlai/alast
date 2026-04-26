@@ -161,6 +161,7 @@ export default function MatchDetailPage() {
           teamAName={match.team_a_name ?? 'Team A'}
           teamBName={match.team_b_name ?? 'Team B'}
           rounds={rounds}
+          matchWinner={teamAWon ? 'a' : teamBWon ? 'b' : null}
         />
       </motion.section>
 

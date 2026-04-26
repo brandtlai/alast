@@ -9,6 +9,8 @@ interface Props {
   teamAName: string
   teamBName: string
   rounds?: MatchRound[]
+  /** 'a' | 'b' | null — 整场比赛的赢方（不是单图）；null = 平 / 未结束 */
+  matchWinner?: 'a' | 'b' | null
 }
 
 function fmt(v: number | null, decimals = 0): string {
@@ -32,7 +34,7 @@ function HsBar({ pct }: { pct: number | null }) {
   )
 }
 
-export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamBName, rounds }: Props) {
+export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamBName, rounds, matchWinner = null }: Props) {
   const teamA = useMemo(() =>
     players.filter(p => p.team_id === teamAId).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
     [players, teamAId]
@@ -82,8 +84,7 @@ export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamB
             teamName={teamAName}
             logoUrl={teamALogo}
             mvpId={mvpId}
-            accentColor="rgba(56,189,248,0.18)"
-            borderColor="rgba(56,189,248,0.35)"
+            outcome={matchWinner === 'a' ? 'win' : matchWinner === 'b' ? 'loss' : 'neutral'}
           />
 
           {/* Half-time divider */}
@@ -105,8 +106,7 @@ export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamB
             teamName={teamBName}
             logoUrl={teamBLogo}
             mvpId={mvpId}
-            accentColor="rgba(234,179,8,0.15)"
-            borderColor="rgba(234,179,8,0.35)"
+            outcome={matchWinner === 'b' ? 'win' : matchWinner === 'a' ? 'loss' : 'neutral'}
           />
         </tbody>
       </table>
@@ -116,20 +116,26 @@ export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamB
 
 const COL_HEADERS = ['K', 'A', 'D', '爆头%', 'ADR', 'Rating'] as const
 
+const OUTCOME_TINT: Record<'win' | 'loss' | 'neutral', { accent: string; border: string }> = {
+  win:     { accent: 'rgba(255, 184, 0, 0.18)',  border: 'rgba(255, 184, 0, 0.45)' },
+  loss:    { accent: 'rgba(255, 43, 214, 0.14)', border: 'rgba(255, 43, 214, 0.45)' },
+  neutral: { accent: 'rgba(255, 255, 255, 0.05)', border: 'rgba(255, 255, 255, 0.15)' },
+}
+
 function TeamSection({
-  team, teamName, logoUrl, mvpId, accentColor, borderColor,
+  team, teamName, logoUrl, mvpId, outcome,
 }: {
   team: MapStatPlayer[]
   teamName: string
   logoUrl: string | null
   mvpId: string | null
-  accentColor: string
-  borderColor: string
+  outcome: 'win' | 'loss' | 'neutral'
 }) {
+  const tint = OUTCOME_TINT[outcome]
   return (
     <>
       {/* Team header row */}
-      <tr style={{ background: accentColor, borderBottom: `1px solid ${borderColor}` }}>
+      <tr style={{ background: tint.accent, borderBottom: `1px solid ${tint.border}` }}>
         <td className="py-2 pl-4 pr-2 w-full">
           <div className="flex items-center gap-2">
             {logoUrl && (
