@@ -5,6 +5,7 @@ import { useMatches } from '../../../api/matches.js'
 import { useNewsList } from '../../../api/news.js'
 import { useCurrentTournament } from '../../../api/currentTournament.js'
 import { groupByRound } from '../lib/groupByRound.js'
+import { formatStage } from '../lib/tournamentRounds.js'
 import MatchRow from '../MatchRow.js'
 import Spinner from '../../Spinner.js'
 import Card from '../../Card.js'
@@ -29,29 +30,6 @@ export default function OverviewTab() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
       <div className="space-y-8 min-w-0">
-        {groups.length === 0 && (
-          <div className="text-sm text-white/40 py-12 text-center">
-            暂无比赛数据
-          </div>
-        )}
-        {groups.map(g => (
-          <section key={g.stage}>
-            <div className="flex items-baseline justify-between mb-3 px-1">
-              <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary">
-                {g.stage}
-              </h2>
-              {g.dateRange && (
-                <span className="text-[10px] font-mono text-white/35">{g.dateRange}</span>
-              )}
-            </div>
-            <div className="space-y-2">
-              {g.matches.map(m => (
-                <MatchRow key={m.id} match={m} variant="overview" />
-              ))}
-            </div>
-          </section>
-        ))}
-
         {/* News mini-strip — hidden entirely when empty */}
         {news && news.length > 0 && (
           <section>
@@ -79,6 +57,29 @@ export default function OverviewTab() {
             </div>
           </section>
         )}
+
+        {groups.length === 0 && (
+          <div className="text-sm text-white/40 py-12 text-center">
+            暂无比赛数据
+          </div>
+        )}
+        {groups.map(g => (
+          <section key={g.stage}>
+            <div className="flex items-baseline justify-between mb-3 px-1">
+              <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary">
+                {formatStage(g.stage)}
+              </h2>
+              {g.dateRange && (
+                <span className="text-[10px] font-mono text-white/35">{g.dateRange}</span>
+              )}
+            </div>
+            <div className="space-y-2">
+              {g.matches.map(m => (
+                <MatchRow key={m.id} match={m} variant="overview" />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
 
       {/* Right rail */}

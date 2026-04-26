@@ -7,6 +7,7 @@ import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
 import type { DraftPlayer } from '../types'
+import { fadeUp, pageReveal, panelReveal, pressTap, staggerContainer } from '../lib/motion'
 
 // ── Draft board data ──────────────────────────────────────────────────────────
 
@@ -24,9 +25,11 @@ const N_TEAMS = 16
 
 function TabPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
       className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest transition-all border"
+      whileHover={{ y: -1, scale: 1.03 }}
+      whileTap={pressTap}
       style={{
         background: active ? 'var(--color-primary)' : 'rgba(255,255,255,0.04)',
         color: active ? '#fff' : 'rgba(248,250,252,0.45)',
@@ -34,7 +37,7 @@ function TabPill({ label, active, onClick }: { label: string; active: boolean; o
       }}
     >
       {label}
-    </button>
+    </motion.button>
   )
 }
 
@@ -46,21 +49,21 @@ export default function PlayersPage() {
   const setTab = (t: string) => setParams(t === 'list' ? {} : { tab: t })
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <motion.div className="max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
       {/* Header */}
-      <div className="mb-6">
+      <motion.div className="mb-6" variants={staggerContainer} initial="hidden" animate="show">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Players</p>
-        <h1 className="text-4xl font-black italic tracking-tighter text-white/90">选手</h1>
-      </div>
+        <motion.h1 variants={fadeUp} className="text-4xl font-black italic tracking-tighter text-white/90">选手</motion.h1>
+      </motion.div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <motion.div className="flex gap-2 mb-6" variants={staggerContainer} initial="hidden" animate="show">
         <TabPill label="选手列表" active={tab === 'list'}  onClick={() => setTab('list')} />
         <TabPill label="选马公示" active={tab === 'draft'} onClick={() => setTab('draft')} />
-      </div>
+      </motion.div>
 
       {tab === 'list' ? <PlayerList /> : <DraftBoard />}
-    </div>
+    </motion.div>
   )
 }
 
@@ -74,7 +77,7 @@ function PlayerList() {
   if (!players || players.length === 0) return <p className="text-sm text-white/40">暂无选手数据</p>
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/[0.08]">
+    <motion.div className="rounded-2xl overflow-hidden border border-white/[0.08] surface-sheen" variants={panelReveal} initial="hidden" animate="show">
       <table className="w-full">
         <thead>
           <tr className="bg-white/[0.02] border-b border-white/[0.06]">
@@ -85,13 +88,11 @@ function PlayerList() {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/[0.04]">
-          {players.map((p, i) => (
+        <motion.tbody className="divide-y divide-white/[0.04]" variants={staggerContainer} initial="hidden" animate="show">
+          {players.map(p => (
             <motion.tr
               key={p.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.03 }}
+              variants={fadeUp}
               className="hover:bg-white/[0.03] transition-colors"
             >
               <td className="px-5 py-3">
@@ -122,9 +123,9 @@ function PlayerList() {
               </td>
             </motion.tr>
           ))}
-        </tbody>
+        </motion.tbody>
       </table>
-    </div>
+    </motion.div>
   )
 }
 
@@ -144,19 +145,20 @@ function DraftBoard() {
   if (isLoading) return <Spinner />
 
   return (
-    <div className="space-y-10">
-      <p className="text-sm text-white/50 -mt-2">
+    <motion.div className="space-y-10" variants={pageReveal} initial="hidden" animate="show">
+      <motion.p variants={fadeUp} className="text-sm text-white/50 -mt-2">
         每队 5 人 = 5 等级各 1 人。前 20% 战力为队长，第 1 轮 S 型逆向选马，第 2–4 轮按公布顺序。
-      </p>
+      </motion.p>
 
       {/* Tier tables */}
-      <div className="space-y-4">
+      <motion.div className="space-y-4" variants={staggerContainer} initial="hidden" animate="show">
         {TIER_ORDER.map(tierKey => {
           const meta = TIER_META[tierKey]
           const tierPlayers = byTier[tierKey]
           return (
-            <div key={tierKey}
-                 className="rounded-md border"
+            <motion.div key={tierKey}
+                 variants={fadeUp}
+                 className="rounded-md border surface-sheen"
                  style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
               <div className="flex items-center gap-4 px-4 py-3 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
                 <div className="w-10 h-10 rounded flex items-center justify-center font-black text-lg flex-shrink-0"
@@ -205,13 +207,13 @@ function DraftBoard() {
               ) : (
                 <p className="text-xs text-white/30 px-4 py-3">选手分配数据待 admin 录入</p>
               )}
-            </div>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
 
       {/* Snake order viz */}
-      <div>
+      <motion.div variants={panelReveal} initial="hidden" animate="show">
         <p className="text-xs font-black uppercase tracking-[0.25em] text-primary mb-4">Pick Order</p>
         <div className="rounded-md border p-6"
              style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
@@ -222,8 +224,8 @@ function DraftBoard() {
             </p>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

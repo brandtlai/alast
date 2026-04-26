@@ -1,6 +1,7 @@
 // src/pages/StatsPage.tsx
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useCurrentTournament } from '../api/currentTournament'
 import { useLeaderboard, useTournamentSummary, useTierComparison, useAvailableMaps } from '../api/stats'
 import Spinner from '../components/Spinner'
@@ -8,17 +9,18 @@ import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
 import TrophySymbol from '../components/TrophySymbol'
 import TierChart from '../components/stats/TierChart'
+import { fadeUp, pageReveal, panelReveal, pressTap, staggerContainer } from '../lib/motion'
 
 type StatKey = 'rating' | 'adr' | 'kast' | 'headshot_pct' | 'first_kills' | 'clutches_won' | 'kd_diff'
 
 const STAT_TABS: { value: StatKey; label: string; format: (v: string) => string }[] = [
-  { value: 'rating',       label: 'Rating',      format: v => parseFloat(v).toFixed(2) },
-  { value: 'adr',          label: 'ADR',         format: v => parseFloat(v).toFixed(1) },
-  { value: 'kast',         label: 'KAST%',       format: v => parseFloat(v).toFixed(1) + '%' },
-  { value: 'headshot_pct', label: 'HS%',         format: v => parseFloat(v).toFixed(1) + '%' },
-  { value: 'first_kills',  label: 'First Kills', format: v => parseFloat(v).toFixed(2) },
-  { value: 'clutches_won', label: 'Clutches',    format: v => parseFloat(v).toFixed(2) },
-  { value: 'kd_diff',      label: '+/−',         format: v => { const n = parseFloat(v); return (n > 0 ? '+' : '') + n.toFixed(1) } },
+  { value: 'rating',       label: 'Rating',  format: v => parseFloat(v).toFixed(2) },
+  { value: 'adr',          label: 'ADR',     format: v => parseFloat(v).toFixed(1) },
+  { value: 'kast',         label: 'KAST%',   format: v => parseFloat(v).toFixed(1) + '%' },
+  { value: 'headshot_pct', label: '爆头率',   format: v => parseFloat(v).toFixed(1) + '%' },
+  { value: 'first_kills',  label: '首杀',     format: v => parseFloat(v).toFixed(2) },
+  { value: 'clutches_won', label: '残局',     format: v => parseFloat(v).toFixed(2) },
+  { value: 'kd_diff',      label: '+/−',     format: v => { const n = parseFloat(v); return (n > 0 ? '+' : '') + n.toFixed(1) } },
 ]
 
 const BRACKET_FILTER = [
@@ -61,9 +63,11 @@ const RANK_STYLE: Record<number, string> = {
 
 function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
       className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest transition-all border"
+      whileHover={{ y: -1, scale: 1.03 }}
+      whileTap={pressTap}
       style={{
         background: active ? 'var(--color-primary)' : 'rgba(255,255,255,0.04)',
         color: active ? '#fff' : 'rgba(248,250,252,0.45)',
@@ -71,7 +75,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
       }}
     >
       {label}
-    </button>
+    </motion.button>
   )
 }
 
@@ -122,40 +126,40 @@ export default function StatsPage() {
   const currentStatDef = STAT_TABS.find(s => s.value === stat)!
 
   return (
-    <div className="relative max-w-7xl mx-auto px-6 py-8">
+    <motion.div className="relative max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
       {/* Trophy watermark */}
       <div className="absolute right-0 top-0 w-[260px] pointer-events-none select-none opacity-20">
         <TrophySymbol variant="outline" className="w-full" />
       </div>
 
       {/* Page heading */}
-      <div className="mb-6">
+      <motion.div className="mb-6" variants={staggerContainer} initial="hidden" animate="show">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Leaderboard</p>
-        <h1 className="text-4xl font-black italic tracking-tighter text-white/90">数据中心</h1>
+        <motion.h1 variants={fadeUp} className="text-4xl font-black italic tracking-tighter text-white/90">数据中心</motion.h1>
         {tournament && <p className="text-xs text-white/35 mt-1">{tournament.name}</p>}
-      </div>
+      </motion.div>
 
       {/* Tournament summary cards */}
       {summary && (
-        <div className="flex gap-3 flex-wrap mb-8">
+        <motion.div className="flex gap-3 flex-wrap mb-8" variants={staggerContainer} initial="hidden" animate="show">
           <SummaryCard label="已完赛场数" value={String(summary.matches_played)} />
           <SummaryCard label="总击杀数" value={Number(summary.total_kills).toLocaleString()} />
           <SummaryCard
             label="平均爆头率"
             value={summary.avg_headshot_pct != null ? (parseFloat(summary.avg_headshot_pct) / 100).toFixed(1) + '%' : '—'}
           />
-        </div>
+        </motion.div>
       )}
 
       {/* Stat tabs */}
-      <div className="flex gap-2 flex-wrap mb-4">
+      <motion.div className="flex gap-2 flex-wrap mb-4" variants={staggerContainer} initial="hidden" animate="show">
         {STAT_TABS.map(s => (
           <FilterChip key={s.value} label={s.label} active={stat === s.value} onClick={() => setStat(s.value)} />
         ))}
-      </div>
+      </motion.div>
 
       {/* Filter bar — one row per dimension */}
-      <div className="space-y-2 mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
+      <motion.div className="space-y-2 mb-6 pb-4 border-b" variants={panelReveal} initial="hidden" animate="show" style={{ borderColor: 'var(--color-data-divider)' }}>
         <FilterRow label="赛段">
           {BRACKET_FILTER.map(f => (
             <FilterChip key={f.value} label={f.label} active={bracketKind === f.value} onClick={() => setBracketKind(f.value)} />
@@ -181,7 +185,7 @@ export default function StatsPage() {
             <FilterChip key={String(f.value)} label={f.label} active={minMaps === f.value} onClick={() => setMinMaps(f.value)} />
           ))}
         </FilterRow>
-      </div>
+      </motion.div>
 
       {/* Leaderboard table */}
       {isLoading && <Spinner />}
@@ -190,7 +194,7 @@ export default function StatsPage() {
         leaderboard.length === 0
           ? <p className="text-sm text-white/40 py-8 text-center">暂无符合条件的数据</p>
           : (
-            <div className="rounded-xl overflow-hidden border mb-10" style={{ borderColor: 'var(--color-data-divider)' }}>
+            <motion.div className="rounded-xl overflow-hidden border mb-10 surface-sheen" variants={panelReveal} initial="hidden" animate="show" style={{ borderColor: 'var(--color-data-divider)' }}>
               <table className="w-full">
                 <thead>
                   <tr style={{ background: 'var(--color-data-surface)', borderBottom: '1px solid var(--color-data-divider)' }}>
@@ -202,9 +206,10 @@ export default function StatsPage() {
                     ))}
                   </tr>
                 </thead>
-                <tbody>
+                <motion.tbody variants={staggerContainer} initial="hidden" animate="show">
                   {leaderboard.map((entry, i) => (
-                    <tr key={entry.id}
+                    <motion.tr key={entry.id}
+                        variants={fadeUp}
                         className="border-b transition-colors hover:bg-white/[0.025]"
                         style={{ borderColor: 'var(--color-data-divider)', background: i % 2 === 0 ? 'transparent' : 'var(--color-data-row)' }}>
                       <td className="px-4 py-3 w-10 text-center">
@@ -249,21 +254,21 @@ export default function StatsPage() {
                           {entry.avg_stat != null ? currentStatDef.format(entry.avg_stat) : '—'}
                         </span>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
-                </tbody>
+                </motion.tbody>
               </table>
-            </div>
+            </motion.div>
           )
       )}
 
       {/* Tier comparison chart */}
       {tournamentId && (
-        <div>
+        <motion.div variants={panelReveal} initial="hidden" animate="show">
           <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Tier 对比分析</p>
           <TierChart data={tierData} />
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

@@ -15,3 +15,20 @@ export function stageOrderIndex(stage: string | null | undefined): number {
   const i = STAGE_ORDER.indexOf(stage)
   return i === -1 ? STAGE_ORDER.length : i
 }
+
+const CN_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+
+/**
+ * Display-only translation of stage labels. DB stores e.g. "小组赛 R1" / "败者组 R4";
+ * we render "小组赛第一轮" / "败者组第四轮". Non-R tokens (QF/SF/Final/GF) pass through.
+ */
+export function formatStage(stage: string | null | undefined): string {
+  if (!stage) return ''
+  return stage
+    .replace(/\s*R(\d+)/g, (_, n) => {
+      const i = parseInt(n, 10)
+      const cn = i >= 1 && i <= CN_NUM.length ? CN_NUM[i - 1] : String(i)
+      return `第${cn}轮`
+    })
+    .replace(/Grand Final|^GF$/i, '总决赛')
+}

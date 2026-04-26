@@ -1,10 +1,12 @@
 import { useParams, Link } from 'react-router-dom'
 import ReactECharts from 'echarts-for-react'
+import { motion } from 'framer-motion'
 import dayjs from 'dayjs'
 import { usePlayer } from '../api/players'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
+import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
 
 function StatCard({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
@@ -32,7 +34,7 @@ export default function PlayerDetailPage() {
         { name: 'Rating', max: 2 },
         { name: 'ADR', max: 150 },
         { name: 'KAST%', max: 100 },
-        { name: 'HS%', max: 80 },
+        { name: '爆头率', max: 80 },
       ],
       axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
       splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } },
@@ -56,9 +58,9 @@ export default function PlayerDetailPage() {
   } : null
 
   return (
-    <div className="space-y-8">
+    <motion.div className="max-w-7xl mx-auto px-6 py-8 space-y-8" variants={pageReveal} initial="hidden" animate="show">
       {/* Header */}
-      <div className="flex items-center gap-6">
+      <motion.div className="flex items-center gap-6" variants={fadeUp}>
         <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold" style={{ background: 'var(--color-secondary)', border: '2px solid var(--color-primary)' }}>
           {player.nickname.slice(0, 2).toUpperCase()}
         </div>
@@ -72,34 +74,34 @@ export default function PlayerDetailPage() {
             </Link>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats Grid */}
       {cs && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <motion.div className="grid grid-cols-2 sm:grid-cols-4 gap-3" variants={staggerContainer} initial="hidden" animate="show">
           <StatCard label="Rating" value={cs.avg_rating} />
           <StatCard label="ADR" value={cs.avg_adr} />
           <StatCard label="KAST%" value={cs.avg_kast != null ? (parseFloat(String(cs.avg_kast)) / 100).toFixed(1) : null} />
-          <StatCard label="HS%" value={cs.avg_hs_pct != null ? (parseFloat(String(cs.avg_hs_pct)) / 100).toFixed(1) : null} />
+          <StatCard label="爆头率" value={cs.avg_hs_pct != null ? (parseFloat(String(cs.avg_hs_pct)) / 100).toFixed(1) : null} />
           <StatCard label="总击杀" value={cs.total_kills} />
           <StatCard label="总死亡" value={cs.total_deaths} />
           <StatCard label="参赛图数" value={cs.maps_played} />
-        </div>
+        </motion.div>
       )}
 
       {/* Radar Chart */}
       {radarOption && (
-        <section>
+        <motion.section variants={panelReveal} initial="hidden" animate="show">
           <h2 className="text-xl font-bold mb-4">能力雷达</h2>
           <div className="rounded-lg p-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', maxWidth: 360 }}>
             <ReactECharts option={radarOption as object} style={{ height: 280 }} />
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* Match History */}
       {player.match_history && player.match_history.length > 0 && (
-        <section>
+        <motion.section variants={panelReveal} initial="hidden" animate="show">
           <h2 className="text-xl font-bold mb-4">近期表现</h2>
           <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--color-border)' }}>
             <table className="w-full text-sm">
@@ -127,8 +129,8 @@ export default function PlayerDetailPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </motion.section>
       )}
-    </div>
+    </motion.div>
   )
 }

@@ -5,9 +5,9 @@ import { RailCard } from './RightRail'
 const STAGES: readonly { label: string; date: string; startISO: string }[] = [
   { label: '报名',         date: '03-11 → 03-30', startISO: '2026-03-11' },
   { label: '选马',         date: '04-01 → 04-03', startISO: '2026-04-01' },
-  { label: '小组赛 R1',    date: '04-06',          startISO: '2026-04-06' },
-  { label: '小组赛 R2',    date: '04-13',          startISO: '2026-04-13' },
-  { label: '小组赛 R3',    date: '04-20',          startISO: '2026-04-20' },
+  { label: '小组赛第一轮',  date: '04-06',          startISO: '2026-04-06' },
+  { label: '小组赛第二轮',  date: '04-13',          startISO: '2026-04-13' },
+  { label: '小组赛第三轮',  date: '04-20',          startISO: '2026-04-20' },
   { label: '胜者组',       date: '05-06 →',        startISO: '2026-05-06' },
   { label: '败者组',       date: '05-13 →',        startISO: '2026-05-13' },
   { label: '总决赛',       date: '06-30',          startISO: '2026-06-30' },

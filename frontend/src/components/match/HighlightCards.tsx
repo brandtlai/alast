@@ -27,7 +27,7 @@ export default function HighlightCards({ highlights }: Props) {
       {/* Clutches */}
       <div className="rounded-md border p-4"
            style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
-        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Clutches</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">残局</p>
         {hasClutches ? (
           <div className="space-y-2">
             {clutches.map((cl, i) => (
@@ -41,16 +41,16 @@ export default function HighlightCards({ highlights }: Props) {
                       </div>}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold text-white/90 truncate">{cl.nickname ?? 'Unknown'}</div>
+                  <div className="text-xs font-bold text-white/90 truncate">{cl.nickname ?? '未知'}</div>
                   <div className="text-[10px] text-white/40">
                     {OPPONENT_LABEL[cl.opponent_count] ?? `1v${cl.opponent_count}`}
-                    {' · R'}{cl.round_number}
-                    {' · '}{cl.kill_count}K
+                    {' · 第'}{cl.round_number}{'回合'}
+                    {' · '}{cl.kill_count}{'杀'}
                   </div>
                 </div>
                 <div className="flex-shrink-0 text-sm font-black"
                      style={{ color: cl.won ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)' }}>
-                  {cl.won ? 'WIN' : 'LOSE'}
+                  {cl.won ? '胜利' : '失败'}
                 </div>
               </div>
             ))}
@@ -63,7 +63,7 @@ export default function HighlightCards({ highlights }: Props) {
       {/* Top Frags */}
       <div className="rounded-md border p-4"
            style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
-        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Top Frags</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">击杀榜</p>
         {hasTopPlayers ? (
           <div className="space-y-2">
             {top_players.map((p, i) => (

@@ -5,6 +5,7 @@ import { useStandings } from '../../../api/tournaments'
 import StandingsTable from '../StandingsTable'
 import RoundPanel from '../RoundPanel'
 import MatchRow from '../MatchRow'
+import { formatStage } from '../lib/tournamentRounds'
 import type { StandingRow as ApiStandingRow } from '../../../types'
 
 const SWISS_ROUNDS = ['小组赛 R1', '小组赛 R2', '小组赛 R3'] as const
@@ -57,12 +58,12 @@ export default function GroupStageTab() {
           return (
             <RoundPanel
               key={round}
-              title={round}
+              title={formatStage(round)}
               subtitle={ms.length > 0 ? `${ms.length} 场` : '待抽签'}
               defaultOpen={i === 0}
             >
               {ms.length === 0
-                ? <p className="text-xs text-white/40 py-2">待小组赛 R{i} 结束后抽签</p>
+                ? <p className="text-xs text-white/40 py-2">待{formatStage(`小组赛 R${i}`)}结束后抽签</p>
                 : <div className="space-y-2">{ms.map(m => <MatchRow key={m.id} match={m} variant="overview" />)}</div>}
             </RoundPanel>
           )

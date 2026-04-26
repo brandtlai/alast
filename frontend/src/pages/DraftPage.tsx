@@ -4,6 +4,7 @@ import { useDraft } from '../api/tournaments'
 import Spinner from '../components/Spinner'
 import TeamLogo from '../components/TeamLogo'
 import type { DraftPlayer } from '../types'
+import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
 
 const TIER_META: Record<string, { label: string; accent: string; desc: string }> = {
   'S':  { label: '特等马', accent: '#FFD700', desc: '前 20% 战力 / 队长' },
@@ -28,24 +29,25 @@ export default function DraftPage() {
   const hasData = (players?.length ?? 0) > 0
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-12">
-      <header>
+    <motion.div className="max-w-7xl mx-auto px-6 py-12 space-y-12" variants={pageReveal} initial="hidden" animate="show">
+      <motion.header variants={staggerContainer} initial="hidden" animate="show">
         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">DRAFT BOARD</p>
-        <h1 className="text-3xl font-black italic uppercase tracking-tight text-white/95">选马公示 / Draft</h1>
-        <p className="text-sm text-white/50 mt-2">每队 5 人 = 5 等级各 1 人。前 20% 战力为队长，第 1 轮 S 型逆向选马，第 2-4 轮按公布顺序。</p>
-      </header>
+        <motion.h1 variants={fadeUp} className="text-3xl font-black italic uppercase tracking-tight text-white/95">选马公示 / Draft</motion.h1>
+        <motion.p variants={fadeUp} className="text-sm text-white/50 mt-2">每队 5 人 = 5 等级各 1 人。前 20% 战力为队长，第 1 轮 S 型逆向选马，第 2-4 轮按公布顺序。</motion.p>
+      </motion.header>
 
       {isLoading && <Spinner />}
 
-      <section>
+      <motion.section variants={panelReveal} initial="hidden" animate="show">
         <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary mb-4">5 Tiers</h2>
-        <div className="space-y-4">
+        <motion.div className="space-y-4" variants={staggerContainer} initial="hidden" animate="show">
           {TIER_ORDER.map(tierKey => {
             const meta = TIER_META[tierKey]
             const tierPlayers = byTier[tierKey]
             return (
-              <div key={tierKey}
-                   className="rounded-md border"
+              <motion.div key={tierKey}
+                   variants={fadeUp}
+                   className="rounded-md border surface-sheen"
                    style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
                 <div className="flex items-center gap-4 px-4 py-3 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
                   <div className="w-10 h-10 rounded flex items-center justify-center font-black text-lg flex-shrink-0"
@@ -91,13 +93,13 @@ export default function DraftPage() {
                 ) : (
                   <p className="text-xs text-white/30 px-4 py-3">选手分配数据待 admin 录入</p>
                 )}
-              </div>
+              </motion.div>
             )
           })}
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
-      <section>
+      <motion.section variants={panelReveal} initial="hidden" animate="show">
         <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary mb-4">Pick Order</h2>
         <div className="rounded-md border p-6"
              style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
@@ -108,8 +110,8 @@ export default function DraftPage() {
             </p>
           )}
         </div>
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   )
 }
 

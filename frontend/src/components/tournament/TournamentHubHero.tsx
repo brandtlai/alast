@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import TrophySymbol from '../TrophySymbol.js'
 import { useCurrentTournament } from '../../api/currentTournament.js'
+import { fadeUp, staggerContainer } from '../../lib/motion.js'
 
 const INFO_ITEMS = [
   { label: 'Tournament Phase', value: '小组赛', accent: false },
@@ -29,23 +30,23 @@ export default function TournamentHubHero() {
         {/* Left: brand text */}
         <motion.div
           className="flex-1"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
         >
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">
+          <motion.p variants={fadeUp} className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">
             ALAST PREMIER
-          </p>
-          <h1 className="font-black italic tracking-tighter leading-none mb-2"
+          </motion.p>
+          <motion.h1 variants={fadeUp} className="font-black italic tracking-tighter leading-none mb-2"
             style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>
             <span className="gold-gradient">PREMIER 2026</span>
-          </h1>
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-5">
+          </motion.h1>
+          <motion.p variants={fadeUp} className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-5">
             {tournament?.name ?? 'SEASON 2026'}
-          </p>
+          </motion.p>
 
           {/* Info bar */}
-          <div className="flex items-center gap-6 flex-wrap">
+          <motion.div variants={fadeUp} className="flex items-center gap-6 flex-wrap">
             {INFO_ITEMS.map((item, i) => (
               <div key={i} className="flex items-center gap-6">
                 {i > 0 && <div className="w-px h-7 bg-white/10" />}
@@ -59,15 +60,15 @@ export default function TournamentHubHero() {
                 </div>
               </div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Trophy */}
         <motion.div
           className="flex-shrink-0 hidden md:block"
           initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          animate={{ opacity: 1, scale: 1, y: [0, -7, 0] }}
+          transition={{ opacity: { duration: 0.5 }, scale: { duration: 0.5 }, y: { duration: 7, repeat: Infinity, ease: 'easeInOut' } }}
         >
           <TrophySymbol variant="full" className="w-[180px] lg:w-[220px]" />
         </motion.div>

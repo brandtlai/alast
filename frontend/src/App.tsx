@@ -11,7 +11,6 @@ import NewsPage from './pages/NewsPage'
 import NewsDetailPage from './pages/NewsDetailPage'
 import StatsPage from './pages/StatsPage'
 import AboutPage from './pages/AboutPage'
-import DraftPage from './pages/DraftPage'
 
 export default function App() {
   return (

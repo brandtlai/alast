@@ -1,5 +1,6 @@
 import type { Match } from '../../types.js'
 import MatchRow from './MatchRow.js'
+import { formatStage } from './lib/tournamentRounds.js'
 
 interface Props {
   title: string
@@ -29,7 +30,7 @@ export default function BracketColumn({ title, subtitle, rounds, isCurrent = fal
             {rounds.map(r => (
               <div key={r.roundLabel}>
                 <div className="text-[9px] font-black uppercase tracking-[0.2em] text-white/35 mb-2">
-                  {r.roundLabel}
+                  {formatStage(r.roundLabel)}
                 </div>
                 <div className="space-y-1.5">
                   {r.matches.map(m => <MatchRow key={m.id} match={m} variant="bracket-card" />)}

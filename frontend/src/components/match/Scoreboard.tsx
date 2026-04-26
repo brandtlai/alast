@@ -114,7 +114,7 @@ export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamB
   )
 }
 
-const COL_HEADERS = ['K', 'A', 'D', 'HS%', 'ADR', 'Rating'] as const
+const COL_HEADERS = ['K', 'A', 'D', '爆头%', 'ADR', 'Rating'] as const
 
 function TeamSection({
   team, teamName, logoUrl, mvpId, accentColor, borderColor,
