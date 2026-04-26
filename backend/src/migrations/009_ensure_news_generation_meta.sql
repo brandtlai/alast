@@ -1,0 +1,2 @@
+ALTER TABLE news
+  ADD COLUMN IF NOT EXISTS generation_meta JSONB;

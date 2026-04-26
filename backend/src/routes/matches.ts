@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { query } from '../db.js'
 import { ok, err } from '../types.js'
+import { formatStageForNews } from '../lib/news-generation/text.js'
 
 const r = new Hono()
 
@@ -11,11 +12,20 @@ r.get('/', async (c) => {
     SELECT m.*,
            ta.name as team_a_name, ta.logo_url as team_a_logo,
            tb.name as team_b_name, tb.logo_url as team_b_logo,
-           t.name as tournament_name
+           t.name as tournament_name,
+           n.slug as news_slug,
+           n.title as news_title
     FROM matches m
     LEFT JOIN teams ta ON ta.id = m.team_a_id
     LEFT JOIN teams tb ON tb.id = m.team_b_id
     LEFT JOIN tournaments t ON t.id = m.tournament_id
+    LEFT JOIN LATERAL (
+      SELECT slug, title
+      FROM news
+      WHERE match_id = m.id AND published_at IS NOT NULL
+      ORDER BY published_at DESC
+      LIMIT 1
+    ) n ON TRUE
     WHERE 1=1
   `
   const params: unknown[] = []
@@ -29,7 +39,7 @@ r.get('/', async (c) => {
   sql += ' ORDER BY m.scheduled_at DESC'
 
   const { rows } = await query(sql, params)
-  return c.json(ok(rows))
+  return c.json(ok(rows.map(row => ({ ...row, stage: formatStageForNews(row.stage) }))))
 })
 
 r.get('/:id', async (c) => {
@@ -38,10 +48,25 @@ r.get('/:id', async (c) => {
   const { rows } = await query(
     `SELECT m.*,
             ta.name as team_a_name, ta.logo_url as team_a_logo,
-            tb.name as team_b_name, tb.logo_url as team_b_logo
+            tb.name as team_b_name, tb.logo_url as team_b_logo,
+            CASE WHEN n.id IS NULL THEN NULL ELSE json_build_object(
+              'id', n.id,
+              'title', n.title,
+              'slug', n.slug,
+              'summary', n.summary,
+              'published_at', n.published_at,
+              'ai_generated', n.ai_generated
+            ) END AS news
      FROM matches m
      LEFT JOIN teams ta ON ta.id = m.team_a_id
      LEFT JOIN teams tb ON tb.id = m.team_b_id
+     LEFT JOIN LATERAL (
+       SELECT id, title, slug, summary, published_at, ai_generated
+       FROM news
+       WHERE match_id = m.id AND published_at IS NOT NULL
+       ORDER BY published_at DESC
+       LIMIT 1
+     ) n ON TRUE
      WHERE m.id = $1`,
     [id]
   )
@@ -68,7 +93,7 @@ r.get('/:id', async (c) => {
     [id]
   )
 
-  return c.json(ok({ ...rows[0], maps }))
+  return c.json(ok({ ...rows[0], stage: formatStageForNews(rows[0].stage), maps }))
 })
 
 export default r

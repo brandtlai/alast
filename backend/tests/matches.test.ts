@@ -54,4 +54,21 @@ describe('GET /api/matches/:id', () => {
     expect(body.data.id).toBe(matchId)
     expect(Array.isArray(body.data.maps)).toBe(true)
   })
+
+  it('returns linked published recap metadata', async () => {
+    const tid = await insertTournament()
+    const ta = await insertTeam({ name: 'Alpha' })
+    const tb = await insertTeam({ name: 'Beta' })
+    const matchId = await insertMatch(tid, ta, tb, { status: 'finished' })
+    await query(
+      `INSERT INTO news (title, slug, category, match_id, published_at, ai_generated)
+       VALUES ('Recap', 'recap-slug', '战报', $1, NOW(), true)`,
+      [matchId],
+    )
+
+    const res = await app.request(`/api/matches/${matchId}`)
+    const body = await res.json() as { data: { news: { title: string; slug: string } | null } }
+
+    expect(body.data.news).toMatchObject({ title: 'Recap', slug: 'recap-slug' })
+  })
 })

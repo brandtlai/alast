@@ -93,7 +93,7 @@ r.get('/tier-comparison', async (c) => {
   const tournamentId = c.req.query('tournament_id')
   if (!tournamentId) return c.json(ok([]))
 
-  const { rows } = await query(
+  const { rows } = await query<{ map_name: string }>(
     `SELECT
        tpa.tier,
        ROUND(AVG(pms.rating)::numeric, 3) AS avg_rating,
@@ -120,7 +120,7 @@ r.get('/maps', async (c) => {
   let condition = ''
   if (tournamentId) { params.push(tournamentId); condition = 'WHERE m.tournament_id = $1' }
 
-  const { rows } = await query(
+  const { rows } = await query<{ map_name: string }>(
     `SELECT DISTINCT mm.map_name
      FROM match_maps mm
      JOIN matches m ON m.id = mm.match_id

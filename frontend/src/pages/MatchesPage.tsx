@@ -8,6 +8,8 @@ import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
 import StatusBadge from '../components/StatusBadge'
 import Card from '../components/Card'
+import { formatStage } from '../components/tournament/lib/tournamentRounds'
+import { fadeUp, pageReveal, pressTap, staggerContainer } from '../lib/motion'
 
 const STATUSES = [
   { value: '',         label: '全部' },
@@ -18,9 +20,11 @@ const STATUSES = [
 
 function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
       className="flex-shrink-0 px-4 py-1.5 text-xs font-black uppercase tracking-widest transition-all"
+      whileHover={{ y: -1, scale: 1.03 }}
+      whileTap={pressTap}
       style={{
         clipPath: 'polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)',
         background: active ? 'var(--color-primary)' : 'rgba(255,255,255,0.05)',
@@ -29,7 +33,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
       }}
     >
       {label}
-    </button>
+    </motion.button>
   )
 }
 
@@ -38,36 +42,37 @@ export default function MatchesPage() {
   const { data: matches, isLoading, error } = useMatches({ status: status || undefined })
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="mb-8">
+    <motion.div className="max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
+      <motion.div className="mb-8" variants={staggerContainer} initial="hidden" animate="show">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Match Schedule</p>
-        <h1 className="text-4xl font-black italic tracking-tighter text-white/90">赛程 / 战绩</h1>
-      </div>
+        <motion.h1 variants={fadeUp} className="text-4xl font-black italic tracking-tighter text-white/90">赛程 / 战绩</motion.h1>
+      </motion.div>
 
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <motion.div className="flex gap-2 mb-6 flex-wrap" variants={staggerContainer} initial="hidden" animate="show">
         {STATUSES.map(s => (
-          <FilterPill key={s.value} label={s.label} active={status === s.value} onClick={() => setStatus(s.value)} />
+          <motion.span key={s.value} variants={fadeUp}>
+            <FilterPill label={s.label} active={status === s.value} onClick={() => setStatus(s.value)} />
+          </motion.span>
         ))}
-      </div>
+      </motion.div>
 
       {isLoading && <Spinner />}
       {error && <ErrorBox message={error.message} />}
       {matches && (
         matches.length === 0
           ? <p className="text-sm text-white/40">暂无比赛</p>
-          : <div className="space-y-3">
-              {matches.map((m, i) => (
+          : <motion.div className="space-y-3" variants={staggerContainer} initial="hidden" animate="show">
+              {matches.map(m => (
                 <motion.div
                   key={m.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
+                  variants={fadeUp}
+                  whileHover={{ x: 3 }}
                 >
                   <Card href={`/matches/${m.id}`} className="px-4 py-3">
                     {/* Meta row */}
                     <div className="flex items-center gap-2 mb-2.5">
                       {m.stage && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-white/30">{m.stage}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-white/30">{formatStage(m.stage)}</span>
                       )}
                       {m.scheduled_at && (
                         <span className="text-[9px] text-white/25 ml-auto tabular-nums">
@@ -111,11 +116,17 @@ export default function MatchesPage() {
                         <TeamLogo url={m.team_b_logo} name={m.team_b_name ?? '?'} size={28} />
                       </div>
                     </div>
+
+                    {m.news_slug && (
+                      <div className="mt-2 pt-2 border-t border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-primary truncate">
+                        赛后解读 · {m.news_title ?? '阅读战报'}
+                      </div>
+                    )}
                   </Card>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

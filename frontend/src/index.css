@@ -55,7 +55,10 @@ body {
 
 /* Hero section background */
 .stage-gradient {
-  background: radial-gradient(circle at 50% -20%, #0F172A 0%, #050714 70%);
+  background:
+    radial-gradient(circle at 72% 10%, rgba(255, 138, 0, 0.14) 0%, transparent 34%),
+    radial-gradient(circle at 32% 0%, rgba(0, 209, 255, 0.09) 0%, transparent 28%),
+    radial-gradient(circle at 50% -20%, #0F172A 0%, #050714 70%);
 }
 
 /* Stat numbers */
@@ -75,6 +78,51 @@ body {
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+.ambient-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(circle at 50% 10%, black 0%, transparent 72%);
+}
+
+.surface-sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.surface-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at var(--sheen-x, 18%) var(--sheen-y, 0%), rgba(255,255,255,0.12), transparent 28%),
+    linear-gradient(115deg, transparent 20%, rgba(255,138,0,0.10) 48%, transparent 72%);
+  transform: translateX(-10%);
+  transition: opacity 240ms ease, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.surface-sheen:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.interactive-lift {
+  will-change: transform, border-color, box-shadow;
+}
+
+.interactive-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22), 0 0 34px rgba(255, 138, 0, 0.08);
+}
+
+.motion-safe-glow {
+  animation: ambientPulse 7s ease-in-out infinite alternate;
 }
 
 /* Scrollbar */
@@ -97,4 +145,22 @@ body {
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-10px); }
+}
+
+@keyframes ambientPulse {
+  from { opacity: 0.42; transform: translate3d(0, 0, 0) scale(1); }
+  to   { opacity: 0.72; transform: translate3d(18px, -10px, 0) scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .interactive-lift:hover {
+    transform: none;
+  }
 }

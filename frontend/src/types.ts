@@ -83,8 +83,33 @@ export interface Match {
   team_b_name?: string | null
   team_b_logo?: string | null
   tournament_name?: string | null
+  news_slug?: string | null
+  news_title?: string | null
+  news?: MatchLinkedNews | null
   // detail view
   maps?: MatchMap[]
+}
+
+export interface MatchLinkedNews {
+  id: string
+  title: string
+  slug: string
+  summary: string | null
+  published_at: string | null
+  ai_generated?: boolean
+}
+
+export interface NewsLinkedMatch {
+  id: string
+  stage: string | null
+  final_score: string
+  team_a_id: string | null
+  team_a_name: string | null
+  team_a_logo: string | null
+  team_b_id: string | null
+  team_b_name: string | null
+  team_b_logo: string | null
+  scheduled_at: string | null
 }
 
 export interface MatchMap {
@@ -124,6 +149,9 @@ export interface NewsArticle {
   author: string | null
   published_at: string | null
   created_at: string
+  ai_generated?: boolean
+  generation_meta?: Record<string, unknown> | null
+  match?: NewsLinkedMatch | null
 }
 
 export interface LeaderboardEntry {
