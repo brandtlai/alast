@@ -17,6 +17,11 @@
   --color-data-divider:    rgba(255, 255, 255, 0.06);
   --color-data-chip:       #1A2342;
   --color-data-text-muted: rgba(255, 255, 255, 0.45);
+
+  /* Rank semantic axis — winner=gold, loser=neon pink */
+  --color-neon-pink-from: #FF2BD6;
+  --color-neon-pink-to:   #B026FF;
+  --color-neon-pink:      #FF2BD6;
 }
 
 body {
@@ -38,6 +43,13 @@ body {
   background-clip: text;
   background-size: 200% auto;
   animation: shimmer 3s infinite linear;
+}
+
+.pink-gradient {
+  background: linear-gradient(135deg, #FF2BD6 0%, #B026FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* ALAST brand letterform */
@@ -152,6 +164,34 @@ body {
   to   { opacity: 0.72; transform: translate3d(18px, -10px, 0) scale(1.04); }
 }
 
+@keyframes sparkBurst {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--spark-x, 40px), var(--spark-y, -40px)) scale(0.2); }
+}
+
+@keyframes particleDrift {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%  { opacity: var(--particle-opacity, 0.25); }
+  90%  { opacity: var(--particle-opacity, 0.25); }
+  100% { transform: translate3d(var(--particle-x, 20px), -100vh, 0); opacity: 0; }
+}
+
+@keyframes glowPulseRank {
+  0%, 100% { box-shadow: 0 0 12px var(--rank-glow, rgba(255, 184, 0, 0.3)); }
+  50%      { box-shadow: 0 0 28px var(--rank-glow, rgba(255, 184, 0, 0.55)); }
+}
+
+@keyframes trophyPendulum {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(7deg); }
+}
+
+@keyframes trophyBreath {
+  0%, 100% { filter: drop-shadow(0 0 14px rgba(255,184,0,0.45)); }
+  50%      { filter: drop-shadow(0 0 26px rgba(255,184,0,0.75)); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -163,4 +203,7 @@ body {
   .interactive-lift:hover {
     transform: none;
   }
+
+  /* Hide ambient particle layer entirely */
+  .ambient-particles { display: none !important; }
 }
