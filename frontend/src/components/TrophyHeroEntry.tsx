@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { easeOutQuart } from '../lib/motion'
 
@@ -25,7 +26,7 @@ function makeSparks() {
 export default function TrophyHeroEntry({ playEntry, className = '' }: Props) {
   const reduceMotion = useReducedMotion()
   const skip = !playEntry || reduceMotion
-  const sparks = skip ? [] : makeSparks()
+  const sparks = useMemo(() => (skip ? [] : makeSparks()), [skip])
 
   return (
     <div className={`relative ${className}`} style={{ width: 220, height: 260 }}>
@@ -108,7 +109,7 @@ export default function TrophyHeroEntry({ playEntry, className = '' }: Props) {
         </div>
       </motion.div>
 
-      {/* Sparks — 0.6s start, stagger 30–50ms */}
+      {/* Sparks — 0.6s start, jitter 0–50ms (radial burst, all-at-once) */}
       {!skip && sparks.map((s, i) => (
         <motion.span
           key={i}
