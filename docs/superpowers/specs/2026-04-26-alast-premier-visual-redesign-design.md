@@ -1,7 +1,7 @@
 # ALAST Premier Visual Redesign — Design Spec
 
 **Date**: 2026-04-26
-**Status**: Written for user review. Brainstorm direction approved; implementation plan pending.
+**Status**: ⚠️ **SUPERSEDED 2026-04-26** by `2026-04-26-trophy-hero-flashy-redesign-design.md`. The team reversed direction from this quiet/restrained editorial approach to a high-energy esports redesign with a hero trophy entry animation, neon-pink secondary brand color, and ambient gold particles. This document is kept as historical reference for the rejected direction.
 **Repo**: `/Users/brandt/alast`
 **Scope**: Frontend visual system, page composition, interaction language, and typography.
 
