@@ -13,7 +13,7 @@ import RoundTimeline from '../components/match/RoundTimeline'
 import EconomyChart from '../components/match/EconomyChart'
 import HighlightCards from '../components/match/HighlightCards'
 import { formatStage } from '../components/tournament/lib/tournamentRounds'
-import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
+import { fadeUp, pageReveal, panelReveal, scoreFlip, staggerContainer } from '../lib/motion'
 
 function formatDuration(seconds: number | null | undefined): string {
   if (!seconds) return ''
@@ -77,14 +77,31 @@ export default function MatchDetailPage() {
 
           <div className="text-center flex-shrink-0 px-4">
             {match.status === 'finished' ? (
-              <div className="flex items-center gap-3">
-                <span className={`text-5xl font-black tabular-nums ${teamAWon ? 'gold-gradient' : 'text-white/40'}`}>
+              <div className="flex items-center gap-3" style={{ perspective: 600 }}>
+                <motion.span
+                  variants={scoreFlip}
+                  initial="hidden"
+                  animate="show"
+                  className={`text-5xl font-black tabular-nums ${
+                    teamAWon ? 'gold-gradient' : teamBWon ? 'pink-gradient' : 'text-white/40'
+                  }`}
+                  style={{ transformOrigin: 'center' }}
+                >
                   {match.maps_won_a}
-                </span>
+                </motion.span>
                 <span className="text-3xl font-black text-white/20">–</span>
-                <span className={`text-5xl font-black tabular-nums ${teamBWon ? 'gold-gradient' : 'text-white/40'}`}>
+                <motion.span
+                  variants={scoreFlip}
+                  initial="hidden"
+                  animate="show"
+                  transition={{ delay: 0.12 }}
+                  className={`text-5xl font-black tabular-nums ${
+                    teamBWon ? 'gold-gradient' : teamAWon ? 'pink-gradient' : 'text-white/40'
+                  }`}
+                  style={{ transformOrigin: 'center' }}
+                >
                   {match.maps_won_b}
-                </span>
+                </motion.span>
               </div>
             ) : (
               <StatusBadge status={match.status} />
