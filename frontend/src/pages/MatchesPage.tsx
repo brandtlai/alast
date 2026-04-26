@@ -9,7 +9,7 @@ import TeamLogo from '../components/TeamLogo'
 import StatusBadge from '../components/StatusBadge'
 import Card from '../components/Card'
 import { formatStage } from '../components/tournament/lib/tournamentRounds'
-import { fadeUp, pageReveal, pressTap, staggerContainer } from '../lib/motion'
+import { fadeUp, pageReveal, pressTap, rankGradient, staggerContainer } from '../lib/motion'
 
 const STATUSES = [
   { value: '',         label: '全部' },
@@ -95,11 +95,33 @@ export default function MatchesPage() {
                       <div className="flex items-center gap-1.5 flex-shrink-0 px-2">
                         {m.status === 'finished' ? (
                           <>
-                            <span className={`text-xl font-black italic tabular-nums ${(m.maps_won_a ?? 0) > (m.maps_won_b ?? 0) ? 'text-primary' : 'text-white/30'}`}>
+                            <span
+                              className="text-xl font-black italic tabular-nums"
+                              style={{
+                                backgroundImage: rankGradient(
+                                  (m.maps_won_a ?? 0) > (m.maps_won_b ?? 0) ? 'win' :
+                                  (m.maps_won_a ?? 0) < (m.maps_won_b ?? 0) ? 'loss' : 'neutral'
+                                ),
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                              }}
+                            >
                               {m.maps_won_a}
                             </span>
                             <span className="text-white/20 text-sm font-bold">:</span>
-                            <span className={`text-xl font-black italic tabular-nums ${(m.maps_won_b ?? 0) > (m.maps_won_a ?? 0) ? 'text-primary' : 'text-white/30'}`}>
+                            <span
+                              className="text-xl font-black italic tabular-nums"
+                              style={{
+                                backgroundImage: rankGradient(
+                                  (m.maps_won_b ?? 0) > (m.maps_won_a ?? 0) ? 'win' :
+                                  (m.maps_won_b ?? 0) < (m.maps_won_a ?? 0) ? 'loss' : 'neutral'
+                                ),
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                              }}
+                            >
                               {m.maps_won_b}
                             </span>
                           </>
