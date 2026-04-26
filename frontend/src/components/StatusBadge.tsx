@@ -1,3 +1,5 @@
+import { glowPulse } from '../lib/motion'
+
 interface Props {
   status: 'upcoming' | 'live' | 'finished'
 }
@@ -5,12 +7,30 @@ interface Props {
 export default function StatusBadge({ status }: Props) {
   if (status === 'live') {
     return (
-      <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-sm bg-red-500/20 border border-red-500/30">
+      <div
+        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-sm border"
+        style={{
+          background: 'rgba(255, 43, 214, 0.12)',
+          borderColor: 'rgba(255, 43, 214, 0.5)',
+          ...glowPulse('loss'),
+        }}
+      >
         <span className="relative flex h-2 w-2 flex-shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          <span
+            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+            style={{ background: 'var(--color-neon-pink)' }}
+          />
+          <span
+            className="relative inline-flex rounded-full h-2 w-2"
+            style={{ background: 'var(--color-neon-pink)' }}
+          />
         </span>
-        <span className="text-[10px] font-black uppercase tracking-widest text-red-400">LIVE</span>
+        <span
+          className="text-[10px] font-black uppercase tracking-widest"
+          style={{ color: '#FF6EC7' }}
+        >
+          LIVE
+        </span>
       </div>
     )
   }
