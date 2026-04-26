@@ -1,8 +1,12 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import TrophySymbol from '../TrophySymbol.js'
+import TrophyHeroEntry from '../TrophyHeroEntry.js'
+import AmbientParticles from '../AmbientParticles.js'
 import { useCurrentTournament } from '../../api/currentTournament.js'
-import { fadeUp, staggerContainer } from '../../lib/motion.js'
+import { fadeUp, headingMask, staggerContainer } from '../../lib/motion.js'
+
+const SESSION_KEY = 'alast.trophyShown'
 
 const INFO_ITEMS = [
   { label: 'Tournament Phase', value: '小组赛', accent: false },
@@ -13,8 +17,23 @@ const INFO_ITEMS = [
 export default function TournamentHubHero() {
   const { data: tournament } = useCurrentTournament()
 
+  // 在 mount 那一刻读取 sessionStorage —— 第一次进首页才播完整入场
+  const [playEntry] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !window.sessionStorage.getItem(SESSION_KEY)
+  })
+
+  useEffect(() => {
+    if (playEntry) {
+      try { window.sessionStorage.setItem(SESSION_KEY, '1') } catch {}
+    }
+  }, [playEntry])
+
   return (
     <section className="relative overflow-hidden stage-gradient" style={{ height: 360 }}>
+      {/* Ambient gold particles — 首页独享，数据页不挂 */}
+      <AmbientParticles />
+
       {/* Single ambient blob */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none rounded-full"
@@ -37,8 +56,11 @@ export default function TournamentHubHero() {
           <motion.p variants={fadeUp} className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">
             ALAST PREMIER
           </motion.p>
-          <motion.h1 variants={fadeUp} className="font-black italic tracking-tighter leading-none mb-2"
-            style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>
+          <motion.h1
+            variants={headingMask}
+            className="font-black italic tracking-tighter leading-none mb-2"
+            style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
+          >
             <span className="gold-gradient">PREMIER 2026</span>
           </motion.h1>
           <motion.p variants={fadeUp} className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-5">
@@ -63,15 +85,10 @@ export default function TournamentHubHero() {
           </motion.div>
         </motion.div>
 
-        {/* Trophy */}
-        <motion.div
-          className="flex-shrink-0 hidden md:block"
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1, y: [0, -7, 0] }}
-          transition={{ opacity: { duration: 0.5 }, scale: { duration: 0.5 }, y: { duration: 7, repeat: Infinity, ease: 'easeInOut' } }}
-        >
-          <TrophySymbol variant="full" className="w-[180px] lg:w-[220px]" />
-        </motion.div>
+        {/* Trophy entry */}
+        <div className="flex-shrink-0 hidden md:block">
+          <TrophyHeroEntry playEntry={playEntry} />
+        </div>
       </div>
 
       {/* Hidden CTA — kept off the hub hero per design (CTA lives in tabs). Link reserved for /about. */}
