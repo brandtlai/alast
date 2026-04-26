@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import TeamLogo from '../TeamLogo.js'
 import StatusBadge from '../StatusBadge.js'
 import type { Match } from '../../types.js'
+import { rankGradient } from '../../lib/motion.js'
 
 interface Props {
   match: Match
@@ -27,7 +28,18 @@ export default function MatchRow({ match, variant = 'overview' }: Props) {
             <TeamLogo url={match.team_a_logo} name={match.team_a_name ?? '?'} size={20} />
             <span className="text-xs font-bold truncate text-white/85">{match.team_a_name ?? 'TBD'}</span>
           </div>
-          <span className={`text-sm font-black tabular-nums ${finished ? 'text-primary' : 'text-white/40'}`}>
+          <span
+            className="text-sm font-black tabular-nums"
+            style={finished ? {
+              backgroundImage: rankGradient(
+                (match.maps_won_a ?? 0) > (match.maps_won_b ?? 0) ? 'win' :
+                (match.maps_won_a ?? 0) < (match.maps_won_b ?? 0) ? 'loss' : 'neutral'
+              ),
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            } : { color: 'rgba(255,255,255,0.4)' }}
+          >
             {finished ? match.maps_won_a : '–'}
           </span>
         </div>
@@ -36,7 +48,18 @@ export default function MatchRow({ match, variant = 'overview' }: Props) {
             <TeamLogo url={match.team_b_logo} name={match.team_b_name ?? '?'} size={20} />
             <span className="text-xs font-bold truncate text-white/85">{match.team_b_name ?? 'TBD'}</span>
           </div>
-          <span className={`text-sm font-black tabular-nums ${finished ? 'text-primary' : 'text-white/40'}`}>
+          <span
+            className="text-sm font-black tabular-nums"
+            style={finished ? {
+              backgroundImage: rankGradient(
+                (match.maps_won_b ?? 0) > (match.maps_won_a ?? 0) ? 'win' :
+                (match.maps_won_b ?? 0) < (match.maps_won_a ?? 0) ? 'loss' : 'neutral'
+              ),
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            } : { color: 'rgba(255,255,255,0.4)' }}
+          >
             {finished ? match.maps_won_b : '–'}
           </span>
         </div>
