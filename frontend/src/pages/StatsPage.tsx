@@ -9,7 +9,7 @@ import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
 import TrophySymbol from '../components/TrophySymbol'
 import TierChart from '../components/stats/TierChart'
-import { fadeUp, pageReveal, panelReveal, pressTap, staggerContainer } from '../lib/motion'
+import { fadeUp, pageReveal, panelReveal, pressTap, rankReveal, staggerContainer } from '../lib/motion'
 
 type StatKey = 'rating' | 'adr' | 'kast' | 'headshot_pct' | 'first_kills' | 'clutches_won' | 'kd_diff'
 
@@ -48,17 +48,19 @@ const MIN_MAPS_FILTER = [
 ]
 
 const TIER_COLORS: Record<string, string> = {
-  S: 'var(--color-gold)',
-  A: 'var(--color-primary)',
-  B: 'var(--color-accent)',
-  'C+': 'rgba(255,255,255,0.5)',
-  D: 'rgba(255,255,255,0.3)',
+  S:    'var(--color-gold)',
+  A:    'var(--color-primary)',
+  B:    'rgba(255, 255, 255, 0.65)',
+  'C+': 'rgba(255, 255, 255, 0.4)',
+  D:    'var(--color-neon-pink)',
 }
 
-const RANK_STYLE: Record<number, string> = {
-  0: 'text-gold',
-  1: 'text-white/60',
-  2: 'text-[#CD7F32]',
+function rankColor(index: number, total: number): string {
+  if (index === 0) return 'var(--color-gold)'
+  if (index === 1) return 'rgba(255, 255, 255, 0.7)'
+  if (index === 2) return '#CD7F32'
+  if (total > 5 && index === total - 1) return 'var(--color-neon-pink)'
+  return 'rgba(255, 255, 255, 0.3)'
 }
 
 function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
@@ -213,9 +215,17 @@ export default function StatsPage() {
                         className="border-b transition-colors hover:bg-white/[0.025]"
                         style={{ borderColor: 'var(--color-data-divider)', background: i % 2 === 0 ? 'transparent' : 'var(--color-data-row)' }}>
                       <td className="px-4 py-3 w-10 text-center">
-                        <span className={`text-sm font-black italic tabular-nums ${RANK_STYLE[i] ?? 'text-white/30'}`}>
+                        <motion.span
+                          variants={rankReveal(
+                            i === 0 ? 'win' :
+                            (leaderboard.length > 5 && i === leaderboard.length - 1) ? 'loss' :
+                            'neutral'
+                          )}
+                          className="inline-block text-sm font-black italic tabular-nums"
+                          style={{ color: rankColor(i, leaderboard.length) }}
+                        >
                           #{i + 1}
-                        </span>
+                        </motion.span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
