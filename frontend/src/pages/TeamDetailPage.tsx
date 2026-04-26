@@ -10,7 +10,8 @@ import StatusBadge from '../components/StatusBadge'
 import Card from '../components/Card'
 import TrophySymbol from '../components/TrophySymbol'
 import { formatStage } from '../components/tournament/lib/tournamentRounds'
-import { fadeUp, pageReveal, pressTap, softHover, staggerContainer } from '../lib/motion'
+import AmbientParticles from '../components/AmbientParticles'
+import { fadeUp, pageReveal, pressTap, rankGradient, softHover, staggerContainer } from '../lib/motion'
 
 export default function TeamDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -25,6 +26,11 @@ export default function TeamDetailPage() {
       {/* Background trophy watermark */}
       <div className="absolute right-0 top-0 w-[300px] pointer-events-none select-none">
         <TrophySymbol variant="dark" className="w-full" />
+      </div>
+
+      {/* Hero ambient particles — 仅这块区域内 */}
+      <div className="absolute inset-x-0 top-0 h-[200px] pointer-events-none -z-0">
+        <AmbientParticles />
       </div>
 
       {/* Header */}
@@ -89,10 +95,38 @@ export default function TeamDetailPage() {
                   <div className="flex items-center justify-between gap-4">
                     <StatusBadge status={m.status} />
                     <span className="text-xs font-black text-white/50">{formatStage(m.stage)}</span>
-                    <div className="flex-1 text-center font-black text-sm text-primary">
-                      {m.team_a_name}&nbsp;
-                      <span className="font-black italic tabular-nums">{m.maps_won_a}–{m.maps_won_b}</span>
-                      &nbsp;{m.team_b_name}
+                    <div className="flex-1 text-center font-black text-sm flex items-center justify-center gap-2 text-white/70">
+                      <span>{m.team_a_name}</span>
+                      <span
+                        className="font-black italic tabular-nums text-base"
+                        style={m.status === 'finished' ? {
+                          backgroundImage: rankGradient(
+                            (m.maps_won_a ?? 0) > (m.maps_won_b ?? 0) ? 'win' :
+                            (m.maps_won_a ?? 0) < (m.maps_won_b ?? 0) ? 'loss' : 'neutral'
+                          ),
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        } : { color: 'rgba(255,255,255,0.4)' }}
+                      >
+                        {m.maps_won_a}
+                      </span>
+                      <span className="text-white/30">–</span>
+                      <span
+                        className="font-black italic tabular-nums text-base"
+                        style={m.status === 'finished' ? {
+                          backgroundImage: rankGradient(
+                            (m.maps_won_b ?? 0) > (m.maps_won_a ?? 0) ? 'win' :
+                            (m.maps_won_b ?? 0) < (m.maps_won_a ?? 0) ? 'loss' : 'neutral'
+                          ),
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        } : { color: 'rgba(255,255,255,0.4)' }}
+                      >
+                        {m.maps_won_b}
+                      </span>
+                      <span>{m.team_b_name}</span>
                     </div>
                     {m.scheduled_at && (
                       <span className="text-xs text-white/30 flex-shrink-0">
