@@ -22,6 +22,7 @@ export interface Player {
   // joined fields
   team_name?: string | null
   team_logo_url?: string | null
+  tier?: string | null  // present on detail view when current tournament has an assignment
   // detail view extras
   career_stats?: CareerStats
   match_history?: MatchHistoryEntry[]

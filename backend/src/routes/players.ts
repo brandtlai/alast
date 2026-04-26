@@ -28,8 +28,13 @@ r.get('/:id', async (c) => {
   const id = c.req.param('id')
 
   const { rows } = await query(
-    `SELECT p.*, t.name as team_name, t.logo_url as team_logo_url
-     FROM players p LEFT JOIN teams t ON t.id = p.team_id
+    `SELECT p.*, t.name as team_name, t.logo_url as team_logo_url,
+            tpa.tier as tier
+     FROM players p
+     LEFT JOIN teams t ON t.id = p.team_id
+     LEFT JOIN tournament_player_assignment tpa
+       ON tpa.player_id = p.id
+       AND tpa.tournament_id = (SELECT id FROM tournaments WHERE is_current = TRUE LIMIT 1)
      WHERE p.id = $1`,
     [id]
   )

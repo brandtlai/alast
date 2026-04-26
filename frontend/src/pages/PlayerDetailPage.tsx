@@ -8,6 +8,14 @@ import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
 import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
 
+const TIER_COLORS: Record<string, string> = {
+  S:    'var(--color-gold)',
+  A:    'var(--color-primary)',
+  B:    'rgba(255, 255, 255, 0.65)',
+  'C+': 'rgba(255, 255, 255, 0.4)',
+  D:    'var(--color-neon-pink)',
+}
+
 function StatCard({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
     <div className="rounded-lg p-4 text-center" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
@@ -65,7 +73,25 @@ export default function PlayerDetailPage() {
           {player.nickname.slice(0, 2).toUpperCase()}
         </div>
         <div>
-          <h1 className="text-3xl font-bold">{player.nickname}</h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-bold">{player.nickname}</h1>
+            {player.tier && (
+              <span
+                className="inline-flex items-center justify-center w-9 h-9 rounded-md text-base font-black"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  color: TIER_COLORS[player.tier] ?? 'rgba(255,255,255,0.4)',
+                  border: `1px solid ${TIER_COLORS[player.tier] ?? 'rgba(255,255,255,0.2)'}`,
+                  boxShadow: player.tier === 'S' || player.tier === 'D'
+                    ? `0 0 14px ${TIER_COLORS[player.tier]}40`
+                    : undefined,
+                }}
+                title={`Tier ${player.tier}`}
+              >
+                {player.tier}
+              </span>
+            )}
+          </div>
           {player.real_name && <div className="opacity-60">{player.real_name}</div>}
           {player.team_name && (
             <Link to={`/teams/${player.team_id}`} className="flex items-center gap-2 mt-1 hover:opacity-80">
