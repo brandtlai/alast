@@ -1,6 +1,9 @@
 // 14 颗慢飘金色粒子，纯 CSS 实现。
 // 仅挂在视觉密度低的 hero 区域（首页 + 战队详情），数据页不挂避免噪声。
+// 调用方需为前景内容设置 z-index ≥ 2（粒子层固定 z-index: 1）。
 // reduce-motion 通过 .ambient-particles 类整层 display:none。
+
+import { useMemo } from 'react'
 
 const COLORS = ['#FFD700', '#FFB800', '#FF8A00'] as const
 const COUNT = 14
@@ -17,7 +20,7 @@ interface Particle {
 }
 
 function makeParticles(): Particle[] {
-  // 固定 seed 也行，但每次刷新轻微变化更有「活感」
+  // 每次 mount 重新生成，同 mount 内通过 useMemo 保持稳定避免动画重置
   return Array.from({ length: COUNT }, () => ({
     size: 1 + Math.random() * 2,
     left: Math.random() * 100,
@@ -35,7 +38,7 @@ interface Props {
 }
 
 export default function AmbientParticles({ className = '' }: Props) {
-  const particles = makeParticles()
+  const particles = useMemo(() => makeParticles(), [])
 
   return (
     <div
@@ -43,6 +46,7 @@ export default function AmbientParticles({ className = '' }: Props) {
       aria-hidden
       style={{ zIndex: 1 }}
     >
+      {/* key=index OK: COUNT is constant, list never reorders or filters. */}
       {particles.map((p, i) => (
         <span
           key={i}
