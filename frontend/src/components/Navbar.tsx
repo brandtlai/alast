@@ -170,8 +170,8 @@ export default function Navbar() {
             <motion.button
               onClick={() => setSearchOpen(true)}
               aria-label="搜索 (⌘K)"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ opacity: 1 }}
+              whileTap={{ opacity: 0.8 }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -239,8 +239,8 @@ export default function Navbar() {
               onClick={() => setMobileOpen(v => !v)}
               className="md:hidden"
               aria-label="菜单"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ opacity: 1 }}
+              whileTap={{ opacity: 0.8 }}
               style={{
                 display: 'flex',
                 alignItems: 'center',

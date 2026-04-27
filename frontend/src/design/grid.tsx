@@ -6,8 +6,8 @@ export function GridBackground() {
       style={{
         zIndex: 0,
         backgroundImage:
-          'radial-gradient(var(--color-grid) 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
+          'radial-gradient(rgba(255,255,255,0.04) 1.25px, transparent 1.25px)',
+        backgroundSize: '28px 28px',
       }}
     />
   )

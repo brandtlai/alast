@@ -411,8 +411,8 @@ export default function StatsPage() {
                               <div style={{
                                 width: 28,
                                 height: 28,
-                                borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.08)',
+                                borderRadius: 'var(--radius-sm)',
+                                background: 'var(--color-surface-2)',
                                 flexShrink: 0,
                                 overflow: 'hidden',
                               }}>

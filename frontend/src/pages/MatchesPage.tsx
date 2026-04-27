@@ -240,7 +240,6 @@ export default function MatchesPage() {
           fontSize: 'var(--text-display-lg)',
           color: 'var(--color-fg)',
           margin: '8px 0 0',
-          fontWeight: 700,
         }}>
           赛程
         </h1>

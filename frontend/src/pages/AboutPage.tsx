@@ -70,9 +70,7 @@ export default function AboutPage() {
           <h2 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 32,
-            textTransform: 'uppercase',
             color: 'var(--color-fg)',
-            letterSpacing: '0.2em',
             paddingBottom: 12,
             borderBottom: '1px solid var(--color-data)',
             display: 'inline-block',
