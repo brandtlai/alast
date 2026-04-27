@@ -7,9 +7,10 @@ interface Props {
   style?: CSSProperties
   staticCorners?: boolean
   label?: string
+  watermark?: boolean
 }
 
-export function HudPanel({ children, className, style, staticCorners, label }: Props) {
+export function HudPanel({ children, className, style, staticCorners, label, watermark }: Props) {
   const [hover, setHover] = useState(false)
   const active = !staticCorners && hover
   return (
@@ -30,6 +31,23 @@ export function HudPanel({ children, className, style, staticCorners, label }: P
     >
       <CornerBracket active={active} />
       {children}
+      {watermark && (
+        <img
+          src="/trophy.png"
+          aria-hidden
+          alt=""
+          style={{
+            position: 'absolute',
+            right: 16,
+            bottom: 16,
+            width: 96,
+            height: 96,
+            opacity: 0.04,
+            filter: 'grayscale(1) brightness(2)',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
     </div>
   )
 }
