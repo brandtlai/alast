@@ -363,7 +363,7 @@ function StandingsAndRecent({ tournamentId, recentFinished }: StandingsRecentPro
       className="standings-grid"
     >
       {/* Standings */}
-      <HudPanel label="积分榜" style={{ padding: 24 }}>
+      <HudPanel label="战绩榜" style={{ padding: 24 }}>
         <TacticalLabel text="STANDINGS" />
         <table
           style={{
@@ -376,7 +376,7 @@ function StandingsAndRecent({ tournamentId, recentFinished }: StandingsRecentPro
         >
           <thead>
             <tr>
-              {['#', '队伍', 'W', 'L', 'PTS'].map(h => (
+              {['#', '队伍', 'W', 'L', '+/-'].map(h => (
                 <th
                   key={h}
                   style={{
@@ -395,39 +395,44 @@ function StandingsAndRecent({ tournamentId, recentFinished }: StandingsRecentPro
             </tr>
           </thead>
           <tbody>
-            {(standings ?? []).map((row, idx) => (
-              <tr
-                key={row.team_id}
-                style={{
-                  borderLeft: idx === 0 ? '2px solid var(--color-gold-2)' : '2px solid transparent',
-                }}
-              >
-                <td style={{ textAlign: 'center', padding: '8px 4px', color: 'var(--color-fg-muted)' }}>
-                  {idx === 0
-                    ? <img src="/trophy.png" width={14} height={14} alt="" style={{ display: 'inline-block', verticalAlign: 'middle', filter: 'drop-shadow(0 0 4px rgba(255,184,0,0.5))' }} />
-                    : <DataReadout value={idx + 1} size={12} color="var(--color-fg-dim)" />}
-                </td>
-                <td style={{ padding: '8px 4px', color: 'var(--color-fg)' }}>
-                  {row.team_logo_url && (
-                    <img
-                      src={row.team_logo_url}
-                      alt=""
-                      style={{ width: 16, height: 16, objectFit: 'contain', display: 'inline', marginRight: 6, verticalAlign: 'middle' }}
-                    />
-                  )}
-                  {row.team_short_name ?? row.team_name}
-                </td>
-                <td style={{ textAlign: 'center', padding: '8px 4px' }}>
-                  <DataReadout value={row.wins} size={12} color="var(--color-data)" />
-                </td>
-                <td style={{ textAlign: 'center', padding: '8px 4px' }}>
-                  <DataReadout value={row.losses} size={12} color="var(--color-fg-dim)" />
-                </td>
-                <td style={{ textAlign: 'center', padding: '8px 4px' }}>
-                  <DataReadout value={row.buchholz} size={12} color="var(--color-fg-muted)" />
-                </td>
-              </tr>
-            ))}
+            {(standings ?? []).map((row, idx) => {
+              const diff = row.round_diff ?? 0
+              const diffStr = diff > 0 ? `+${diff}` : String(diff)
+              const diffColor = diff > 0 ? 'var(--color-data)' : diff < 0 ? 'var(--color-fire)' : 'var(--color-fg-muted)'
+              return (
+                <tr
+                  key={row.team_id}
+                  style={{
+                    borderLeft: idx === 0 ? '2px solid var(--color-gold-2)' : '2px solid transparent',
+                  }}
+                >
+                  <td style={{ textAlign: 'center', padding: '8px 4px', color: 'var(--color-fg-muted)' }}>
+                    {idx === 0
+                      ? <img src="/trophy.png" width={14} height={14} alt="" style={{ display: 'inline-block', verticalAlign: 'middle', filter: 'drop-shadow(0 0 4px rgba(255,184,0,0.5))' }} />
+                      : <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--color-fg-dim)' }}>{idx + 1}</span>}
+                  </td>
+                  <td style={{ padding: '8px 4px', color: 'var(--color-fg)' }}>
+                    {row.team_logo_url && (
+                      <img
+                        src={row.team_logo_url}
+                        alt=""
+                        style={{ width: 16, height: 16, objectFit: 'contain', display: 'inline', marginRight: 6, verticalAlign: 'middle' }}
+                      />
+                    )}
+                    {row.team_short_name ?? row.team_name}
+                  </td>
+                  <td style={{ textAlign: 'center', padding: '8px 4px' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--color-data)' }}>{row.wins}</span>
+                  </td>
+                  <td style={{ textAlign: 'center', padding: '8px 4px' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--color-fg-dim)' }}>{row.losses}</span>
+                  </td>
+                  <td style={{ textAlign: 'center', padding: '8px 4px' }}>
+                    <span title={`Buchholz: ${row.buchholz?.toFixed?.(1) ?? row.buchholz}`} style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: diffColor }}>{diffStr}</span>
+                  </td>
+                </tr>
+              )
+            })}
             {(!standings || standings.length === 0) && (
               <tr>
                 <td colSpan={5} style={{ textAlign: 'center', color: 'var(--color-fg-dim)', padding: '16px 0' }}>
@@ -437,6 +442,16 @@ function StandingsAndRecent({ tournamentId, recentFinished }: StandingsRecentPro
             )}
           </tbody>
         </table>
+        <div style={{
+          marginTop: 12,
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--text-mono-xs)',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          color: 'var(--color-fg-dim)',
+        }}>
+          SORTED BY: WINS · BUCHHOLZ · ROUND_DIFF
+        </div>
       </HudPanel>
 
       {/* Recent results */}
