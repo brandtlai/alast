@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { query } from '../../db.js'
 import type { GenerationMeta } from './types.js'
+import { normalizeGeneratedNewsText } from './text.js'
 
 interface GeneratedArticle {
   match_id: string
@@ -37,6 +38,11 @@ export async function importGeneratedNews(filePath: string): Promise<{ updated: 
     assertArticle(value)
     if (seen.has(value.match_id)) throw new Error(`duplicate generated article for match_id ${value.match_id}`)
     seen.add(value.match_id)
+    const normalized = {
+      title: normalizeGeneratedNewsText(value.title),
+      summary: normalizeGeneratedNewsText(value.summary),
+      content: normalizeGeneratedNewsText(value.content),
+    }
 
     const { rows: existing } = await query<{ id: string }>(
       'SELECT id FROM news WHERE match_id = $1 AND ai_generated = TRUE LIMIT 1',
@@ -53,7 +59,7 @@ export async function importGeneratedNews(filePath: string): Promise<{ updated: 
              ai_generated = TRUE,
              generation_meta = $4
          WHERE id = $5`,
-        [value.title, value.summary, value.content, JSON.stringify(value.generation_meta), existing[0].id],
+        [normalized.title, normalized.summary, normalized.content, JSON.stringify(value.generation_meta), existing[0].id],
       )
       updated += 1
     } else {
@@ -62,7 +68,7 @@ export async function importGeneratedNews(filePath: string): Promise<{ updated: 
            (title, slug, summary, content, category, match_id, author,
             ai_generated, generation_meta, published_at)
          VALUES ($1,$2,$3,$4,'战报',$5,'ALAST 解说团',TRUE,$6,NULL)`,
-        [value.title, slugify(value.title), value.summary, value.content, value.match_id, JSON.stringify(value.generation_meta)],
+        [normalized.title, slugify(normalized.title), normalized.summary, normalized.content, value.match_id, JSON.stringify(value.generation_meta)],
       )
       inserted += 1
     }

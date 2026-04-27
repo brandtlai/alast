@@ -35,9 +35,9 @@ describe('importGeneratedNews', () => {
     const file = join(dir, 'generated.jsonl')
     await writeFile(file, `${JSON.stringify({
       match_id: matchId,
-      title: '新标题',
-      summary: '新摘要',
-      content: '新正文',
+      title: '新标题 quad',
+      summary: 'Flet4 force_clutch + quad',
+      content: 'pistol 双吃后 eco win，不是 full buy；Kaumi 双 clutch。',
       generation_meta: {
         model: 'gpt-5.5',
         prompt_version: 'offline-v1',
@@ -62,9 +62,9 @@ describe('importGeneratedNews', () => {
     }>('SELECT * FROM news WHERE match_id = $1', [matchId])
     expect(news.id).toBe(existing.id)
     expect(news.slug).toBe(existing.slug)
-    expect(news.title).toBe('新标题')
-    expect(news.summary).toBe('新摘要')
-    expect(news.content).toBe('新正文')
+    expect(news.title).toBe('新标题四杀')
+    expect(news.summary).toBe('Flet4 强起残局四杀')
+    expect(news.content).toBe('手枪局双吃后经济局胜利，不是全甲长枪；Kaumi 双残局。')
     expect(new Date(news.published_at).toISOString()).toBe(publishedAt)
     expect(news.generation_meta.model).toBe('gpt-5.5')
   })

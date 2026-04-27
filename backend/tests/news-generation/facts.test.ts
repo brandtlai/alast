@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { extractMatchFacts } from '../../src/lib/news-generation/facts.js'
-import { formatStageForNews, translateNewsTerm } from '../../src/lib/news-generation/text.js'
+import { formatStageForNews, normalizeGeneratedNewsText, translateNewsTerm } from '../../src/lib/news-generation/text.js'
 import {
   insertMatchMap,
   insertPlayer,
@@ -49,6 +49,14 @@ describe('news-generation text helpers', () => {
     expect(translateNewsTerm('first kill')).toBe('首杀')
     expect(translateNewsTerm('clutch')).toBe('残局')
     expect(translateNewsTerm('won')).toBe('胜利')
+  })
+
+  it('normalizes generated public copy terms before publishing', () => {
+    expect(normalizeGeneratedNewsText(
+      'Flet4 1v5 force_clutch + quad 是 highlight reel，pistol 双吃后 eco win；不是 full buy。',
+    )).toBe('Flet4 1v5 强起残局四杀是高光集锦，手枪局双吃后经济局胜利；不是全甲长枪。')
+    expect(normalizeGeneratedNewsText('Kaumi 双 clutch，standout 里还有 force 和 anti-eco。'))
+      .toBe('Kaumi 双残局，亮眼名单里还有强起和防经济局。')
   })
 })
 
