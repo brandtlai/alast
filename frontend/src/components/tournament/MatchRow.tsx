@@ -110,7 +110,7 @@ export default function MatchRow({ match, variant = 'overview' }: Props) {
 
       {/* BO badge */}
       <div className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/30 w-10 text-right flex-shrink-0">
-        {variant === 'results' ? 'FT' : 'BO?'}
+        {variant === 'results' ? 'FT' : `BO${match.best_of ?? 1}`}
       </div>
     </Link>
   )
