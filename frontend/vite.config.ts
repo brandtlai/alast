@@ -11,7 +11,8 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: process.env.BUILD_TARGET === 'preview' ? 'dist-preview' : 'dist',
+    emptyOutDir: true,
     sourcemap: false,
   },
 })
