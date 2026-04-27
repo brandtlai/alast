@@ -79,18 +79,34 @@ export default function Navbar() {
             to="/"
             onClick={() => setMobileOpen(false)}
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 22,
-              background: 'var(--gold-gradient)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
               flexShrink: 0,
-              letterSpacing: '0.02em',
-              paddingRight: 4,
+              textDecoration: 'none',
             }}
           >
-            ALAST
+            <img
+              src="/trophy.png"
+              width={24}
+              height={24}
+              alt=""
+              style={{ filter: 'drop-shadow(0 0 8px rgba(255,184,0,0.35))', flexShrink: 0 }}
+            />
+            <span
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 22,
+                background: 'var(--gold-gradient)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                letterSpacing: '0.02em',
+                paddingRight: 4,
+              }}
+            >
+              ALAST
+            </span>
           </Link>
 
           {/* SECTOR indicator — desktop only */}

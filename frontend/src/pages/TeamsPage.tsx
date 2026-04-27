@@ -95,11 +95,28 @@ export default function TeamsPage() {
                 <motion.div key={t.id} variants={hudEnter}>
                   <Link to={`/teams/${t.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
                     <HudPanel
+                      watermark={((t as any).rank === 1 || (t as any).is_champion) ? true : undefined}
                       style={{
                         padding: 24,
                         borderColor: (t as any).is_champion ? 'var(--color-gold-2)' : undefined,
                       }}
                     >
+                      {/* Champion emblem: rank-1 or is_champion */}
+                      {((t as any).rank === 1 || (t as any).is_champion) && (
+                        <img
+                          src="/trophy.png"
+                          width={28}
+                          height={28}
+                          alt=""
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            opacity: 0.85,
+                            filter: 'drop-shadow(0 0 6px rgba(255,184,0,0.4))',
+                          }}
+                        />
+                      )}
                       <header style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                         {t.logo_url && (
                           <img src={t.logo_url} width={40} height={40} alt="" style={{ objectFit: 'contain' }} />

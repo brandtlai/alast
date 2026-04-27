@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Star } from 'lucide-react'
+
 import { HudPanel } from '../components/hud/HudPanel'
 import { TacticalLabel } from '../components/hud/TacticalLabel'
 import { DataReadout } from '../components/hud/DataReadout'
@@ -63,28 +63,6 @@ function featuredLabel(match: Match): string {
 
 // ── Section 1: Hero ───────────────────────────────────────────────────────────
 
-function HeroRadar() {
-  return (
-    <svg viewBox="0 0 480 480" width="100%" height="100%" aria-hidden>
-      {[60, 120, 180, 220].map(r => (
-        <circle
-          key={r} cx={240} cy={240} r={r}
-          fill="none" stroke="var(--color-data)" strokeOpacity={0.18} strokeWidth={1}
-        />
-      ))}
-      <line x1={20} y1={240} x2={460} y2={240} stroke="var(--color-data)" strokeOpacity={0.12} />
-      <line x1={240} y1={20} x2={240} y2={460} stroke="var(--color-data)" strokeOpacity={0.12} />
-      <motion.line
-        x1={240} y1={240} x2={460} y2={240}
-        stroke="var(--color-data)" strokeWidth={1}
-        animate={{ rotate: [0, 360] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-        style={{ transformOrigin: '240px 240px' }}
-      />
-    </svg>
-  )
-}
-
 interface HeroSectionProps {
   featured: Match | null
 }
@@ -101,129 +79,136 @@ function HeroSection({ featured }: HeroSectionProps) {
   const [ctaHover, setCtaHover] = useState(false)
 
   return (
-    <section
-      style={{
-        minHeight: '85vh',
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0,3fr) minmax(0,2fr)',
-        gap: 48,
-        alignItems: 'center',
-        padding: '64px 32px',
-        maxWidth: 1280,
-        margin: '0 auto',
-      }}
-      className="hero-grid"
-    >
-      {/* Left */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <TacticalLabel
-          key={matchId}
-          text={label}
-          typewriter
+    <section>
+      {/* Full-bleed brand hero — ~85vh, image is self-contained, no overlay UI */}
+      <div style={{
+        position: 'relative',
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)',
+        height: 'min(85vh, 1080px)',
+        overflow: 'hidden',
+        borderBottom: '1px solid var(--color-line)',
+      }}>
+        <img
+          src="/images/alast-hero.png"
+          alt="ALAST Premier 2026 — Born to Win. Play as One."
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            display: 'block',
+          }}
         />
+        {/* Subtle dark gradient at bottom for separation from page below */}
+        <div aria-hidden style={{
+          position: 'absolute', left: 0, right: 0, bottom: 0, height: 160,
+          background: 'linear-gradient(180deg, transparent 0%, var(--color-bg) 100%)',
+          pointerEvents: 'none',
+        }} />
+      </div>
 
-        {/* Team names */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'var(--text-display-xl)',
-              fontStyle: 'italic',
-              color: 'var(--color-fg)',
-              lineHeight: 1,
-              flex: '1 1 auto',
-              textAlign: 'right',
-            }}
-          >
-            {teamA}
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'clamp(20px, 3vw, 36px)',
-              color: 'var(--color-fg-muted)',
-              letterSpacing: '0.2em',
-              flexShrink: 0,
-            }}
-          >
-            VS
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'var(--text-display-xl)',
-              fontStyle: 'italic',
-              color: 'var(--color-fg)',
-              lineHeight: 1,
-              flex: '1 1 auto',
-            }}
-          >
-            {teamB}
-          </span>
-        </div>
+      {/* Featured match block — second screen below the hero image */}
+      <div style={{ padding: '64px 32px', maxWidth: 1280, margin: '0 auto' }}>
+        <HudPanel style={{ padding: 48 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <TacticalLabel
+              key={matchId}
+              text={label}
+              typewriter
+            />
 
-        {/* Match time */}
-        {featured?.scheduled_at && (
-          <DataReadout
-            value={formatTime(featured.scheduled_at)}
-            size={24}
-            color="var(--color-fg-muted)"
-          />
-        )}
+            {/* Team names */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--text-display-xl)',
+                  fontStyle: 'italic',
+                  color: 'var(--color-fg)',
+                  lineHeight: 1,
+                  flex: '1 1 auto',
+                  textAlign: 'right',
+                }}
+              >
+                {teamA}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 'clamp(20px, 3vw, 36px)',
+                  color: 'var(--color-fg-muted)',
+                  letterSpacing: '0.2em',
+                  flexShrink: 0,
+                }}
+              >
+                VS
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--text-display-xl)',
+                  fontStyle: 'italic',
+                  color: 'var(--color-fg)',
+                  lineHeight: 1,
+                  flex: '1 1 auto',
+                }}
+              >
+                {teamB}
+              </span>
+            </div>
 
-        {/* Score for finished/live */}
-        {featured && featured.status !== 'upcoming' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <DataReadout value={featured.maps_won_a} size={32} />
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-fg-dim)' }}>:</span>
-            <DataReadout value={featured.maps_won_b} size={32} />
+            {/* Match time */}
+            {featured?.scheduled_at && (
+              <DataReadout
+                value={formatTime(featured.scheduled_at)}
+                size={24}
+                color="var(--color-fg-muted)"
+              />
+            )}
+
+            {/* Score for finished/live */}
+            {featured && featured.status !== 'upcoming' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <DataReadout value={featured.maps_won_a} size={32} />
+                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-fg-dim)' }}>:</span>
+                <DataReadout value={featured.maps_won_b} size={32} />
+              </div>
+            )}
+
+            {/* Countdown — upcoming only */}
+            {featured?.status === 'upcoming' && (
+              <DataReadout value={countdown} size={18} color="var(--color-fg-muted)" />
+            )}
+
+            {/* CTA */}
+            {matchId && (
+              <Link
+                to={`/matches/${matchId}`}
+                onMouseEnter={() => setCtaHover(true)}
+                onMouseLeave={() => setCtaHover(false)}
+                style={{
+                  display: 'inline-block',
+                  alignSelf: 'flex-start',
+                  border: '1px solid var(--color-fire)',
+                  padding: '12px 20px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 'var(--text-mono-sm)',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  color: ctaHover ? '#fff' : 'var(--color-fire)',
+                  background: ctaHover ? 'var(--color-fire)' : 'transparent',
+                  borderRadius: 'var(--radius-sm)',
+                  transition: 'background var(--duration-mid) var(--ease-hud), color var(--duration-mid) var(--ease-hud)',
+                }}
+              >
+                查看战报 →
+              </Link>
+            )}
           </div>
-        )}
-
-        {/* Countdown — upcoming only */}
-        {featured?.status === 'upcoming' && (
-          <DataReadout value={countdown} size={18} color="var(--color-fg-muted)" />
-        )}
-
-        {/* CTA */}
-        {matchId && (
-          <Link
-            to={`/matches/${matchId}`}
-            onMouseEnter={() => setCtaHover(true)}
-            onMouseLeave={() => setCtaHover(false)}
-            style={{
-              display: 'inline-block',
-              alignSelf: 'flex-start',
-              border: '1px solid var(--color-fire)',
-              padding: '12px 20px',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-mono-sm)',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              color: ctaHover ? '#fff' : 'var(--color-fire)',
-              background: ctaHover ? 'var(--color-fire)' : 'transparent',
-              borderRadius: 'var(--radius-sm)',
-              transition: 'background var(--duration-mid) var(--ease-hud), color var(--duration-mid) var(--ease-hud)',
-            }}
-          >
-            查看战报 →
-          </Link>
-        )}
+        </HudPanel>
       </div>
-
-      {/* Right: radar */}
-      <div style={{ maxWidth: 480, width: '100%', aspectRatio: '1', margin: '0 auto' }}>
-        <HeroRadar />
-      </div>
-
-      <style>{`
-        @media (max-width: 960px) {
-          .hero-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </section>
   )
 }
@@ -419,7 +404,7 @@ function StandingsAndRecent({ tournamentId, recentFinished }: StandingsRecentPro
               >
                 <td style={{ textAlign: 'center', padding: '8px 4px', color: 'var(--color-fg-muted)' }}>
                   {idx === 0
-                    ? <Star size={12} color="var(--color-gold-2)" fill="var(--color-gold-2)" style={{ display: 'inline' }} />
+                    ? <img src="/trophy.png" width={14} height={14} alt="" style={{ display: 'inline-block', verticalAlign: 'middle', filter: 'drop-shadow(0 0 4px rgba(255,184,0,0.5))' }} />
                     : <DataReadout value={idx + 1} size={12} color="var(--color-fg-dim)" />}
                 </td>
                 <td style={{ padding: '8px 4px', color: 'var(--color-fg)' }}>

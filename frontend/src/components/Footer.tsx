@@ -24,21 +24,23 @@ export default function Footer() {
         className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between gap-6"
       >
         {/* ALAST brand */}
-        <span
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 18,
-            background: 'var(--gold-gradient)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            letterSpacing: '0.02em',
-            flexShrink: 0,
-            paddingRight: 3,
-          }}
-        >
-          ALAST
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <img src="/trophy.png" width={18} height={18} alt="" />
+          <span
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 18,
+              background: 'var(--gold-gradient)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '0.02em',
+              paddingRight: 3,
+            }}
+          >
+            ALAST
+          </span>
+        </div>
 
         {/* Copyright */}
         <span

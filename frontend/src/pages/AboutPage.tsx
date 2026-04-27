@@ -11,31 +11,33 @@ const SPECS = [
 export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh' }}>
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '120px 24px 96px', position: 'relative' }}>
+      {/* Full-bleed premier banner */}
+      <section style={{
+        position: 'relative',
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)',
+        height: 'min(360px, 40vh)',
+        overflow: 'hidden',
+        borderBottom: '1px solid var(--color-line)',
+      }}>
+        <img
+          src="/images/alast-premier.jpeg"
+          alt="ALAST PREMIER 2026.04 - 2026.06"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+        />
+        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(7,9,12,0.0) 0%, rgba(7,9,12,0.45) 60%, var(--color-bg) 100%)' }} />
+        <div style={{ position: 'absolute', left: 32, right: 32, bottom: 32 }}>
+          <TacticalLabel text="SECTOR :: BRIEFING" />
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-display-xl)', marginTop: 8, lineHeight: 1, color: 'var(--color-fg)' }}>
+            ABOUT ALAST
+          </h1>
+        </div>
+      </section>
 
-        {/* Header */}
-        <TacticalLabel text="SECTOR :: BRIEFING" />
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'var(--text-display-xl)',
-          marginTop: 16,
-          lineHeight: 1,
-          color: 'var(--color-fg)',
-        }}>
-          ABOUT ALAST
-        </h1>
-        <h2 style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: 32,
-          color: 'var(--color-fg-muted)',
-          marginTop: 12,
-          fontWeight: 500,
-        }}>
-          关于 ALAST Premier 2026
-        </h2>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '64px 24px 96px', position: 'relative' }}>
 
         {/* Intro section */}
-        <section style={{ marginTop: 64 }}>
+        <section style={{ marginTop: 0 }}>
           <h2 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 32,
