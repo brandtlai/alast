@@ -1,6 +1,17 @@
 export default function ErrorBox({ message }: { message: string }) {
   return (
-    <div className="rounded-lg p-4 text-sm" style={{ background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.3)', color: '#FF6B6B' }}>
+    <div
+      style={{
+        padding: 16,
+        fontSize: 14,
+        fontFamily: 'var(--font-mono)',
+        color: 'var(--color-alert)',
+        background: 'var(--color-fire-soft)',
+        border: '1px solid rgba(255,61,20,0.35)',
+        borderRadius: 'var(--radius-sm)',
+        letterSpacing: '0.05em',
+      }}
+    >
       {message}
     </div>
   )

@@ -1,26 +1,30 @@
-// src/pages/StatsPage.tsx
-import { useState, type ReactNode } from 'react'
+// src/pages/StatsPage.tsx — Tactical OS re-skin (T29)
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import ReactECharts from 'echarts-for-react'
 import { useCurrentTournament } from '../api/currentTournament'
 import { useLeaderboard, useTournamentSummary, useTierComparison, useAvailableMaps } from '../api/stats'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
 import TeamLogo from '../components/TeamLogo'
-import TrophySymbol from '../components/TrophySymbol'
-import TierChart from '../components/stats/TierChart'
-import { fadeUp, headingMask, pageReveal, panelReveal, pressTap, rankReveal, staggerContainer } from '../lib/motion'
+import { HudPanel } from '../components/hud/HudPanel'
+import { TacticalLabel } from '../components/hud/TacticalLabel'
+import { DataReadout } from '../components/hud/DataReadout'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 type StatKey = 'rating' | 'adr' | 'kast' | 'headshot_pct' | 'first_kills' | 'clutches_won' | 'kd_diff'
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
 const STAT_TABS: { value: StatKey; label: string; format: (v: string) => string }[] = [
-  { value: 'rating',       label: 'Rating',  format: v => parseFloat(v).toFixed(2) },
-  { value: 'adr',          label: 'ADR',     format: v => parseFloat(v).toFixed(1) },
-  { value: 'kast',         label: 'KAST%',   format: v => parseFloat(v).toFixed(1) + '%' },
-  { value: 'headshot_pct', label: '爆头率',   format: v => parseFloat(v).toFixed(1) + '%' },
-  { value: 'first_kills',  label: '首杀',     format: v => parseFloat(v).toFixed(2) },
-  { value: 'clutches_won', label: '残局',     format: v => parseFloat(v).toFixed(2) },
-  { value: 'kd_diff',      label: '+/−',     format: v => { const n = parseFloat(v); return (n > 0 ? '+' : '') + n.toFixed(1) } },
+  { value: 'rating',       label: 'RATING',    format: v => parseFloat(v).toFixed(2) },
+  { value: 'adr',          label: 'ADR',        format: v => parseFloat(v).toFixed(1) },
+  { value: 'kast',         label: 'KAST%',      format: v => parseFloat(v).toFixed(1) + '%' },
+  { value: 'headshot_pct', label: '爆头率',      format: v => parseFloat(v).toFixed(1) + '%' },
+  { value: 'first_kills',  label: '首杀',        format: v => parseFloat(v).toFixed(2) },
+  { value: 'clutches_won', label: '残局',        format: v => parseFloat(v).toFixed(2) },
+  { value: 'kd_diff',      label: '+/−',        format: v => { const n = parseFloat(v); return (n > 0 ? '+' : '') + n.toFixed(1) } },
 ]
 
 const BRACKET_FILTER = [
@@ -32,12 +36,12 @@ const BRACKET_FILTER = [
 ]
 
 const TIER_FILTER = [
-  { value: '',   label: '全部 Tier' },
-  { value: 'S',  label: '特等马 S' },
-  { value: 'A',  label: '上等马 A' },
-  { value: 'B',  label: '中等马 B' },
-  { value: 'C+', label: '下等马 C+' },
-  { value: 'D',  label: '赠品马 D' },
+  { value: '',   label: '全部 TIER' },
+  { value: 'S',  label: 'S' },
+  { value: 'A',  label: 'A' },
+  { value: 'B',  label: 'B' },
+  { value: 'C+', label: 'C+' },
+  { value: 'D',  label: 'D' },
 ]
 
 const MIN_MAPS_FILTER = [
@@ -47,44 +51,100 @@ const MIN_MAPS_FILTER = [
   { value: 10,   label: '≥10 图' },
 ]
 
+// Tier label map (CN no letter-spacing)
+const TIER_LABELS: Record<string, string> = {
+  S: '特等马', A: '上等马', B: '中等马', 'C+': '下等马', D: '赠品马',
+}
+
+// Tier color map — new tokens only
 const TIER_COLORS: Record<string, string> = {
-  S:    'var(--color-gold)',
-  A:    'var(--color-primary)',
-  B:    'rgba(255, 255, 255, 0.65)',
-  'C+': 'rgba(255, 255, 255, 0.4)',
-  D:    'var(--color-neon-pink)',
+  S:    'var(--color-gold-1)',
+  A:    'var(--color-data)',
+  B:    'var(--color-fg)',
+  'C+': 'var(--color-fg-muted)',
+  D:    'var(--color-fire)',
 }
 
-function rankColor(index: number, total: number): string {
-  if (index === 0) return 'var(--color-gold)'
-  if (index === 1) return 'rgba(255, 255, 255, 0.7)'
-  if (index === 2) return '#CD7F32'
-  if (total > 5 && index === total - 1) return 'var(--color-neon-pink)'
-  return 'rgba(255, 255, 255, 0.3)'
+// Leaderboard column widths: # | PLAYER | TEAM | MAPS | STAT
+const COL_WIDTHS = ['48px', '1fr', '160px', '72px', '100px']
+
+// ── ECharts base theme ────────────────────────────────────────────────────────
+
+const AXIS_STYLE = {
+  axisLine:  { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
+  axisLabel: { color: 'rgba(255,255,255,0.45)', fontFamily: 'JetBrains Mono', fontSize: 11 },
+  splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
 }
 
-function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+const TOOLTIP_STYLE = {
+  backgroundColor: 'var(--color-surface)',
+  borderColor: 'rgba(255,255,255,0.08)',
+  textStyle: { color: 'rgba(255,255,255,0.8)', fontFamily: 'JetBrains Mono', fontSize: 11 },
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function ratingColor(raw: string | number | null | undefined): string {
+  const v = typeof raw === 'string' ? parseFloat(raw) : (raw ?? 0)
+  if (isNaN(v)) return 'var(--color-fg-muted)'
+  if (v >= 1.0) return 'var(--color-data)'
+  if (v >= 0.9) return 'var(--color-fg)'
+  return 'var(--color-fg-muted)'
+}
+
+function statColor(statKey: StatKey, raw: string | null | undefined): string {
+  if (statKey === 'rating') return ratingColor(raw)
+  return 'var(--color-data)'
+}
+
+function rankLabel(i: number, total: number): { label: string; color: string } {
+  if (i === 0)                              return { label: '01', color: 'var(--color-gold-1)' }
+  if (i === 1)                              return { label: '02', color: 'var(--color-fg)' }
+  if (i === 2)                              return { label: '03', color: 'var(--color-fg-muted)' }
+  if (total > 5 && i === total - 1)         return { label: String(i + 1).padStart(2, '0'), color: 'var(--color-fire)' }
+  return { label: String(i + 1).padStart(2, '0'), color: 'var(--color-fg-dim)' }
+}
+
+// ── Pill filter button ────────────────────────────────────────────────────────
+
+function Pill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest transition-all border"
-      whileHover={{ y: -1, scale: 1.03 }}
-      whileTap={pressTap}
       style={{
-        background: active ? 'var(--color-primary)' : 'rgba(255,255,255,0.04)',
-        color: active ? '#fff' : 'rgba(248,250,252,0.45)',
-        borderColor: active ? 'var(--color-primary)' : 'rgba(255,255,255,0.08)',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--text-mono-xs)',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        padding: '4px 10px',
+        borderRadius: 'var(--radius-sm)',
+        border: `1px solid ${active ? 'var(--color-data)' : 'var(--color-line)'}`,
+        background: active ? 'rgba(199,255,61,0.08)' : 'transparent',
+        color: active ? 'var(--color-data)' : 'var(--color-fg-muted)',
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        whiteSpace: 'nowrap' as const,
       }}
     >
       {label}
-    </motion.button>
+    </button>
   )
 }
 
-function FilterRow({ label, children }: { label: string; children: ReactNode }) {
+// ── Filter row ────────────────────────────────────────────────────────────────
+
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-[10px] font-black uppercase tracking-widest text-white/25 w-14 flex-shrink-0">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
+      <span style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--text-mono-xs)',
+        letterSpacing: '0.2em',
+        textTransform: 'uppercase',
+        color: 'var(--color-fg-dim)',
+        width: 64,
+        flexShrink: 0,
+      }}>
         {label}
       </span>
       {children}
@@ -92,28 +152,20 @@ function FilterRow({ label, children }: { label: string; children: ReactNode }) 
   )
 }
 
-function SummaryCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg px-5 py-4 flex flex-col gap-1 min-w-[130px]"
-         style={{ background: 'var(--color-data-surface)', border: '1px solid var(--color-data-divider)' }}>
-      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{label}</span>
-      <span className="text-2xl font-black tabular-nums" style={{ color: 'var(--color-primary)' }}>{value}</span>
-    </div>
-  )
-}
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function StatsPage() {
-  const [stat, setStat] = useState<StatKey>('rating')
+  const [stat, setStat]               = useState<StatKey>('rating')
   const [bracketKind, setBracketKind] = useState('')
-  const [map, setMap] = useState('')
-  const [tier, setTier] = useState('')
-  const [minMaps, setMinMaps] = useState<number | null>(null)
+  const [map, setMap]                 = useState('')
+  const [tier, setTier]               = useState('')
+  const [minMaps, setMinMaps]         = useState<number | null>(null)
 
   const { data: tournament } = useCurrentTournament()
   const tournamentId = tournament?.id
 
-  const { data: summary } = useTournamentSummary(tournamentId)
-  const { data: tierData = [] } = useTierComparison(tournamentId)
+  const { data: summary }           = useTournamentSummary(tournamentId)
+  const { data: tierData = [] }     = useTierComparison(tournamentId)
   const { data: availableMaps = [] } = useAvailableMaps(tournamentId)
   const { data: leaderboard, isLoading, error } = useLeaderboard({
     tournament_id: tournamentId,
@@ -127,158 +179,374 @@ export default function StatsPage() {
 
   const currentStatDef = STAT_TABS.find(s => s.value === stat)!
 
+  // ── Tier chart option ────────────────────────────────────────────────────────
+
+  const tierChartOption = tierData.length > 0 ? {
+    backgroundColor: 'transparent',
+    textStyle: { color: 'var(--color-fg-muted)', fontFamily: 'JetBrains Mono', fontSize: 11 },
+    tooltip: {
+      trigger: 'axis',
+      ...TOOLTIP_STYLE,
+      formatter: (params: Array<{ seriesName: string; value: number; dataIndex: number }>) => {
+        const idx = params[0]?.dataIndex
+        const d = tierData[idx]
+        return `<b>Tier ${d?.tier ?? ''}</b> (${d?.players ?? 0} 人)<br>` +
+               params.map(p => `${p.seriesName}: ${p.value}`).join('<br>')
+      }
+    },
+    legend: {
+      data: ['Avg Rating', 'Avg ADR'],
+      textStyle: { color: 'rgba(255,255,255,0.5)', fontSize: 11, fontFamily: 'JetBrains Mono' },
+      top: 4,
+    },
+    grid: { left: 55, right: 55, top: 40, bottom: 40 },
+    xAxis: {
+      type: 'category',
+      data: tierData.map(d => `${d.tier}\n${TIER_LABELS[d.tier] ?? ''}`),
+      ...AXIS_STYLE,
+      axisLabel: { ...AXIS_STYLE.axisLabel, lineHeight: 16 },
+    },
+    yAxis: [
+      { type: 'value', name: 'Rating', nameTextStyle: { color: 'rgba(255,255,255,0.3)', fontSize: 10 }, ...AXIS_STYLE, min: 0, max: 2 },
+      { type: 'value', name: 'ADR',    nameTextStyle: { color: 'rgba(255,255,255,0.3)', fontSize: 10 }, ...AXIS_STYLE, min: 0 },
+    ],
+    series: [
+      {
+        name: 'Avg Rating',
+        type: 'bar',
+        yAxisIndex: 0,
+        data: tierData.map(d => parseFloat(d.avg_rating ?? '0')),
+        itemStyle: { color: '#C7FF3D' },
+        barMaxWidth: 28,
+        label: { show: true, position: 'top', color: 'rgba(255,255,255,0.5)', fontSize: 10, formatter: ({ value }: { value: number }) => value.toFixed(2) },
+      },
+      {
+        name: 'Avg ADR',
+        type: 'bar',
+        yAxisIndex: 1,
+        data: tierData.map(d => parseFloat(d.avg_adr ?? '0')),
+        itemStyle: { color: '#5EEAD4' },
+        barMaxWidth: 28,
+        label: { show: true, position: 'top', color: 'rgba(255,255,255,0.5)', fontSize: 10, formatter: ({ value }: { value: number }) => value.toFixed(1) },
+      },
+    ],
+  } : null
+
   return (
-    <motion.div className="relative max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
-      {/* Trophy watermark */}
-      <div className="absolute right-0 top-0 w-[260px] pointer-events-none select-none opacity-20">
-        <TrophySymbol variant="outline" className="w-full" />
+    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div style={{ padding: '64px 32px 24px' }}>
+        <TacticalLabel text="SECTOR :: ANALYTICS" />
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'var(--text-display-lg)',
+          color: 'var(--color-fg)',
+          margin: '8px 0 4px',
+          lineHeight: 1,
+        }}>
+          数据
+        </h1>
+        {tournament && (
+          <p style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 'var(--text-mono-xs)',
+            color: 'var(--color-fg-dim)',
+            marginTop: 4,
+            letterSpacing: '0.1em',
+          }}>
+            {tournament.name}
+          </p>
+        )}
       </div>
 
-      {/* Page heading */}
-      <motion.div className="mb-6" variants={staggerContainer} initial="hidden" animate="show">
-        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Leaderboard</p>
-        <motion.h1 variants={headingMask} className="text-4xl font-black italic tracking-tighter text-white/90">数据中心</motion.h1>
-        {tournament && <p className="text-xs text-white/35 mt-1">{tournament.name}</p>}
-      </motion.div>
-
-      {/* Tournament summary cards */}
+      {/* ── KPI summary tiles ───────────────────────────────────────────────── */}
       {summary && (
-        <motion.div className="flex gap-3 flex-wrap mb-8" variants={staggerContainer} initial="hidden" animate="show">
-          <SummaryCard label="已完赛场数" value={String(summary.matches_played)} />
-          <SummaryCard label="总击杀数" value={Number(summary.total_kills).toLocaleString()} />
-          <SummaryCard
-            label="平均爆头率"
-            value={summary.avg_headshot_pct != null ? parseFloat(summary.avg_headshot_pct).toFixed(1) + '%' : '—'}
-          />
-        </motion.div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 16,
+          padding: '0 32px 32px',
+        }}>
+          <HudPanel staticCorners style={{ padding: 24 }}>
+            <TacticalLabel text="MATCHES PLAYED" />
+            <div style={{ marginTop: 12 }}>
+              <DataReadout value={summary.matches_played} size={48} />
+            </div>
+          </HudPanel>
+
+          <HudPanel staticCorners style={{ padding: 24 }}>
+            <TacticalLabel text="TOTAL KILLS" />
+            <div style={{ marginTop: 12 }}>
+              <DataReadout value={Number(summary.total_kills).toLocaleString()} size={48} />
+            </div>
+          </HudPanel>
+
+          <HudPanel staticCorners style={{ padding: 24 }}>
+            <TacticalLabel text="AVG HS%" />
+            <div style={{ marginTop: 12 }}>
+              <DataReadout
+                value={summary.avg_headshot_pct != null
+                  ? parseFloat(summary.avg_headshot_pct).toFixed(1) + '%'
+                  : '—'}
+                size={48}
+              />
+            </div>
+          </HudPanel>
+        </div>
       )}
 
-      {/* Stat tabs */}
-      <motion.div className="flex gap-2 flex-wrap mb-4" variants={staggerContainer} initial="hidden" animate="show">
+      {/* ── Stat tab pills ──────────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        flexWrap: 'wrap',
+        padding: '0 32px 16px',
+      }}>
         {STAT_TABS.map(s => (
-          <FilterChip key={s.value} label={s.label} active={stat === s.value} onClick={() => setStat(s.value)} />
+          <Pill key={s.value} label={s.label} active={stat === s.value} onClick={() => setStat(s.value)} />
         ))}
-      </motion.div>
+      </div>
 
-      {/* Filter bar — one row per dimension */}
-      <motion.div className="space-y-2 mb-6 pb-4 border-b" variants={panelReveal} initial="hidden" animate="show" style={{ borderColor: 'var(--color-data-divider)' }}>
+      {/* ── Filter bar ──────────────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        padding: '0 32px 24px',
+        borderBottom: '1px solid var(--color-line)',
+        marginBottom: 24,
+      }}>
         <FilterRow label="赛段">
           {BRACKET_FILTER.map(f => (
-            <FilterChip key={f.value} label={f.label} active={bracketKind === f.value} onClick={() => setBracketKind(f.value)} />
+            <Pill key={f.value} label={f.label} active={bracketKind === f.value} onClick={() => setBracketKind(f.value)} />
           ))}
         </FilterRow>
 
         {availableMaps.length > 0 && (
           <FilterRow label="地图">
             {[{ value: '', label: '全部' }, ...availableMaps.map(m => ({ value: m, label: m.replace('de_', '').toUpperCase() }))].map(f => (
-              <FilterChip key={f.value} label={f.label} active={map === f.value} onClick={() => setMap(f.value)} />
+              <Pill key={f.value} label={f.label} active={map === f.value} onClick={() => setMap(f.value)} />
             ))}
           </FilterRow>
         )}
 
-        <FilterRow label="Tier">
+        <FilterRow label="TIER">
           {TIER_FILTER.map(f => (
-            <FilterChip key={f.value} label={f.label} active={tier === f.value} onClick={() => setTier(f.value)} />
+            <Pill key={f.value} label={f.label} active={tier === f.value} onClick={() => setTier(f.value)} />
           ))}
         </FilterRow>
 
-        <FilterRow label="最少图数">
+        <FilterRow label="图数">
           {MIN_MAPS_FILTER.map(f => (
-            <FilterChip key={String(f.value)} label={f.label} active={minMaps === f.value} onClick={() => setMinMaps(f.value)} />
+            <Pill key={String(f.value)} label={f.label} active={minMaps === f.value} onClick={() => setMinMaps(f.value)} />
           ))}
         </FilterRow>
-      </motion.div>
+      </div>
 
-      {/* Leaderboard table */}
-      {isLoading && <Spinner />}
-      {error && <ErrorBox message={error.message} />}
-      {leaderboard && (
-        leaderboard.length === 0
-          ? <p className="text-sm text-white/40 py-8 text-center">暂无符合条件的数据</p>
-          : (
-            <motion.div className="rounded-xl overflow-hidden border mb-10 surface-sheen" variants={panelReveal} initial="hidden" animate="show" style={{ borderColor: 'var(--color-data-divider)' }}>
-              <table className="w-full">
-                <thead>
-                  <tr style={{ background: 'var(--color-data-surface)', borderBottom: '1px solid var(--color-data-divider)' }}>
-                    {['#', '选手', '战队', '图数', currentStatDef.label].map(h => (
-                      <th key={h}
-                          className={`px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white/35 ${['#', '图数', currentStatDef.label].includes(h) ? 'text-center' : 'text-left'}`}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <motion.tbody variants={staggerContainer} initial="hidden" animate="show">
-                  {leaderboard.map((entry, i) => (
-                    <motion.tr key={entry.id}
-                        variants={fadeUp}
-                        className="border-b transition-colors hover:bg-white/[0.025]"
-                        style={{ borderColor: 'var(--color-data-divider)', background: i % 2 === 0 ? 'transparent' : 'var(--color-data-row)' }}>
-                      <td className="px-4 py-3 w-10 text-center">
-                        <motion.span
-                          variants={rankReveal(
-                            i === 0 ? 'win' :
-                            (leaderboard.length > 5 && i === leaderboard.length - 1) ? 'loss' :
-                            'neutral'
-                          )}
-                          className="inline-block text-sm font-black italic tabular-nums"
-                          style={{ color: rankColor(i, leaderboard.length) }}
-                        >
-                          #{i + 1}
-                        </motion.span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-white/10 flex-shrink-0 overflow-hidden">
-                            {entry.avatar_url
-                              ? <img src={entry.avatar_url} alt={entry.nickname} className="w-full h-full object-cover" />
-                              : <div className="w-full h-full flex items-center justify-center text-[9px] font-black text-white/40">
-                                  {entry.nickname[0]}
-                                </div>}
-                          </div>
-                          <Link to={`/players/${entry.id}`}
-                                className="font-black text-sm text-white/90 hover:text-primary transition-colors">
-                            {entry.nickname}
-                          </Link>
-                          {entry.tier && (
-                            <span className="text-[9px] font-black px-1 py-0.5 rounded flex-shrink-0"
-                                  style={{ color: TIER_COLORS[entry.tier] ?? 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)' }}>
-                              {entry.tier}
+      {/* ── Leaderboard table ───────────────────────────────────────────────── */}
+      <div style={{ padding: '0 32px', marginBottom: 40 }}>
+        {isLoading && <Spinner />}
+        {error    && <ErrorBox message={error.message} />}
+        {leaderboard && (
+          leaderboard.length === 0
+            ? (
+              <p style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 'var(--text-mono-xs)',
+                color: 'var(--color-fg-dim)',
+                textAlign: 'center',
+                padding: '48px 0',
+              }}>
+                暂无符合条件的数据
+              </p>
+            )
+            : (
+              <HudPanel staticCorners style={{ overflow: 'hidden', padding: 0 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <colgroup>
+                    {COL_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}
+                  </colgroup>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--color-line)' }}>
+                      {['#', 'PLAYER', 'TEAM', 'MAPS', currentStatDef.label].map((h, i) => (
+                        <th key={h} style={{
+                          padding: '10px 12px',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 'var(--text-mono-xs)',
+                          letterSpacing: '0.2em',
+                          textTransform: 'uppercase',
+                          color: 'var(--color-fg-dim)',
+                          textAlign: i === 0 || i >= 3 ? 'center' : 'left',
+                          fontWeight: 400,
+                        }}>
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaderboard.map((entry, i) => {
+                      const { label: rankStr, color: rankClr } = rankLabel(i, leaderboard.length)
+                      return (
+                        <tr key={entry.id} style={{
+                          borderBottom: '1px solid var(--color-line)',
+                          background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
+                        }}>
+                          {/* Rank */}
+                          <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                            <span style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 'var(--text-mono-xs)',
+                              color: rankClr,
+                              letterSpacing: '0.1em',
+                            }}>
+                              {rankStr}
                             </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        {entry.team_name
-                          ? <div className="flex items-center gap-2">
-                              <TeamLogo url={entry.team_logo_url} name={entry.team_name} size={18} />
-                              <span className="text-sm text-white/55 font-bold truncate max-w-[120px]">{entry.team_name}</span>
-                            </div>
-                          : <span className="text-white/25">—</span>}
-                      </td>
-                      <td className="px-4 py-3 text-center text-sm text-white/45 font-bold tabular-nums">
-                        {entry.maps_played}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="electric-blue-accent text-sm font-black italic tabular-nums">
-                          {entry.avg_stat != null ? currentStatDef.format(entry.avg_stat) : '—'}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </motion.tbody>
-              </table>
-            </motion.div>
-          )
-      )}
+                          </td>
 
-      {/* Tier comparison chart */}
-      {tournamentId && (
-        <motion.div variants={panelReveal} initial="hidden" animate="show">
-          <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">Tier 对比分析</p>
-          <TierChart data={tierData} />
-        </motion.div>
+                          {/* Player */}
+                          <td style={{ padding: '10px 12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: 'var(--radius-sm)',
+                                background: 'var(--color-surface-2)',
+                                flexShrink: 0,
+                                overflow: 'hidden',
+                              }}>
+                                {entry.avatar_url
+                                  ? <img src={entry.avatar_url} alt={entry.nickname} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-fg-dim)' }}>
+                                      {entry.nickname[0]}
+                                    </div>}
+                              </div>
+                              <Link
+                                to={`/players/${entry.id}`}
+                                style={{
+                                  fontFamily: 'var(--font-mono)',
+                                  fontSize: 13,
+                                  color: 'var(--color-fg)',
+                                  textDecoration: 'none',
+                                  letterSpacing: '0.02em',
+                                }}
+                              >
+                                {entry.nickname}
+                              </Link>
+                              {entry.tier && (
+                                <span style={{
+                                  fontFamily: 'var(--font-mono)',
+                                  fontSize: 9,
+                                  letterSpacing: '0.1em',
+                                  padding: '2px 4px',
+                                  borderRadius: 2,
+                                  color: TIER_COLORS[entry.tier] ?? 'var(--color-fg-muted)',
+                                  border: `1px solid ${TIER_COLORS[entry.tier] ?? 'var(--color-line)'}`,
+                                  opacity: 0.8,
+                                }}>
+                                  {entry.tier}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Team */}
+                          <td style={{ padding: '10px 12px' }}>
+                            {entry.team_name
+                              ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <TeamLogo url={entry.team_logo_url} name={entry.team_name} size={20} />
+                                  <span style={{
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: 12,
+                                    color: 'var(--color-fg-muted)',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: 120,
+                                    display: 'inline-block',
+                                  }}>
+                                    {entry.team_name}
+                                  </span>
+                                </div>
+                              )
+                              : <span style={{ color: 'var(--color-fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>—</span>}
+                          </td>
+
+                          {/* Maps played */}
+                          <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                            <span style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 12,
+                              color: 'var(--color-fg-muted)',
+                              fontVariantNumeric: 'tabular-nums',
+                            }}>
+                              {entry.maps_played}
+                            </span>
+                          </td>
+
+                          {/* Stat value */}
+                          <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                            <span style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 13,
+                              fontVariantNumeric: 'tabular-nums',
+                              color: statColor(stat, entry.avg_stat),
+                              letterSpacing: '0.02em',
+                            }}>
+                              {entry.avg_stat != null ? currentStatDef.format(entry.avg_stat) : '—'}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </HudPanel>
+            )
+        )}
+      </div>
+
+      {/* ── Multi-chart grid ────────────────────────────────────────────────── */}
+      {tournamentId && tierChartOption && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+          gap: 24,
+          padding: '0 32px 64px',
+        }}>
+          <HudPanel staticCorners style={{ padding: 16 }}>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <TacticalLabel text="TIER :: COMPARISON" />
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 'var(--text-mono-xs)',
+                color: 'var(--color-fg-dim)',
+                letterSpacing: '0.2em',
+              }}>
+                RATING / ADR
+              </span>
+            </header>
+            {tierData.length === 0
+              ? (
+                <div style={{
+                  height: 280,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 'var(--text-mono-xs)',
+                  color: 'var(--color-fg-dim)',
+                }}>
+                  Tier 数据需至少一场已完赛且有 tier 指定的选手
+                </div>
+              )
+              : <ReactECharts option={tierChartOption} style={{ height: 280 }} opts={{ renderer: 'svg' }} />
+            }
+          </HudPanel>
+        </div>
       )}
-    </motion.div>
+    </div>
   )
 }

@@ -1,8 +1,5 @@
 // src/pages/AboutPage.tsx
-import { motion } from 'framer-motion'
-import TrophySymbol from '../components/TrophySymbol'
-import Card from '../components/Card'
-import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
+import { TacticalLabel } from '../components/hud/TacticalLabel'
 
 const SPECS = [
   ['游戏',   'Counter-Strike 2'],
@@ -13,51 +10,149 @@ const SPECS = [
 
 export default function AboutPage() {
   return (
-    <motion.div className="relative max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
-      {/* Trophy decoration */}
-      <motion.div
-        className="absolute right-0 top-0 w-[500px] pointer-events-none select-none"
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <TrophySymbol variant="outline" className="w-full" />
-      </motion.div>
+    <div style={{ minHeight: '100vh' }}>
+      {/* Full-bleed premier banner */}
+      <section style={{
+        position: 'relative',
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)',
+        height: 'min(360px, 40vh)',
+        overflow: 'hidden',
+        borderBottom: '1px solid var(--color-line)',
+      }}>
+        <img
+          src="/images/alast-premier.jpeg"
+          alt="ALAST PREMIER 2026.04 - 2026.06"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+        />
+        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(7,9,12,0.0) 0%, rgba(7,9,12,0.45) 60%, var(--color-bg) 100%)' }} />
+        <div style={{ position: 'absolute', left: 32, right: 32, bottom: 32 }}>
+          <TacticalLabel text="SECTOR :: BRIEFING" />
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-display-xl)', marginTop: 8, lineHeight: 1, color: 'var(--color-fg)' }}>
+            ABOUT ALAST
+          </h1>
+        </div>
+      </section>
 
-      <motion.div className="relative z-10 max-w-2xl space-y-10" variants={staggerContainer} initial="hidden" animate="show">
-        <motion.div variants={panelReveal}>
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">About</p>
-          <h1 className="text-4xl font-black italic tracking-tighter text-white/90 mb-6">关于 ALAST Premier</h1>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '64px 24px 96px', position: 'relative' }}>
 
-          <div className="space-y-4 text-sm text-white/70 leading-relaxed">
-            <p>
-              <span className="font-black text-primary">ALAST Premier</span> 是一项面向中国区玩家的高水平 CS2 精英赛事，
+        {/* Intro section */}
+        <section style={{ marginTop: 0 }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 32,
+            textTransform: 'uppercase',
+            color: 'var(--color-fg)',
+            letterSpacing: '0.2em',
+            paddingBottom: 12,
+            borderBottom: '1px solid var(--color-data)',
+            display: 'inline-block',
+          }}>
+            OVERVIEW
+          </h2>
+          <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 17, color: 'var(--color-fg)', lineHeight: 1.85 }}>
+              <strong style={{ color: 'var(--color-data)' }}>ALAST Premier</strong> 是一项面向中国区玩家的高水平 CS2 精英赛事，
               以严格的赛制、完整的数据追踪和专业的赛事运营为核心，打造国内顶级电竞比赛体验。
             </p>
-            <p>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 17, color: 'var(--color-fg)', lineHeight: 1.85 }}>
               赛事采用 BO3 淘汰制 + 小组循环赛的混合赛制，所有比赛数据通过 CS Demo Manager 解析，
               精确追踪每位选手在每张地图的表现——包括 Rating、ADR、KAST、首杀/首死等 HLTV 级别指标。
             </p>
-            <p>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 17, color: 'var(--color-fg)', lineHeight: 1.85 }}>
               本站为 ALAST Premier 2026 官方信息平台，提供实时赛程、选手数据、战队信息及赛事新闻。
             </p>
           </div>
-        </motion.div>
+        </section>
 
-        <motion.section variants={panelReveal}>
-          <h2 className="text-xl font-black italic uppercase tracking-tight text-white/80 mb-4">赛事规格</h2>
-          <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-3" variants={staggerContainer} initial="hidden" animate="show">
+        {/* Specs section */}
+        <section style={{ marginTop: 64 }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 32,
+            color: 'var(--color-fg)',
+            paddingBottom: 12,
+            borderBottom: '1px solid var(--color-data)',
+            display: 'inline-block',
+          }}>
+            赛事规格
+          </h2>
+          <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
             {SPECS.map(([k, v]) => (
-              <motion.div key={k} variants={fadeUp}>
-                <Card hover={false} className="p-4">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-white/35 mb-1">{k}</div>
-                  <div className="font-black text-sm text-white/85">{v}</div>
-                </Card>
-              </motion.div>
+              <div
+                key={k}
+                style={{
+                  padding: '20px 24px',
+                  border: '1px solid var(--color-line)',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--color-surface)',
+                }}
+              >
+                <div style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 'var(--text-mono-xs)',
+                  color: 'var(--color-fg-dim)',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  marginBottom: 8,
+                }}>
+                  {k}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 'var(--text-mono-md)',
+                  color: 'var(--color-fg)',
+                  fontWeight: 700,
+                }}>
+                  {v}
+                </div>
+              </div>
             ))}
-          </motion.div>
-        </motion.section>
-      </motion.div>
-    </motion.div>
+          </div>
+        </section>
+
+        {/* Mission section */}
+        <section style={{ marginTop: 64 }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 32,
+            textTransform: 'uppercase',
+            color: 'var(--color-fg)',
+            letterSpacing: '0.2em',
+            paddingBottom: 12,
+            borderBottom: '1px solid var(--color-data)',
+            display: 'inline-block',
+          }}>
+            MISSION
+          </h2>
+          <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 17, color: 'var(--color-fg)', lineHeight: 1.85 }}>
+              我们相信，竞技游戏的核心是数据与公平。ALAST Premier 致力于为每一位参赛选手提供透明、可追溯的比赛记录，让每一次击杀、每一轮战术都有据可查。
+            </p>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 17, color: 'var(--color-fg)', lineHeight: 1.85 }}>
+              通过 HLTV 级别的数据指标体系，我们让玩家、教练和观众都能深度理解比赛——从宏观战术到微观决策，从团队配合到个人发挥。
+            </p>
+          </div>
+        </section>
+
+        {/* Data sources section */}
+        <section id="data" style={{ marginTop: 96 }}>
+          <TacticalLabel text="DATA SOURCES" />
+          <ul style={{
+            marginTop: 16,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 'var(--text-mono-md)',
+            color: 'var(--color-fg-muted)',
+            listStyle: 'none',
+            padding: 0,
+          }}>
+            <li style={{ padding: '6px 0', borderBottom: '1px solid var(--color-line)' }}>CSDM batch JSON imports</li>
+            <li style={{ padding: '6px 0', borderBottom: '1px solid var(--color-line)' }}>Tournament admin entry</li>
+            <li style={{ padding: '6px 0', borderBottom: '1px solid var(--color-line)' }}>CS Demo Manager v4+ parse pipeline</li>
+          </ul>
+        </section>
+
+      </div>
+    </div>
   )
 }

@@ -7,7 +7,7 @@ export default function TeamLogo({ url, name, size = 40 }: Props) {
   return (
     <div
       className="rounded flex items-center justify-center font-bold text-xs"
-      style={{ width: size, height: size, background: 'var(--color-secondary)', color: 'var(--color-primary)', border: '1px solid var(--color-border)', flexShrink: 0 }}
+      style={{ width: size, height: size, background: 'var(--color-surface-2)', color: 'var(--color-fg-dim)', border: '1px solid var(--color-line)', flexShrink: 0 }}
     >
       {name.slice(0, 2).toUpperCase()}
     </div>

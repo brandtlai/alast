@@ -1,3 +1,5 @@
+@import "./design/fonts.css";
+@import "./design/tokens.css";
 @import "tailwindcss";
 
 @theme {
@@ -25,9 +27,9 @@
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
   min-height: 100vh;
 }
 

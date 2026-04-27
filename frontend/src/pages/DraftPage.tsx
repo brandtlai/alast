@@ -7,11 +7,11 @@ import type { DraftPlayer } from '../types'
 import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
 
 const TIER_META: Record<string, { label: string; accent: string; desc: string }> = {
-  'S':  { label: '特等马', accent: '#FFD700', desc: '前 20% 战力 / 队长' },
-  'A':  { label: '上等马', accent: '#FF8A00', desc: '高战力' },
-  'B':  { label: '中等马', accent: '#00D1FF', desc: '中坚' },
-  'C+': { label: '下等马', accent: '#A0AEC0', desc: '潜力' },
-  'D':  { label: '赠品马', accent: '#718096', desc: '友情参与' },
+  'S':  { label: '特等马', accent: 'var(--color-data)',     desc: '前 20% 战力 / 队长' },
+  'A':  { label: '上等马', accent: 'var(--color-fg)',       desc: '高战力' },
+  'B':  { label: '中等马', accent: 'var(--color-fg-muted)', desc: '中坚' },
+  'C+': { label: '下等马', accent: 'var(--color-fg-dim)',   desc: '潜力' },
+  'D':  { label: '赠品马', accent: 'var(--color-fire)',     desc: '友情参与' },
 }
 const TIER_ORDER = ['S', 'A', 'B', 'C+', 'D'] as const
 
