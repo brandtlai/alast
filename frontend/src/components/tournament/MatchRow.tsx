@@ -77,9 +77,11 @@ export default function MatchRow({ match, variant = 'overview' }: Props) {
         borderColor: 'var(--color-data-divider)',
       }}
     >
-      {/* Time */}
-      <div className="hidden sm:block text-[10px] font-mono text-white/35 w-14 flex-shrink-0">
-        {match.scheduled_at ? dayjs(match.scheduled_at).format('MM-DD HH:mm') : ''}
+      {/* Time / reschedule note */}
+      <div className="hidden sm:block text-[10px] font-mono w-14 flex-shrink-0">
+        {match.note
+          ? <span className="text-amber-300/80 font-black uppercase tracking-wider">改期</span>
+          : <span className="text-white/35">{match.scheduled_at ? dayjs(match.scheduled_at).format('MM-DD HH:mm') : ''}</span>}
       </div>
 
       {/* Team A */}

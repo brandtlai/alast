@@ -67,6 +67,19 @@ export default function MatchDetailPage() {
           {match.scheduled_at && <span>· {dayjs(match.scheduled_at).format('YYYY-MM-DD HH:mm')}</span>}
         </div>
 
+        {match.note && (
+          <div
+            className="mb-4 rounded-md border px-4 py-2 text-xs font-bold text-center"
+            style={{
+              background: 'rgba(251,191,36,0.08)',
+              borderColor: 'rgba(251,191,36,0.35)',
+              color: 'rgba(252,211,77,0.95)',
+            }}
+          >
+            ⓘ {match.note}
+          </div>
+        )}
+
         <div className="flex items-center justify-around gap-4">
           <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
             <TeamLogo url={match.team_a_logo} name={match.team_a_name ?? '?'} size={72} />
