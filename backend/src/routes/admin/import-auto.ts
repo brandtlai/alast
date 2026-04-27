@@ -256,8 +256,8 @@ r.post('/upload', async (c) => {
       const playerId = steamToPlayerId.get(steamId)
       if (!playerId) continue
       const teamId = steamToTeamId.get(steamId) ?? null
-      const kast = dp.kast != null ? dp.kast * 100 : null
-      const headshotPct = dp.headshotPercentage != null ? dp.headshotPercentage * 100 : null
+      const kast = dp.kast ?? null
+      const headshotPct = dp.headshotPercentage ?? null
       const clutchesWon = dp.vsOneWonCount != null
         ? (dp.vsOneWonCount + (dp.vsTwoWonCount ?? 0) + (dp.vsThreeWonCount ?? 0) + (dp.vsFourWonCount ?? 0) + (dp.vsFiveWonCount ?? 0))
         : null

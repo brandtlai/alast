@@ -287,7 +287,7 @@ export default function StatsPage() {
             <div style={{ marginTop: 12 }}>
               <DataReadout
                 value={summary.avg_headshot_pct != null
-                  ? (parseFloat(summary.avg_headshot_pct) / 100).toFixed(1) + '%'
+                  ? parseFloat(summary.avg_headshot_pct).toFixed(1) + '%'
                   : '—'}
                 size={48}
               />

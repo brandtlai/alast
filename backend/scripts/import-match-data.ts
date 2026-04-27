@@ -27,6 +27,8 @@ const TEAM_NAME_ALIASES: Record<string, string> = {
   '牛头人': 'NTR',
   '英特尔科学家': '英特尔首席科学家',
   'country love': 'CountryLove',
+  'Vitality': 'vitALIty',
+  'ShenTiGo': 'ShenT1Go',
 }
 
 function normalizeTeamName(name: string): string {
@@ -294,7 +296,7 @@ async function importJson(
       teamId = jsonAIsTeamA ? dbTeamBId : dbTeamAId
     }
 
-    const kast = jp.kast != null ? jp.kast * 100 : null // JSON kast is 0-1 float
+    const kast = jp.kast ?? null
 
     await q(`
       INSERT INTO player_match_stats
@@ -307,7 +309,7 @@ async function importJson(
       playerId, matchMapId, teamId,
       jp.killCount ?? null, jp.deathCount ?? null, jp.assistCount ?? null,
       jp.headshotCount ?? null,
-      jp.headshotPercentage != null ? jp.headshotPercentage * 100 : null,
+      jp.headshotPercentage ?? null,
       jp.averageDamagePerRound ?? null,
       kast,
       jp.hltvRating2 ?? jp.hltvRating ?? null,

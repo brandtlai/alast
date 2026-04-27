@@ -512,6 +512,26 @@ export default function MatchDetailPage() {
           {match.scheduled_at && <span>· {dayjs(match.scheduled_at).format('YYYY-MM-DD HH:mm')}</span>}
         </div>
 
+        {/* Reschedule / admin note (from main: matches.note column) */}
+        {match.note && (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: '8px 16px',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-mono-sm)',
+              letterSpacing: '0.1em',
+              textAlign: 'center',
+              background: 'var(--color-fire-soft)',
+              border: '1px solid rgba(255,61,20,0.35)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--color-fire)',
+            }}
+          >
+            ⓘ {match.note}
+          </div>
+        )}
+
         {/* 3-column score grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 24 }}>
           {/* Team A */}

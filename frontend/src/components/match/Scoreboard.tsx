@@ -20,7 +20,7 @@ function fmt(v: number | null, decimals = 0): string {
 
 function HsBar({ pct }: { pct: number | null }) {
   if (pct == null) return <span className="text-white/30 text-xs tabular-nums">—</span>
-  const value = Math.round(pct / 100)
+  const value = Math.round(pct)
   return (
     <div className="relative h-[18px] w-14 rounded-sm overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
       <div

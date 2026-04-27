@@ -78,6 +78,7 @@ export interface Match {
   bracket_kind?: string | null
   bracket_round?: number | null
   best_of?: number
+  note?: string | null
   // joined fields
   team_a_name?: string | null
   team_a_logo?: string | null

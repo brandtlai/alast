@@ -73,9 +73,9 @@ export default function PlayerDetailPage() {
         value: [
           avgRating ?? 0,
           avgAdr ?? 0,
-          // kast is stored as fractional (0–1) or percent? Use as-is but clamp
-          avgKast != null ? (avgKast > 1 ? avgKast : avgKast * 100) : 0,
-          avgHsPct != null ? (avgHsPct > 1 ? avgHsPct : avgHsPct * 100) : 0,
+          // backend stores kast/hs_pct as percent (0–100) after the R3 unit fix on main
+          avgKast ?? 0,
+          avgHsPct ?? 0,
           kdr != null ? parseFloat(kdr) : 0,
         ],
         name: player.nickname,
