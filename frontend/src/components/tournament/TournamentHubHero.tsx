@@ -20,8 +20,9 @@ export default function TournamentHubHero() {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: 'url(/poster.png)',
-          backgroundSize: 'cover',
+          backgroundSize: '60% auto',
           backgroundPosition: 'center 30%',
+          backgroundRepeat: 'no-repeat',
         }}
       />
 
