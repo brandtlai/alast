@@ -353,12 +353,12 @@ function StandingsAndRecent({ tournamentId, recentFinished }: StandingsRecentPro
   return (
     <section
       style={{
-        maxWidth: 1280,
+        maxWidth: 1680,
         margin: '0 auto',
-        padding: '0 32px',
+        padding: '0 48px',
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: 32,
+        gap: 40,
       }}
       className="standings-grid"
     >
