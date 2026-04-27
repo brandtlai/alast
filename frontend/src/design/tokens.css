@@ -73,21 +73,6 @@
   --duration-slow: 480ms;
 }
 
-/* Body baseline */
-html, body {
-  background: var(--color-bg);
-  color: var(--color-fg);
-  font-family: var(--font-sans);
-  font-size: var(--text-body);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Reusable utility — gold gradient text (logo, champion) */
-.gold-gradient {
-  background: var(--gold-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+/* Note: body baseline + .gold-gradient utility are intentionally NOT redeclared here.
+   The old src/index.css owns those for now — old pages depend on them.
+   New (Tactical OS) pages reference the new --color-* / --font-* tokens above directly. */
