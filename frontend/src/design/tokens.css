@@ -37,7 +37,7 @@
   --font-mono:         "JetBrains Mono", ui-monospace, monospace;
   --font-sans:         "Geist", "Noto Sans SC", system-ui, sans-serif;
   --font-display:      "Anton", "Noto Sans SC", sans-serif;
-  --font-serif:        "Noto Serif SC", "Source Han Serif SC", serif;
+  --font-serif:        Georgia, "Noto Serif SC", "Source Han Serif SC", serif;
 
   /* Type scale */
   --text-mono-xs:      10px;
