@@ -81,13 +81,13 @@ export default function Navbar() {
             style={{
               fontFamily: 'var(--font-display)',
               fontSize: 22,
-              fontStyle: 'italic',
               background: 'var(--gold-gradient)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
               flexShrink: 0,
               letterSpacing: '0.02em',
+              paddingRight: 4,
             }}
           >
             ALAST

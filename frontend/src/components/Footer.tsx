@@ -28,13 +28,13 @@ export default function Footer() {
           style={{
             fontFamily: 'var(--font-display)',
             fontSize: 18,
-            fontStyle: 'italic',
             background: 'var(--gold-gradient)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             letterSpacing: '0.02em',
             flexShrink: 0,
+            paddingRight: 3,
           }}
         >
           ALAST
