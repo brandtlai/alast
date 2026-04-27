@@ -37,8 +37,8 @@ interface Props {
   players?: MapStatPlayer[]
 }
 
-const CT_COLOR = 'var(--color-accent)'
-const T_COLOR = '#FFD700'
+const CT_COLOR = 'var(--color-data-2)'
+const T_COLOR = 'var(--color-fire)'
 
 export default function RoundTimeline({ rounds, teamAName, teamBName, teamAId, teamBId, players = [] }: Props) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)

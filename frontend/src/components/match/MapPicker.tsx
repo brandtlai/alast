@@ -20,15 +20,15 @@ export default function MapPicker({ maps, selectedId, onSelect }: Props) {
             onClick={() => onSelect(m.id)}
             className="px-4 py-2 rounded-md text-sm font-black transition-all"
             style={{
-              background: selected ? 'var(--color-primary)' : 'var(--color-data-chip)',
-              color: selected ? '#fff' : 'var(--color-data-text-muted)',
-              border: `1px solid ${selected ? 'transparent' : 'var(--color-data-divider)'}`,
+              background: selected ? 'transparent' : 'var(--color-surface-2)',
+              color: selected ? 'var(--color-data)' : 'var(--color-fg-muted)',
+              border: `1px solid ${selected ? 'var(--color-data)' : 'var(--color-line)'}`,
             }}
           >
             <span className="uppercase tracking-wide text-xs opacity-70 mr-1.5">MAP {i + 1}</span>
             {m.map_name.replace('de_', '')}
             {hasScore && (
-              <span className="ml-2 tabular-nums font-mono text-xs" style={{ color: selected ? '#fff' : 'var(--color-data-text-muted)' }}>
+              <span className="ml-2 tabular-nums font-mono text-xs" style={{ color: selected ? 'var(--color-data)' : 'var(--color-fg-dim)' }}>
                 {m.score_a}–{m.score_b}
               </span>
             )}
