@@ -1,12 +1,13 @@
-// src/pages/TeamsPage.tsx
+// src/pages/TeamsPage.tsx — Tactical OS re-skin (T20)
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTeams } from '../api/teams'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
-import TeamLogo from '../components/TeamLogo'
-import Card from '../components/Card'
-import { fadeUp, pageReveal, pressTap, softHover, staggerContainer } from '../lib/motion'
+import { HudPanel } from '../components/hud/HudPanel'
+import { TacticalLabel } from '../components/hud/TacticalLabel'
+import { hudStagger, hudEnter } from '../design/motion'
 
 const REGIONS = ['', 'Asia', 'EU', 'NA', 'CIS']
 
@@ -15,65 +16,159 @@ export default function TeamsPage() {
   const { data: teams, isLoading, error } = useTeams(region || undefined)
 
   return (
-    <motion.div className="max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
-      <motion.div className="mb-8" variants={staggerContainer} initial="hidden" animate="show">
-        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Competing Teams</p>
-        <motion.h1 variants={fadeUp} className="text-4xl font-black italic tracking-tighter text-white/90">参赛战队</motion.h1>
-      </motion.div>
+    <div>
+      {/* Header */}
+      <div style={{ padding: '64px 32px 24px' }}>
+        <TacticalLabel text="SECTOR :: ROSTER" />
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-display-lg)',
+            lineHeight: 1,
+            color: 'var(--color-fg)',
+            margin: '8px 0 0',
+          }}
+        >
+          参赛战队
+        </h1>
+      </div>
 
-      <motion.div className="flex gap-2 mb-6 flex-wrap" variants={staggerContainer} initial="hidden" animate="show">
+      {/* Region filter */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '0 32px', marginBottom: 24 }}>
         {REGIONS.map(r => (
-          <motion.button
+          <button
             key={r}
             onClick={() => setRegion(r)}
-            className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest transition-all border"
-            variants={fadeUp}
-            whileHover={{ y: -1, scale: 1.03 }}
-            whileTap={pressTap}
             style={{
-              background: region === r ? 'var(--color-primary)' : 'rgba(255,255,255,0.05)',
-              color: region === r ? '#fff' : 'rgba(248,250,252,0.5)',
-              borderColor: region === r ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
+              padding: '6px 16px',
+              border: `1px solid ${region === r ? 'var(--color-data)' : 'var(--color-line)'}`,
+              borderRadius: 'var(--radius-sm)',
+              background: region === r ? 'rgba(199,255,61,0.1)' : 'transparent',
+              color: region === r ? 'var(--color-data)' : 'var(--color-fg-muted)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-mono-sm)',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              transition: 'all var(--duration-mid) var(--ease-hud)',
             }}
           >
             {r || '全部'}
-          </motion.button>
+          </button>
         ))}
-      </motion.div>
+      </div>
 
-      {isLoading && <Spinner />}
-      {error && <ErrorBox message={error.message} />}
+      {/* States */}
+      {isLoading && (
+        <div style={{ padding: '0 32px' }}>
+          <Spinner />
+        </div>
+      )}
+      {error && (
+        <div style={{ padding: '0 32px' }}>
+          <ErrorBox message={error.message} />
+        </div>
+      )}
+
+      {/* Grid */}
       {teams && (
         teams.length === 0
-          ? <p className="text-sm text-white/40">暂无战队</p>
-          : <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" variants={staggerContainer} initial="hidden" animate="show">
-              {teams.map(team => (
-                <motion.div
-                  key={team.id}
-                  variants={fadeUp}
-                  whileHover={softHover}
-                  whileTap={pressTap}
-                >
-                  <Card href={`/teams/${team.id}`} className="p-5">
-                    <div className="flex items-center gap-4">
-                      <TeamLogo url={team.logo_url} name={team.name} size={56} />
-                      <div className="min-w-0">
-                        <div className="font-black text-white/90 truncate">{team.name}</div>
-                        {team.short_name && (
-                          <div className="text-sm text-white/40 font-bold truncate">{team.short_name}</div>
+          ? (
+            <p style={{ padding: '0 32px', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-sm)', color: 'var(--color-fg-dim)' }}>
+              暂无战队
+            </p>
+          )
+          : (
+            <motion.div
+              variants={hudStagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              style={{
+                display: 'grid',
+                gap: 24,
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                padding: '0 32px',
+              }}
+            >
+              {teams.map(t => (
+                <motion.div key={t.id} variants={hudEnter}>
+                  <Link to={`/teams/${t.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                    <HudPanel
+                      style={{
+                        padding: 24,
+                        borderColor: (t as any).is_champion ? 'var(--color-gold-2)' : undefined,
+                      }}
+                    >
+                      <header style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        {t.logo_url && (
+                          <img src={t.logo_url} width={40} height={40} alt="" style={{ objectFit: 'contain' }} />
                         )}
-                        {team.region && (
-                          <span className="inline-flex mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-accent/10 border border-accent/20 text-accent">
-                            {team.region}
-                          </span>
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, lineHeight: 1, color: 'var(--color-fg)' }}>
+                            {t.name}
+                          </div>
+                          {(t as any).cn_name && (
+                            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 14, color: 'var(--color-fg-muted)', marginTop: 4 }}>
+                              {(t as any).cn_name}
+                            </div>
+                          )}
+                          {t.short_name && !(t as any).cn_name && (
+                            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 14, color: 'var(--color-fg-muted)', marginTop: 4 }}>
+                              {t.short_name}
+                            </div>
+                          )}
+                        </div>
+                      </header>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginTop: 16,
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 'var(--text-mono-sm)',
+                          color: 'var(--color-fg-muted)',
+                        }}
+                      >
+                        <span>
+                          {(t as any).wins ?? 0}W-{(t as any).losses ?? 0}L
+                        </span>
+                        {(t as any).rank != null && (
+                          <span>RANK #{(t as any).rank}</span>
+                        )}
+                        {t.region && (
+                          <span style={{ letterSpacing: '0.2em', textTransform: 'uppercase' }}>{t.region}</span>
                         )}
                       </div>
-                    </div>
-                  </Card>
+
+                      {(t as any).players?.length ? (
+                        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                          {(t as any).players.slice(0, 5).map((p: any) => (
+                            p.avatar_url
+                              ? (
+                                <img
+                                  key={p.id}
+                                  src={p.avatar_url}
+                                  width={28}
+                                  height={28}
+                                  alt={p.name ?? p.nickname}
+                                  style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
+                                />
+                              )
+                              : null
+                          ))}
+                        </div>
+                      ) : null}
+                    </HudPanel>
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>
+          )
       )}
-    </motion.div>
+
+      <div style={{ height: 64 }} />
+    </div>
   )
 }
