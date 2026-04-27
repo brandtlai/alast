@@ -1,8 +1,8 @@
+// src/pages/NewsDetailPage.tsx
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { motion } from 'framer-motion'
 import dayjs from 'dayjs'
 import { useNewsArticle } from '../api/news'
 import { useMatchMaps, useMapRounds, useMapStats } from '../api/matches'
@@ -11,7 +11,7 @@ import ErrorBox from '../components/ErrorBox'
 import MapPicker from '../components/match/MapPicker'
 import RoundTimeline from '../components/match/RoundTimeline'
 import Scoreboard from '../components/match/Scoreboard'
-import { fadeUp, pageReveal, panelReveal, staggerContainer } from '../lib/motion'
+import { TacticalLabel } from '../components/hud/TacticalLabel'
 
 export default function NewsDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -40,78 +40,172 @@ export default function NewsDetailPage() {
   if (!article) return null
 
   return (
-    <motion.div className="max-w-7xl mx-auto px-4 sm:px-6" variants={pageReveal} initial="hidden" animate="show">
-      <div className="max-w-3xl mx-auto">
-        <motion.div className="mb-6" variants={fadeUp}>
-          <Link to="/news" className="text-sm opacity-50 hover:opacity-80" style={{ color: 'var(--color-accent)' }}>← 返回新闻</Link>
-        </motion.div>
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '96px 24px' }}>
+      {/* Back link */}
+      <Link
+        to="/news"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--text-mono-xs)',
+          color: 'var(--color-fg-muted)',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          textDecoration: 'none',
+        }}
+      >
+        ← BACK TO DISPATCH
+      </Link>
 
-        {article.cover_image_url && (
-          <motion.img src={article.cover_image_url} alt={article.title} className="w-full h-64 object-cover rounded-xl mb-6" variants={panelReveal} />
-        )}
-
-        {article.match && (
-          <motion.div
-            variants={panelReveal}
-            className="mb-6 rounded-xl p-4"
-            style={{ background: 'var(--color-data-surface)', border: '1px solid var(--color-data-divider)' }}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/35 mb-1">
-                  {article.match.stage ?? '比赛'} · {article.match.final_score}
-                </p>
-                <div className="text-sm font-black text-white/85 truncate">
-                  {article.match.team_a_name ?? 'TBD'} vs {article.match.team_b_name ?? 'TBD'}
-                </div>
-              </div>
-              <Link
-                to={`/matches/${article.match.id}`}
-                className="inline-flex items-center justify-center px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white/10 text-white/70 hover:bg-white/15 transition"
-              >
-                查看比赛数据
-              </Link>
-            </div>
-          </motion.div>
-        )}
-
-        <motion.div className="mb-6" variants={staggerContainer} initial="hidden" animate="show">
-          {article.category && <span className="text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>{article.category} · </span>}
-          <span className="text-sm opacity-40">{dayjs(article.published_at).format('YYYY年MM月DD日')} · {article.author ?? 'ALAST'}</span>
-        </motion.div>
-
-        <motion.h1 variants={fadeUp} className="text-3xl font-bold mb-4">{article.title}</motion.h1>
-        {article.summary && <motion.p variants={fadeUp} className="text-lg opacity-60 mb-6 border-l-2 pl-4" style={{ borderColor: 'var(--color-primary)' }}>{article.summary}</motion.p>}
+      {/* Category label */}
+      <div style={{ marginTop: 24 }}>
+        <TacticalLabel text={`DISPATCH :: ${article.category?.toUpperCase() ?? 'ARTICLE'}`} />
       </div>
 
+      {/* Headline */}
+      <h1 style={{
+        fontFamily: 'var(--font-serif)',
+        fontSize: 'var(--text-display-lg)',
+        fontWeight: 900,
+        lineHeight: 1.15,
+        marginTop: 16,
+        color: 'var(--color-fg)',
+      }}>
+        {article.title}
+      </h1>
+
+      {/* Meta row */}
+      <div style={{
+        display: 'flex',
+        gap: 16,
+        marginTop: 16,
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--text-mono-sm)',
+        color: 'var(--color-fg-muted)',
+      }}>
+        <span>{dayjs(article.published_at).format('YYYY.MM.DD')}</span>
+        {article.author && <span>{article.author}</span>}
+      </div>
+
+      {/* Cover image */}
+      {article.cover_image_url && (
+        <img
+          src={article.cover_image_url}
+          alt=""
+          style={{ width: '100%', marginTop: 32, borderRadius: 'var(--radius-sm)' }}
+        />
+      )}
+
+      {/* Linked match banner */}
+      {article.match && (
+        <div style={{
+          marginTop: 32,
+          padding: '16px 20px',
+          border: '1px solid var(--color-line-strong)',
+          borderRadius: 'var(--radius-md)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+          flexWrap: 'wrap',
+        }}>
+          <div>
+            <div style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-mono-xs)',
+              color: 'var(--color-fg-dim)',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              marginBottom: 6,
+            }}>
+              {(article.match.stage ?? '比赛').toUpperCase()} · {article.match.final_score}
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-mono-sm)',
+              color: 'var(--color-fg)',
+              fontWeight: 700,
+            }}>
+              {article.match.team_a_name ?? 'TBD'} vs {article.match.team_b_name ?? 'TBD'}
+            </div>
+          </div>
+          <Link
+            to={`/matches/${article.match.id}`}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-mono-xs)',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              color: 'var(--color-data)',
+              textDecoration: 'none',
+              border: '1px solid var(--color-data)',
+              padding: '6px 12px',
+              borderRadius: 'var(--radius-sm)',
+            }}
+          >
+            查看比赛数据
+          </Link>
+        </div>
+      )}
+
+      {/* In-article match data (scoreboard + round timeline) */}
       {article.match && selectedMap && (
-        <motion.section
-          variants={panelReveal}
-          className="mb-8 rounded-xl border p-4 sm:p-5"
-          style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-end gap-3 mb-4">
-            <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">比赛经过 / 最终数据</p>
-              <h2 className="text-xl font-black text-white/90">
+        <section style={{
+          marginTop: 48,
+          border: '1px solid var(--color-line)',
+          borderRadius: 'var(--radius-md)',
+          padding: '20px 24px',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap',
+            marginBottom: 24,
+          }}>
+            <div>
+              <div style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 'var(--text-mono-xs)',
+                color: 'var(--color-fg-dim)',
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                marginBottom: 6,
+              }}>
+                比赛经过 / 最终数据
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-sm)', color: 'var(--color-fg)', fontWeight: 700 }}>
                 {article.match.team_a_name ?? 'TBD'} vs {article.match.team_b_name ?? 'TBD'}
-              </h2>
-              <p className="text-xs text-white/40 mt-1">
-                {article.match.stage ?? '比赛'} · {selectedMap.map_name.replace('de_', '').toUpperCase()} · {selectedMap.score_a ?? 0}–{selectedMap.score_b ?? 0}
-              </p>
+              </div>
+              <div style={{
+                marginTop: 4,
+                fontFamily: 'var(--font-mono)',
+                fontSize: 'var(--text-mono-xs)',
+                color: 'var(--color-fg-dim)',
+                letterSpacing: '0.1em',
+              }}>
+                {(article.match.stage ?? '比赛').toUpperCase()} · {selectedMap.map_name.replace('de_', '').toUpperCase()} · {selectedMap.score_a ?? 0}–{selectedMap.score_b ?? 0}
+              </div>
             </div>
             {maps.length > 1 && (
-              <div className="sm:min-w-72">
+              <div style={{ minWidth: 240 }}>
                 <MapPicker maps={maps} selectedId={selectedMapId} onSelect={setSelectedMapId} />
               </div>
             )}
           </div>
 
-          <div className="space-y-5">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">
+              <div style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 'var(--text-mono-xs)',
+                color: 'var(--color-fg-dim)',
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                marginBottom: 12,
+              }}>
                 {selectedMap.map_name.replace('de_', '').toUpperCase()} Scoreboard
-              </h3>
+              </div>
               <Scoreboard
                 players={stats}
                 teamAId={article.match.team_a_id}
@@ -121,7 +215,6 @@ export default function NewsDetailPage() {
                 rounds={rounds}
               />
             </div>
-
             <RoundTimeline
               rounds={rounds}
               teamAName={article.match.team_a_name ?? 'Team A'}
@@ -131,32 +224,58 @@ export default function NewsDetailPage() {
               players={stats}
             />
           </div>
-        </motion.section>
+        </section>
       )}
 
-      <div className="max-w-3xl mx-auto">
-        {article.content && (
-          <motion.div className="prose prose-invert max-w-none"
-            variants={panelReveal}
-            style={{ '--tw-prose-body': 'rgba(248,250,252,0.8)', '--tw-prose-headings': '#F8FAFC', '--tw-prose-links': 'var(--color-accent)' } as React.CSSProperties}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
-          </motion.div>
-        )}
+      {/* Article body */}
+      {article.content && (
+        <div style={{ marginTop: 32, maxWidth: '65ch' }}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              p:  (p) => <p {...p} style={{ marginTop: 20, lineHeight: 1.85, color: 'var(--color-fg)' }} />,
+              h2: (p) => <h2 {...p} style={{ marginTop: 48, marginBottom: 8, fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--color-fg)' }} />,
+              h3: (p) => <h3 {...p} style={{ marginTop: 36, marginBottom: 8, fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--color-fg)' }} />,
+              a:  (p) => <a {...p} style={{ color: 'var(--color-data)', textDecoration: 'underline' }} />,
+              code: (p) => <code {...p} style={{ fontFamily: 'var(--font-mono)', background: 'var(--color-surface)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }} />,
+              blockquote: (p) => <blockquote {...p} style={{ marginTop: 24, paddingLeft: 16, borderLeft: '2px solid var(--color-data)', color: 'var(--color-fg-muted)', fontStyle: 'italic' }} />,
+            }}
+          >
+            {article.content}
+          </ReactMarkdown>
+        </div>
+      )}
 
-        {article.ai_generated && (
-          <motion.p variants={fadeUp} className="mt-8 text-xs text-white/35 italic">
-            本文由 AI 模仿「玩机器」解说风格生成，仅为致敬，与本人无关。
-          </motion.p>
-        )}
+      {article.ai_generated && (
+        <p style={{
+          marginTop: 32,
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--text-mono-xs)',
+          color: 'var(--color-fg-dim)',
+          fontStyle: 'italic',
+        }}>
+          本文由 AI 模仿「玩机器」解说风格生成，仅为致敬，与本人无关。
+        </p>
+      )}
 
-        {article.match && (
-          <motion.div variants={fadeUp} className="mt-6">
-            <Link to={`/matches/${article.match.id}`} className="text-sm font-bold text-primary hover:opacity-80">
-              返回本场比赛数据 →
-            </Link>
-          </motion.div>
-        )}
-      </div>
-    </motion.div>
+      {/* Match link footer */}
+      {article.match && (
+        <div style={{ marginTop: 48 }}>
+          <Link
+            to={`/matches/${article.match.id}`}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-mono-sm)',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              color: 'var(--color-data)',
+              textDecoration: 'none',
+            }}
+          >
+            返回本场比赛数据 →
+          </Link>
+        </div>
+      )}
+    </article>
   )
 }

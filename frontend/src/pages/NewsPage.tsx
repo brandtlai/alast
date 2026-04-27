@@ -1,94 +1,146 @@
 // src/pages/NewsPage.tsx
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useNewsList } from '../api/news'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
-import Card from '../components/Card'
-import { fadeUp, headingMask, pageReveal, pressTap, softHover, staggerContainer } from '../lib/motion'
+import { TacticalLabel } from '../components/hud/TacticalLabel'
 
 const CATEGORIES = ['', '战报', '资讯', '专访']
+const CATEGORY_LABELS: Record<string, string> = {
+  '':   '全部',
+  '战报': '战报',
+  '资讯': '资讯',
+  '专访': '专访',
+}
 
 export default function NewsPage() {
   const [category, setCategory] = useState('')
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null)
   const { data: articles, isLoading, error } = useNewsList({ category: category || undefined })
 
   return (
-    <motion.div className="max-w-7xl mx-auto px-6 py-8" variants={pageReveal} initial="hidden" animate="show">
-      <motion.div className="mb-8" variants={staggerContainer} initial="hidden" animate="show">
-        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-1">Latest News</p>
-        <motion.h1 variants={headingMask} className="text-4xl font-black italic tracking-tighter text-white/90">战报新闻</motion.h1>
-      </motion.div>
+    <div style={{ minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{ padding: '64px 32px 24px', maxWidth: 960, margin: '0 auto' }}>
+        <TacticalLabel text="SECTOR :: DISPATCH" />
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'var(--text-display-lg)',
+          color: 'var(--color-fg)',
+          margin: '12px 0 0',
+          lineHeight: 1,
+        }}>
+          新闻
+        </h1>
+      </div>
 
-      <motion.div className="flex gap-2 mb-6 flex-wrap" variants={staggerContainer} initial="hidden" animate="show">
+      {/* Filter bar */}
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 32px 32px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {CATEGORIES.map(c => (
-          <motion.button
+          <button
             key={c}
             onClick={() => setCategory(c)}
-            className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest transition-all border"
-            variants={fadeUp}
-            whileHover={{ y: -1, scale: 1.03 }}
-            whileTap={pressTap}
             style={{
-              background: category === c ? 'var(--color-primary)' : 'rgba(255,255,255,0.05)',
-              color: category === c ? '#fff' : 'rgba(248,250,252,0.5)',
-              borderColor: category === c ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-mono-sm)',
+              padding: '6px 14px',
+              borderRadius: 'var(--radius-sm)',
+              border: `1px solid ${category === c ? 'var(--color-data)' : 'var(--color-line)'}`,
+              background: category === c ? 'rgba(199,255,61,0.08)' : 'transparent',
+              color: category === c ? 'var(--color-data)' : 'var(--color-fg-muted)',
+              cursor: 'pointer',
+              transition: 'border-color var(--duration-fast) var(--ease-mech), color var(--duration-fast) var(--ease-mech)',
             }}
           >
-            {c || '全部'}
-          </motion.button>
+            {CATEGORY_LABELS[c]}
+          </button>
         ))}
-      </motion.div>
+      </div>
 
-      {isLoading && <Spinner />}
-      {error && <ErrorBox message={error.message} />}
-      {articles && (
-        articles.length === 0
-          ? <p className="text-sm text-white/40">暂无文章</p>
-          : <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" variants={staggerContainer} initial="hidden" animate="show">
-              {articles.map(a => (
-                <motion.div
-                  key={a.id}
-                  variants={fadeUp}
-                  whileHover={softHover}
-                  whileTap={pressTap}
-                >
-                  <Card href={`/news/${a.slug}`} className="flex flex-col">
-                    <div className="h-44 overflow-hidden bg-secondary flex items-center justify-center flex-shrink-0">
-                      {a.cover_image_url
-                        ? <img
-                            src={a.cover_image_url}
-                            alt={a.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        : <span className="text-5xl opacity-20">🏆</span>}
-                    </div>
-                    <div className="p-4 flex-1 flex flex-col">
-                      {a.category && (
-                        <span className="inline-flex mb-2 self-start px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-[9px] font-black uppercase tracking-widest text-primary">
-                          {a.category}
-                        </span>
-                      )}
-                      <h3 className="font-black text-sm leading-snug line-clamp-2 flex-1 text-white/90">{a.title}</h3>
-                      {a.summary && (
-                        <p className="text-xs text-white/50 mt-1.5 line-clamp-2">{a.summary}</p>
-                      )}
-                      {a.match && (
-                        <div className="mt-3 text-[10px] font-bold text-white/40 truncate">
-                          {a.match.stage ?? '比赛'} · {a.match.team_a_name ?? 'TBD'} vs {a.match.team_b_name ?? 'TBD'} · {a.match.final_score}
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-[10px] text-white/35 font-bold">{a.author ?? 'ALAST'}</span>
-                        <span className="text-[10px] text-white/35">{dayjs(a.published_at).format('YYYY-MM-DD')}</span>
+      {/* Article list */}
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 32px 96px' }}>
+        {isLoading && <Spinner />}
+        {error && <ErrorBox message={error.message} />}
+        {articles && (
+          articles.length === 0
+            ? (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-sm)', color: 'var(--color-fg-dim)' }}>
+                暂无文章
+              </p>
+            )
+            : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {articles.map(a => (
+                  <li
+                    key={a.slug}
+                    style={{ borderBottom: '1px solid var(--color-line)', padding: '32px 0' }}
+                  >
+                    <header style={{
+                      display: 'flex',
+                      gap: 16,
+                      alignItems: 'center',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 'var(--text-mono-sm)',
+                      color: 'var(--color-fg-muted)',
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                    }}>
+                      {a.category && <span>{a.category}</span>}
+                      <span style={{ color: 'var(--color-data)' }}>
+                        {dayjs(a.published_at).format('YYYY.MM.DD')}
+                      </span>
+                      {a.author && <span>{a.author.toUpperCase()}</span>}
+                    </header>
+                    <Link
+                      to={`/news/${a.slug}`}
+                      onMouseEnter={() => setHoveredSlug(a.slug)}
+                      onMouseLeave={() => setHoveredSlug(null)}
+                      style={{
+                        display: 'block',
+                        marginTop: 12,
+                        color: hoveredSlug === a.slug ? 'var(--color-data)' : 'var(--color-fg)',
+                        textDecoration: 'none',
+                        fontFamily: 'var(--font-serif)',
+                        fontSize: 32,
+                        fontWeight: 700,
+                        lineHeight: 1.25,
+                        transition: 'color var(--duration-fast) var(--ease-mech)',
+                      }}
+                    >
+                      {a.title}
+                    </Link>
+                    {a.summary && (
+                      <p style={{
+                        marginTop: 12,
+                        color: 'var(--color-fg-muted)',
+                        maxWidth: '65ch',
+                        lineHeight: 1.7,
+                        fontSize: 15,
+                        margin: '12px 0 0',
+                      }}>
+                        {a.summary}
+                      </p>
+                    )}
+                    {a.match && (
+                      <div style={{
+                        marginTop: 12,
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 'var(--text-mono-sm)',
+                        color: 'var(--color-fg-dim)',
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                      }}>
+                        {(a.match.stage ?? '比赛').toUpperCase()} · {a.match.team_a_name ?? 'TBD'} vs {a.match.team_b_name ?? 'TBD'} · {a.match.final_score}
                       </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-      )}
-    </motion.div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )
+        )}
+      </div>
+    </div>
   )
 }
