@@ -101,20 +101,28 @@ interface ScoreboardProps {
   teamBName: string
 }
 
-const TH_STYLE: React.CSSProperties = {
+// Shared column widths: PLAYER 1fr | K 56px | D 56px | A 56px | ADR 64px | RATING 72px
+const COL_WIDTHS = '1fr 56px 56px 56px 64px 72px'
+
+const TH_MONO: React.CSSProperties = {
   fontFamily: 'var(--font-mono)',
-  fontSize: 'var(--text-mono-xs)',
-  letterSpacing: '0.2em',
+  fontVariantNumeric: 'tabular-nums',
+  fontSize: 10,
+  letterSpacing: '0.15em',
   textTransform: 'uppercase',
   color: 'var(--color-fg-dim)',
-  padding: '12px 16px',
-  borderBottom: '1px solid var(--color-line)',
-  textAlign: 'left',
   fontWeight: 400,
+  textAlign: 'right',
+  padding: '8px 0',
 }
 
-const TD_STYLE: React.CSSProperties = {
-  padding: '12px 16px',
+const TD_NUM: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontVariantNumeric: 'tabular-nums',
+  fontSize: 13,
+  textAlign: 'right',
+  color: 'var(--color-fg)',
+  padding: '11px 0',
   borderBottom: '1px solid var(--color-line)',
 }
 
@@ -126,53 +134,54 @@ function PlayerTable({ players, teamName }: { players: MapStatPlayer[]; teamName
         <TacticalLabel text={teamName} />
       </div>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              {['PLAYER', 'K', 'D', 'A', 'ADR', 'RATING'].map(col => (
-                <th key={col} style={TH_STYLE}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {players.map(p => {
-              const rating = p.rating ?? 0
-              const ratingColor = rating >= 1.0 ? 'var(--color-data)' : 'var(--color-fg-muted)'
-              return (
-                <tr key={p.player_id}>
-                  <td style={TD_STYLE}>
-                    <Link
-                      to={`/players/${p.player_id}`}
-                      style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: 18,
-                        color: 'var(--color-fg)',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      {p.nickname}
-                    </Link>
-                  </td>
-                  <td style={TD_STYLE}>
-                    <DataReadout value={p.kills ?? 0} />
-                  </td>
-                  <td style={TD_STYLE}>
-                    <DataReadout value={p.deaths ?? 0} />
-                  </td>
-                  <td style={TD_STYLE}>
-                    <DataReadout value={p.assists ?? 0} />
-                  </td>
-                  <td style={TD_STYLE}>
-                    <DataReadout value={p.adr != null ? Math.round(p.adr) : 0} />
-                  </td>
-                  <td style={TD_STYLE}>
-                    <DataReadout value={rating.toFixed(2)} color={ratingColor} />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        {/* Header row */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: COL_WIDTHS,
+          borderBottom: '1px solid var(--color-line)',
+          paddingBottom: 4,
+        }}>
+          {(['PLAYER', 'K', 'D', 'A', 'ADR', 'RTG'] as const).map(col => (
+            <span key={col} style={{ ...TH_MONO, textAlign: col === 'PLAYER' ? 'left' : 'right' }}>
+              {col}
+            </span>
+          ))}
+        </div>
+        {/* Body rows */}
+        {players.map(p => {
+          const rating = p.rating ?? 0
+          const ratingColor = rating >= 1.0 ? 'var(--color-data)' : 'var(--color-fg-muted)'
+          return (
+            <div key={p.player_id} style={{
+              display: 'grid',
+              gridTemplateColumns: COL_WIDTHS,
+              alignItems: 'center',
+            }}>
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 16,
+                color: 'var(--color-fg)',
+                padding: '11px 0',
+                borderBottom: '1px solid var(--color-line)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                <Link
+                  to={`/players/${p.player_id}`}
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                >
+                  {p.nickname}
+                </Link>
+              </span>
+              <span style={TD_NUM}>{p.kills ?? 0}</span>
+              <span style={TD_NUM}>{p.deaths ?? 0}</span>
+              <span style={TD_NUM}>{p.assists ?? 0}</span>
+              <span style={TD_NUM}>{p.adr != null ? Math.round(p.adr) : '—'}</span>
+              <span style={{ ...TD_NUM, color: ratingColor }}>{rating.toFixed(2)}</span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -204,6 +213,30 @@ interface RoundsTabProps {
   teamBName: string
 }
 
+// end_reason codes from CSDM: 1=TargetBombed 7=TerroristWin 8=CTWin 9=BombDefused 12=TargetSaved
+function formatEndReason(code: number | null): string {
+  switch (code) {
+    case 1: return 'BOMB EXPLODED'
+    case 7: return 'T ELIMINATED'
+    case 8: return 'CT ELIMINATED'
+    case 9: return 'BOMB DEFUSED'
+    case 12: return 'TIME EXPIRED'
+    default: return ''
+  }
+}
+
+const HALF_LABEL_STYLE: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  padding: '10px 16px',
+  fontFamily: 'var(--font-mono)',
+  fontSize: 10,
+  letterSpacing: '0.25em',
+  textTransform: 'uppercase',
+  color: 'var(--color-fg-dim)',
+}
+
 function RoundsTab({ rounds, teamAId, teamBId, teamAName, teamBName }: RoundsTabProps) {
   if (rounds.length === 0) {
     return (
@@ -213,40 +246,173 @@ function RoundsTab({ rounds, teamAId, teamBId, teamAName, teamBName }: RoundsTab
     )
   }
 
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
-      {rounds.map(round => {
-        const kills = round.kills?.length ?? 0
-        const winnerName =
-          round.winner_team_id === teamAId ? teamAName
-          : round.winner_team_id === teamBId ? teamBName
-          : null
-        const isClutch = kills > 0 && round.kills
-          ? (() => {
-              const killerIds = round.kills!.map(k => k.killer_player_id).filter(Boolean)
-              const unique = new Set(killerIds)
-              return unique.size === 1 && kills >= 3
-            })()
-          : false
+  const firstHalf = rounds.filter(r => r.round_number <= 12)
+  const secondHalf = rounds.filter(r => r.round_number >= 13 && r.round_number <= 24)
+  const overtime = rounds.filter(r => r.round_number > 24)
 
-        return (
-          <HudPanel key={round.id} staticCorners style={{ padding: 16 }}>
-            <DataReadout value={round.round_number} size={28} pad={2} />
-            {winnerName && (
-              <div style={{ marginTop: 8, fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-data)' }}>
-                {winnerName}
-              </div>
-            )}
-            <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <DataReadout value={kills} size={14} />
-              {isClutch && (
-                <Zap size={14} style={{ color: 'var(--color-fire)' }} />
-              )}
-            </div>
-          </HudPanel>
-        )
-      })}
-    </div>
+  function renderHalfRows(halfRounds: MatchRound[]) {
+    return halfRounds.map(round => {
+      const isAWinner = round.winner_team_id === teamAId
+      const isBWinner = round.winner_team_id === teamBId
+      const winnerName = isAWinner ? teamAName : isBWinner ? teamBName : null
+      const barColor = isAWinner ? 'var(--color-data)' : isBWinner ? 'var(--color-fire)' : 'var(--color-line)'
+      const endReasonLabel = formatEndReason(round.end_reason)
+
+      // Detect clutch: single killer got 3+ kills in the round
+      let clutchKiller: string | null = null
+      if (round.kills && round.kills.length >= 3) {
+        const killerMap = new Map<string, number>()
+        for (const k of round.kills) {
+          if (k.killer_player_id) {
+            killerMap.set(k.killer_player_id, (killerMap.get(k.killer_player_id) ?? 0) + 1)
+          }
+        }
+        for (const [pid, count] of killerMap) {
+          if (count >= 3) { clutchKiller = pid; break }
+        }
+      }
+
+      const scoreA = round.team_a_score
+      const scoreB = round.team_b_score
+      const hasScore = scoreA != null && scoreB != null
+
+      return (
+        <div
+          key={round.id}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '4px 44px 1fr auto auto auto',
+            alignItems: 'center',
+            gap: 12,
+            padding: '10px 16px',
+            borderBottom: '1px solid var(--color-line)',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLDivElement).style.background = 'rgba(199,255,61,0.04)'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLDivElement).style.background = 'transparent'
+          }}
+        >
+          {/* Colored side bar */}
+          <div style={{ width: 4, height: '100%', minHeight: 32, background: barColor, borderRadius: 2 }} />
+
+          {/* Round number pill */}
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontVariantNumeric: 'tabular-nums',
+            fontSize: 12,
+            color: 'var(--color-fg-dim)',
+            letterSpacing: '0.05em',
+          }}>
+            R{String(round.round_number).padStart(2, '0')}
+          </span>
+
+          {/* Winner team name */}
+          <span style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 16,
+            color: isAWinner ? 'var(--color-data)' : isBWinner ? 'var(--color-fire)' : 'var(--color-fg-dim)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>
+            {winnerName ?? '—'}
+          </span>
+
+          {/* Win condition tag */}
+          {endReasonLabel ? (
+            <span style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              color: 'var(--color-fg-dim)',
+              padding: '2px 6px',
+              border: '1px solid var(--color-line)',
+              borderRadius: 2,
+              whiteSpace: 'nowrap',
+            }}>
+              {endReasonLabel}
+            </span>
+          ) : <span />}
+
+          {/* Running score */}
+          {hasScore ? (
+            <span style={{
+              fontFamily: 'var(--font-mono)',
+              fontVariantNumeric: 'tabular-nums',
+              fontSize: 13,
+              color: 'var(--color-fg-muted)',
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.05em',
+            }}>
+              <span style={{ color: isAWinner ? 'var(--color-data)' : 'inherit' }}>
+                {String(scoreA).padStart(2, '0')}
+              </span>
+              {' : '}
+              <span style={{ color: isBWinner ? 'var(--color-fire)' : 'inherit' }}>
+                {String(scoreB).padStart(2, '0')}
+              </span>
+            </span>
+          ) : <span />}
+
+          {/* Clutch indicator */}
+          {clutchKiller ? (
+            <span style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10,
+              color: 'var(--color-data)',
+              letterSpacing: '0.1em',
+            }}>
+              <Zap size={12} />
+              <span>CLUTCH</span>
+            </span>
+          ) : <span />}
+        </div>
+      )
+    })
+  }
+
+  const dividerLine = <div style={{ width: 40, height: 1, background: 'var(--color-line)', flex: 1 }} />
+
+  return (
+    <HudPanel staticCorners style={{ overflow: 'hidden' }}>
+      {firstHalf.length > 0 && (
+        <>
+          <div style={HALF_LABEL_STYLE}>
+            {dividerLine}
+            <span>HALF 1</span>
+            {dividerLine}
+          </div>
+          {renderHalfRows(firstHalf)}
+        </>
+      )}
+      {secondHalf.length > 0 && (
+        <>
+          <div style={HALF_LABEL_STYLE}>
+            {dividerLine}
+            <span>HALF 2</span>
+            {dividerLine}
+          </div>
+          {renderHalfRows(secondHalf)}
+        </>
+      )}
+      {overtime.length > 0 && (
+        <>
+          <div style={HALF_LABEL_STYLE}>
+            {dividerLine}
+            <span>OVERTIME</span>
+            {dividerLine}
+          </div>
+          {renderHalfRows(overtime)}
+        </>
+      )}
+    </HudPanel>
   )
 }
 
