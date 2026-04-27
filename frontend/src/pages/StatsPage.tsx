@@ -148,7 +148,7 @@ export default function StatsPage() {
           <SummaryCard label="总击杀数" value={Number(summary.total_kills).toLocaleString()} />
           <SummaryCard
             label="平均爆头率"
-            value={summary.avg_headshot_pct != null ? (parseFloat(summary.avg_headshot_pct) / 100).toFixed(1) + '%' : '—'}
+            value={summary.avg_headshot_pct != null ? parseFloat(summary.avg_headshot_pct).toFixed(1) + '%' : '—'}
           />
         </motion.div>
       )}

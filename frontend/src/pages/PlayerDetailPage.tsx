@@ -54,8 +54,8 @@ export default function PlayerDetailPage() {
         value: [
           parseFloat(cs.avg_rating ?? '0'),
           parseFloat(cs.avg_adr ?? '0'),
-          parseFloat(cs.avg_kast ?? '0') / 100,
-          parseFloat(cs.avg_hs_pct ?? '0') / 100,
+          parseFloat(cs.avg_kast ?? '0'),
+          parseFloat(cs.avg_hs_pct ?? '0'),
         ],
         name: player.nickname,
         areaStyle: { color: 'rgba(255,138,0,0.2)' },
@@ -114,8 +114,8 @@ export default function PlayerDetailPage() {
         <motion.div className="grid grid-cols-2 sm:grid-cols-4 gap-3" variants={staggerContainer} initial="hidden" animate="show">
           <StatCard label="Rating" value={cs.avg_rating} />
           <StatCard label="ADR" value={cs.avg_adr} />
-          <StatCard label="KAST%" value={cs.avg_kast != null ? (parseFloat(String(cs.avg_kast)) / 100).toFixed(1) : null} />
-          <StatCard label="爆头率" value={cs.avg_hs_pct != null ? (parseFloat(String(cs.avg_hs_pct)) / 100).toFixed(1) : null} />
+          <StatCard label="KAST%" value={cs.avg_kast != null ? parseFloat(String(cs.avg_kast)).toFixed(1) : null} />
+          <StatCard label="爆头率" value={cs.avg_hs_pct != null ? parseFloat(String(cs.avg_hs_pct)).toFixed(1) : null} />
           <StatCard label="总击杀" value={cs.total_kills} />
           <StatCard label="总死亡" value={cs.total_deaths} />
           <StatCard label="参赛图数" value={cs.maps_played} />
