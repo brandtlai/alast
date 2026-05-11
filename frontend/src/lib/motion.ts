@@ -66,18 +66,8 @@ const RANK_GRADIENT: Record<Outcome, string> = {
   neutral: 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4))',
 }
 
-const RANK_GLOW: Record<Outcome, string> = {
-  win:     'rgba(255, 184, 0, 0.55)',
-  loss:    'rgba(255, 61, 20, 0.5)',
-  neutral: 'rgba(255, 255, 255, 0.18)',
-}
-
 export function rankGradient(outcome: Outcome): string {
   return RANK_GRADIENT[outcome]
-}
-
-export function rankGlow(outcome: Outcome): string {
-  return RANK_GLOW[outcome]
 }
 
 // Reveal for rank-tagged elements. No scale.

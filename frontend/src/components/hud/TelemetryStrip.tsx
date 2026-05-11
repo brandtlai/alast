@@ -63,12 +63,11 @@ function formatHm(iso: string | null | undefined): string {
 }
 
 export function TelemetryStrip() {
-  const { data: live = [] } = useMatches({ status: 'live' })
   const { data: all = [] } = useMatches({})
 
   const next = pickNextUpcoming(all)
   const last = pickLastFinished(all)
-  const liveCount = live.length
+  const liveCount = all.filter(m => m.status === 'live').length
 
   return (
     <motion.div
