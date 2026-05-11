@@ -73,6 +73,6 @@
   --duration-slow: 480ms;
 }
 
-/* Note: body baseline + .gold-gradient utility are intentionally NOT redeclared here.
-   The old src/index.css owns those for now — old pages depend on them.
-   New (Tactical OS) pages reference the new --color-* / --font-* tokens above directly. */
+/* Body baseline and reusable utility classes (.gold-gradient, .ambient-grid,
+   .surface-sheen, .custom-scrollbar) live in src/index.css; this file owns
+   only the token declarations consumed across the app. */
