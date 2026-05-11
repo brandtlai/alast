@@ -65,40 +65,45 @@ Expected: ends with `✓ built in <Ns>` and no errors. If this fails, stop and f
 
 - [ ] **Step 1: Write the script**
 
+Use PCRE (`grep -P`) with a negative-lookahead so `--color-gold` does NOT match the legitimate new tokens `--color-gold-1/2/3`. Plain `\b` does NOT work here because `-` is itself a word boundary, so `--color-gold\b` would still match `--color-gold-1`.
+
 Create `scripts/check-deprecated-tokens.sh`:
 ```bash
 #!/usr/bin/env bash
 # Fails (exit 1) if any frontend source file outside index.css references a
 # deprecated Tactical-OS-era token. Update the DEPRECATED list when retiring
 # additional tokens.
+#
+# Patterns are PCRE (grep -P). The (?![-\w]) suffix prevents `--color-gold`
+# from matching the new `--color-gold-1/2/3` tokens.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/frontend/src"
 
 DEPRECATED=(
-  '--color-primary\b'
-  '--color-foreground\b'
-  '--color-background\b'
-  '--color-secondary\b'
-  '--color-accent\b'
-  '--color-card\b'
-  '--color-border\b'
-  '--color-gold\b'
-  '--color-gold-orange\b'
-  '--color-data-surface\b'
-  '--color-data-row\b'
-  '--color-data-divider\b'
-  '--color-data-chip\b'
-  '--color-data-text-muted\b'
+  '--color-primary(?![-\w])'
+  '--color-foreground(?![-\w])'
+  '--color-background(?![-\w])'
+  '--color-secondary(?![-\w])'
+  '--color-accent(?![-\w])'
+  '--color-card(?![-\w])'
+  '--color-border(?![-\w])'
+  '--color-gold(?![-\w])'
+  '--color-gold-orange(?![-\w])'
+  '--color-data-surface(?![-\w])'
+  '--color-data-row(?![-\w])'
+  '--color-data-divider(?![-\w])'
+  '--color-data-chip(?![-\w])'
+  '--color-data-text-muted(?![-\w])'
   '--color-neon-pink'
 )
 
 bad=0
 for pat in "${DEPRECATED[@]}"; do
-  hits=$(grep -RIn --include='*.ts' --include='*.tsx' --include='*.css' \
+  hits=$(grep -RIPn --include='*.ts' --include='*.tsx' --include='*.css' \
     --exclude='index.css' \
-    -E "$pat" "$SRC" 2>/dev/null || true)
+    -e "$pat" "$SRC" 2>/dev/null || true)
   if [[ -n "$hits" ]]; then
     echo "❌ deprecated token usage: $pat"
     echo "$hits"
@@ -118,7 +123,15 @@ exit $bad
 chmod +x scripts/check-deprecated-tokens.sh
 bash scripts/check-deprecated-tokens.sh
 ```
-Expected: prints failures for `--color-primary` (Scoreboard, AdminImport), `--color-card` / `--color-border` (AdminImport), `--color-data-surface|divider|chip` (Scoreboard, RoundTimeline, DraftPage), `--color-neon-pink` (AdminImport). Exit code 1.
+Expected baseline failures (exit 1):
+- `--color-primary` — Scoreboard, AdminImport (2 sites)
+- `--color-card` / `--color-border` — AdminImport (2 sites each)
+- `--color-gold` — Scoreboard.tsx (the bare `var(--color-gold)`, NOT the `--color-gold-1/2/3` tokens which must NOT appear in output)
+- `--color-data-surface` / `--color-data-divider` — Scoreboard, RoundTimeline, DraftPage, EconomyChart
+- `--color-data-chip` — DraftPage
+- `--color-neon-pink` — AdminImport
+
+If `--color-gold-1`, `--color-gold-2`, or `--color-gold-3` show up in the output, the regex is wrong — use the lookahead form above.
 
 - [ ] **Step 3: Commit the guard script**
 
@@ -178,12 +191,13 @@ git commit -m "refactor(frontend): migrate AdminImportPage to Tactical OS tokens
 ### Task 3: Migrate `Scoreboard` token references
 
 **Files:**
-- Modify: `frontend/src/components/match/Scoreboard.tsx:68,79,91,163,167`
+- Modify: `frontend/src/components/match/Scoreboard.tsx:68,79,91,163,167,182`
 
 Token mapping:
 - `var(--color-data-surface)` → `var(--color-surface-2)`
 - `var(--color-data-divider)` → `var(--color-line)`
-- `var(--color-primary)` (rating ≥ 1.0 highlight color) → `var(--color-data)` (lime — semantically "good performance")
+- `var(--color-primary)` (rating ≥ 1.0 highlight) → `var(--color-data)` (lime — semantic "good performance")
+- `var(--color-gold)` (MVP badge background+text on line 182) → `var(--color-gold-2)` (the new champion mid-gold)
 
 - [ ] **Step 1: Replace the references**
 
@@ -191,6 +205,8 @@ Use Edit on `frontend/src/components/match/Scoreboard.tsx`:
 - replace `'var(--color-data-surface)'` → `'var(--color-surface-2)'` (replace_all)
 - replace `'var(--color-data-divider)'` → `'var(--color-line)'` (replace_all)
 - replace `'var(--color-primary)'` → `'var(--color-data)'` (replace_all in this file)
+- replace `'var(--color-gold)22'` → `'var(--color-gold-2)22'` (the `22` is a hex alpha suffix on the CSS string)
+- replace `'var(--color-gold)'` → `'var(--color-gold-2)'` (replace_all — only one remaining occurrence after the previous step)
 
 - [ ] **Step 2: Confirm via guard script**
 
@@ -239,6 +255,36 @@ Expected: no RoundTimeline failures, no TS errors.
 ```bash
 git add frontend/src/components/match/RoundTimeline.tsx
 git commit -m "refactor(frontend): migrate RoundTimeline to Tactical OS tokens"
+```
+
+---
+
+### Task 4b: Migrate `EconomyChart` token references
+
+**Files:**
+- Modify: `frontend/src/components/match/EconomyChart.tsx:14,129`
+
+Same token mapping as Tasks 3-4 — discovered during Task 1's baseline run, was missing from the original plan.
+
+- [ ] **Step 1: Replace the references**
+
+Use Edit on `frontend/src/components/match/EconomyChart.tsx`:
+- replace `'var(--color-data-surface)'` → `'var(--color-surface-2)'` (replace_all)
+- replace `'var(--color-data-divider)'` → `'var(--color-line)'` (replace_all)
+
+- [ ] **Step 2: Guard + type-check**
+
+```bash
+bash scripts/check-deprecated-tokens.sh 2>&1 | grep -i economychart
+cd frontend && npx tsc -b 2>&1 | tail -3
+```
+Expected: no EconomyChart failures, no TS errors.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add frontend/src/components/match/EconomyChart.tsx
+git commit -m "refactor(frontend): migrate EconomyChart to Tactical OS tokens"
 ```
 
 ---
