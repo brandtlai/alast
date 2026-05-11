@@ -8,6 +8,7 @@ import { TacticalLabel } from '../components/hud/TacticalLabel'
 import { DataReadout } from '../components/hud/DataReadout'
 import { ScanLine } from '../components/hud/ScanLine'
 import { StatusDot } from '../components/hud/StatusDot'
+import { TelemetryStrip } from '../components/hud/TelemetryStrip'
 import { hudEnter, hudStagger } from '../design/motion'
 import { useMatches } from '../api/matches'
 import { useCurrentTournament } from '../api/currentTournament'
@@ -106,6 +107,18 @@ function HeroSection({ featured }: HeroSectionProps) {
           background: 'linear-gradient(180deg, transparent 0%, var(--color-bg) 100%)',
           pointerEvents: 'none',
         }} />
+
+        {/* Hero telemetry — first-fold "the data feed is live" cue */}
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          bottom: 32,
+          transform: 'translateX(-50%)',
+          width: 'min(980px, calc(100% - 48px))',
+          zIndex: 2,
+        }}>
+          <TelemetryStrip />
+        </div>
       </div>
 
       {/* Featured match block — second screen below the hero image */}

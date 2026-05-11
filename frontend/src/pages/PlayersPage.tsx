@@ -485,9 +485,9 @@ function DraftBoard() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontFamily: 'var(--font-display)',
                       fontSize: 18,
-                      background: meta.accent + '22',
+                      background: `color-mix(in srgb, ${meta.accent} 13%, transparent)`,
                       color: meta.accent,
-                      border: `1px solid ${meta.accent}66`,
+                      border: `1px solid color-mix(in srgb, ${meta.accent} 40%, transparent)`,
                       flexShrink: 0,
                     }}
                   >
@@ -536,7 +536,7 @@ function DraftBoard() {
                             {p.nickname}
                           </Link>
                           {p.is_captain && (
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-xs)', letterSpacing: '0.15em', padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: meta.accent + '22', color: meta.accent }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-xs)', letterSpacing: '0.15em', padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: `color-mix(in srgb, ${meta.accent} 13%, transparent)`, color: meta.accent }}>
                               C
                             </span>
                           )}

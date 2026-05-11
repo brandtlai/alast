@@ -4,7 +4,6 @@
 // Prefer importing from `src/design/motion.ts` directly for new code.
 
 import type { Variants } from 'framer-motion'
-import type React from 'react'
 
 export const easeOutQuart = [0.22, 1, 0.36, 1] as const
 export const easeSoft = [0.16, 1, 0.3, 1] as const
@@ -67,18 +66,8 @@ const RANK_GRADIENT: Record<Outcome, string> = {
   neutral: 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4))',
 }
 
-const RANK_GLOW: Record<Outcome, string> = {
-  win:     'rgba(255, 184, 0, 0.55)',
-  loss:    'rgba(255, 61, 20, 0.5)',
-  neutral: 'rgba(255, 255, 255, 0.18)',
-}
-
 export function rankGradient(outcome: Outcome): string {
   return RANK_GRADIENT[outcome]
-}
-
-export function rankGlow(outcome: Outcome): string {
-  return RANK_GLOW[outcome]
 }
 
 // Reveal for rank-tagged elements. No scale.
@@ -90,11 +79,6 @@ export const rankReveal = (_outcome: Outcome): Variants => ({
     transition: { duration: 0.3, ease: easeSoft },
   },
 })
-
-export const glowPulse = (tone: Outcome) => ({
-  animation: 'glowPulseRank 6.5s ease-in-out infinite',
-  ['--rank-glow' as string]: rankGlow(tone),
-}) as React.CSSProperties
 
 // Heading reveal — replaced clipPath wipe with simple opacity+y to match Tactical OS tone.
 export const headingMask: Variants = {

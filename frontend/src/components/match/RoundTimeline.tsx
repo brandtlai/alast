@@ -58,7 +58,7 @@ export default function RoundTimeline({ rounds, teamAName, teamBName, teamAId, t
   if (rounds.length === 0) {
     return (
       <div className="rounded-md border py-6 text-center text-xs text-white/30"
-           style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
+           style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
         回合数据待导入
       </div>
     )
@@ -66,7 +66,7 @@ export default function RoundTimeline({ rounds, teamAName, teamBName, teamAId, t
 
   return (
     <div className="rounded-md border p-4"
-         style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
+         style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
       <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-4">Round Timeline</p>
 
       <div className="flex items-stretch gap-px">
@@ -89,7 +89,7 @@ export default function RoundTimeline({ rounds, teamAName, teamBName, teamAId, t
               {/* Half-time divider */}
               {isHalfGap && (
                 <div className="flex items-center mx-1.5">
-                  <div className="w-px self-stretch" style={{ background: 'var(--color-data-divider)' }} />
+                  <div className="w-px self-stretch" style={{ background: 'var(--color-line)' }} />
                 </div>
               )}
 
@@ -153,10 +153,10 @@ export default function RoundTimeline({ rounds, teamAName, teamBName, teamAId, t
                 {isHovered && (
                   <div
                     className={`absolute z-50 bottom-full mb-2 min-w-[15rem] w-max max-w-xs rounded-md border shadow-xl pointer-events-none ${tooltipRight ? 'left-0' : 'right-0'}`}
-                    style={{ background: '#0A0F2D', borderColor: 'var(--color-data-divider)' }}
+                    style={{ background: '#0A0F2D', borderColor: 'var(--color-line)' }}
                   >
                     {/* Header */}
-                    <div className="px-3 pt-3 pb-2 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
+                    <div className="px-3 pt-3 pb-2 border-b" style={{ borderColor: 'var(--color-line)' }}>
                       <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">
                         Round {r.round_number}
                       </div>
@@ -166,7 +166,7 @@ export default function RoundTimeline({ rounds, teamAName, teamBName, teamAId, t
                     </div>
 
                     {/* Meta */}
-                    <div className="px-3 py-2 border-b space-y-1" style={{ borderColor: 'var(--color-data-divider)' }}>
+                    <div className="px-3 py-2 border-b space-y-1" style={{ borderColor: 'var(--color-line)' }}>
                       {(r.team_a_economy_type || r.team_b_economy_type) && (
                         <div className="text-[10px] text-white/45">
                           {teamAName}: <span className="text-white/70">{fmtEco(r.team_a_economy_type)}</span>

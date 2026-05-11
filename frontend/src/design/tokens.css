@@ -1,5 +1,19 @@
 /* Tactical OS design tokens — single source of truth.
-   Spec: docs/superpowers/specs/2026-04-27-alast-frontend-impeccable.md §3 */
+   Spec: docs/superpowers/specs/2026-04-27-alast-frontend-impeccable.md §3
+
+   Color semantics — keep these axes clean:
+
+     --color-data        (lime  #C7FF3D)  Data / interactive accent / "good"
+     --color-data-2      (teal  #5EEAD4)  Secondary data, charts series #2
+     --color-fire        (red-orange)     Heat / attack / urgent CTA
+     --color-alert       (red   #FF2D2D)  Errors, destructive
+     --color-gold-1..3   (gold)           Champion / MVP / trophy ONLY
+                                          Do NOT use for generic accents.
+     --color-fg / muted / dim             Text — fg-dim is AA-compliant
+                                          but reserve for non-critical UI.
+
+   If you need a new color, extend this block — never inline hex codes
+   into pages. Run scripts/check-deprecated-tokens.sh before committing. */
 
 @theme {
   /* Atmosphere */
@@ -13,7 +27,8 @@
   /* Text */
   --color-fg:          #F2F4F7;
   --color-fg-muted:    rgba(242,244,247,0.62);
-  --color-fg-dim:      rgba(242,244,247,0.38);
+  /* AA-compliant against --color-bg #07090C (≈ 4.7:1). */
+  --color-fg-dim:      rgba(242,244,247,0.56);
 
   /* Info / data */
   --color-data:        #C7FF3D;
@@ -73,6 +88,6 @@
   --duration-slow: 480ms;
 }
 
-/* Note: body baseline + .gold-gradient utility are intentionally NOT redeclared here.
-   The old src/index.css owns those for now — old pages depend on them.
-   New (Tactical OS) pages reference the new --color-* / --font-* tokens above directly. */
+/* Body baseline and reusable utility classes (.gold-gradient, .ambient-grid,
+   .surface-sheen, .custom-scrollbar) live in src/index.css; this file owns
+   only the token declarations consumed across the app. */
