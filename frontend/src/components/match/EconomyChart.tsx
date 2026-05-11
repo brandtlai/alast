@@ -11,7 +11,7 @@ export default function EconomyChart({ rounds, teamAName, teamBName }: Props) {
   if (rounds.length === 0) {
     return (
       <div className="rounded-md border py-8 text-center text-xs text-white/30"
-           style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
+           style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
         经济数据待导入
       </div>
     )
@@ -126,7 +126,7 @@ export default function EconomyChart({ rounds, teamAName, teamBName }: Props) {
 
   return (
     <div className="rounded-md border overflow-hidden"
-         style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
+         style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
       <p className="text-[10px] font-black uppercase tracking-widest text-white/40 px-4 pt-4 mb-1">Economy</p>
       <ReactECharts option={option} style={{ height: '280px' }} opts={{ renderer: 'svg' }} />
     </div>
