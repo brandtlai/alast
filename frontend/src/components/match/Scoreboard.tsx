@@ -174,12 +174,12 @@ function PlayerRow({ player: p, isMvp }: { player: MapStatPlayer; isMvp: boolean
                   {p.nickname[0]}
                 </div>}
           </div>
-          <span className="font-bold text-white/90 group-hover:text-primary transition-colors">
+          <span className="font-bold text-white/90 group-hover:text-[color:var(--color-data)] transition-colors">
             {p.nickname}
           </span>
           {isMvp && (
             <span className="text-[8px] font-black uppercase tracking-widest px-1 py-0.5 rounded flex-shrink-0"
-                  style={{ background: 'var(--color-gold-2)22', color: 'var(--color-gold-2)' }}>MVP</span>
+                  style={{ background: 'color-mix(in srgb, var(--color-gold-2) 13%, transparent)', color: 'var(--color-gold-2)' }}>MVP</span>
           )}
           {p.is_sub && (
             <span className="text-[8px] font-black uppercase tracking-widest px-1 py-0.5 rounded flex-shrink-0"

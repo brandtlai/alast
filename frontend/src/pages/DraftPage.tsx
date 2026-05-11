@@ -31,7 +31,7 @@ export default function DraftPage() {
   return (
     <motion.div className="max-w-7xl mx-auto px-6 py-12 space-y-12" variants={pageReveal} initial="hidden" animate="show">
       <motion.header variants={staggerContainer} initial="hidden" animate="show">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">DRAFT BOARD</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[color:var(--color-data)] mb-2">DRAFT BOARD</p>
         <motion.h1 variants={fadeUp} className="text-3xl font-black italic uppercase tracking-tight text-white/95">选马公示 / Draft</motion.h1>
         <motion.p variants={fadeUp} className="text-sm text-white/50 mt-2">每队 5 人 = 5 等级各 1 人。前 20% 战力为队长，第 1 轮 S 型逆向选马，第 2-4 轮按公布顺序。</motion.p>
       </motion.header>
@@ -39,7 +39,7 @@ export default function DraftPage() {
       {isLoading && <Spinner />}
 
       <motion.section variants={panelReveal} initial="hidden" animate="show">
-        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary mb-4">5 Tiers</h2>
+        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-[color:var(--color-data)] mb-4">5 Tiers</h2>
         <motion.div className="space-y-4" variants={staggerContainer} initial="hidden" animate="show">
           {TIER_ORDER.map(tierKey => {
             const meta = TIER_META[tierKey]
@@ -51,7 +51,11 @@ export default function DraftPage() {
                    style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
                 <div className="flex items-center gap-4 px-4 py-3 border-b" style={{ borderColor: 'var(--color-line)' }}>
                   <div className="w-10 h-10 rounded flex items-center justify-center font-black text-lg flex-shrink-0"
-                       style={{ background: meta.accent + '22', color: meta.accent, border: `1px solid ${meta.accent}66` }}>
+                       style={{
+                         background: `color-mix(in srgb, ${meta.accent} 13%, transparent)`,
+                         color: meta.accent,
+                         border: `1px solid color-mix(in srgb, ${meta.accent} 40%, transparent)`,
+                       }}>
                     {tierKey}
                   </div>
                   <div>
@@ -79,7 +83,7 @@ export default function DraftPage() {
                             <span className="text-sm font-bold text-white/90 flex-1 min-w-0 truncate">{p.nickname}</span>
                             {p.is_captain && (
                               <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded"
-                                    style={{ background: meta.accent + '22', color: meta.accent }}>C</span>
+                                    style={{ background: `color-mix(in srgb, ${meta.accent} 13%, transparent)`, color: meta.accent }}>C</span>
                             )}
                             {p.team_name && (
                               <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -100,7 +104,7 @@ export default function DraftPage() {
       </motion.section>
 
       <motion.section variants={panelReveal} initial="hidden" animate="show">
-        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary mb-4">Pick Order</h2>
+        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-[color:var(--color-data)] mb-4">Pick Order</h2>
         <div className="rounded-md border p-6"
              style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
           <SnakeOrderViz rounds={4} teams={N_TEAMS} players={players ?? []} />

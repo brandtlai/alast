@@ -40,6 +40,21 @@ for pat in "${DEPRECATED[@]}"; do
   fi
 done
 
+DEPRECATED_UTIL=(
+  '\b(?:text|bg|border|hover:bg|hover:text|hover:border|focus:bg|focus:text|focus:border|file:bg|file:text|hover:file:bg|hover:file:text|group-hover:text|group-hover:bg|group-hover:border)-(?:primary|secondary|accent|card|border|gold|gold-orange|neon-pink)(?![-\w])'
+)
+
+for pat in "${DEPRECATED_UTIL[@]}"; do
+  hits=$(grep -RIPn --include='*.ts' --include='*.tsx' --include='*.css' \
+    --exclude='index.css' \
+    -e "$pat" "$SRC" 2>/dev/null || true)
+  if [[ -n "$hits" ]]; then
+    echo "❌ deprecated Tailwind utility usage: $pat"
+    echo "$hits"
+    bad=1
+  fi
+done
+
 if [[ $bad -eq 0 ]]; then
   echo "✅ no deprecated Tactical-OS tokens in frontend/src"
 fi

@@ -131,12 +131,12 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
                           className="group flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
                         >
                           <TeamLogo url={team.logo_url} name={team.name} size={28} />
-                          <span className="flex-1 text-sm font-black group-hover:text-primary transition-colors">
+                          <span className="flex-1 text-sm font-black group-hover:text-[color:var(--color-data)] transition-colors">
                             {team.name}
                           </span>
                           <ChevronRight
                             size={14}
-                            className="text-white/30 group-hover:text-primary group-hover:translate-x-1 transition-all"
+                            className="text-white/30 group-hover:text-[color:var(--color-data)] group-hover:translate-x-1 transition-all"
                           />
                         </Link>
                       </motion.div>
@@ -155,11 +155,11 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
                           onClick={() => onOpenChange(false)}
                           className="group flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
                         >
-                          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs font-black text-primary flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-[color-mix(in_srgb,var(--color-data)_20%,transparent)] flex items-center justify-center text-xs font-black text-[color:var(--color-data)] flex-shrink-0">
                             {player.nickname.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-black group-hover:text-primary transition-colors">
+                            <p className="text-sm font-black group-hover:text-[color:var(--color-data)] transition-colors">
                               {player.nickname}
                             </p>
                             {player.team_name && (
@@ -168,7 +168,7 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
                           </div>
                           <ChevronRight
                             size={14}
-                            className="text-white/30 group-hover:text-primary group-hover:translate-x-1 transition-all"
+                            className="text-white/30 group-hover:text-[color:var(--color-data)] group-hover:translate-x-1 transition-all"
                           />
                         </Link>
                       </motion.div>
