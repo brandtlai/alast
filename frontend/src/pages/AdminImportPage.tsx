@@ -64,7 +64,7 @@ export default function AdminImportPage() {
         </p>
       </div>
 
-      <section className="rounded-lg p-5 space-y-3" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
+      <section className="rounded-lg p-5 space-y-3" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)' }}>
         <label className="block text-xs font-black uppercase tracking-widest text-white/60">Admin Key</label>
         <input
           type="password"
@@ -76,7 +76,7 @@ export default function AdminImportPage() {
         <p className="text-[11px] text-white/40">保存在浏览器 localStorage，仅用于鉴权 header。</p>
       </section>
 
-      <section className="rounded-lg p-5 space-y-3" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
+      <section className="rounded-lg p-5 space-y-3" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)' }}>
         <label className="block text-xs font-black uppercase tracking-widest text-white/60">CSDM JSON 文件</label>
         <input
           type="file"
@@ -90,14 +90,14 @@ export default function AdminImportPage() {
           onClick={upload}
           disabled={!file || !adminKey || uploading}
           className="px-5 py-2 rounded font-black uppercase tracking-widest text-xs transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          style={{ background: 'var(--color-primary)', color: '#fff' }}
+          style={{ background: 'var(--color-data)', color: '#fff' }}
         >
           {uploading ? '导入中…' : '上传并导入'}
         </button>
       </section>
 
       {error && (
-        <div className="rounded-lg p-4 text-sm" style={{ background: 'rgba(255, 43, 214, 0.1)', border: '1px solid rgba(255, 43, 214, 0.4)', color: 'var(--color-neon-pink)' }}>
+        <div className="rounded-lg p-4 text-sm" style={{ background: 'rgba(255, 45, 45, 0.1)', border: '1px solid rgba(255, 45, 45, 0.4)', color: 'var(--color-alert)' }}>
           {error}
         </div>
       )}
