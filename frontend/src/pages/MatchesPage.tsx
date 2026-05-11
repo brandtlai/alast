@@ -42,8 +42,12 @@ function groupByDate(matches: Match[]): { date: string; matches: Match[] }[] {
     if (bucket) bucket.push(m)
     else map.set(key, [m])
   }
-  // sort ascending by date key
-  const sorted = Array.from(map.entries()).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  // sort descending by date so the latest matches/results surface first; TBD always last
+  const sorted = Array.from(map.entries()).sort(([a], [b]) => {
+    if (a === 'TBD') return 1
+    if (b === 'TBD') return -1
+    return a < b ? 1 : a > b ? -1 : 0
+  })
   return sorted.map(([date, matches]) => ({ date, matches }))
 }
 

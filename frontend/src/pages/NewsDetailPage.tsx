@@ -40,7 +40,7 @@ export default function NewsDetailPage() {
   if (!article) return null
 
   return (
-    <article style={{ maxWidth: 720, margin: '0 auto', padding: '96px 24px' }}>
+    <article style={{ maxWidth: 1080, margin: '0 auto', padding: '96px 24px' }}>
       {/* Back link */}
       <Link
         to="/news"
@@ -229,7 +229,7 @@ export default function NewsDetailPage() {
 
       {/* Article body */}
       {article.content && (
-        <div style={{ marginTop: 32, maxWidth: '65ch' }}>
+        <div style={{ margin: '32px auto 0', maxWidth: '65ch' }}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{

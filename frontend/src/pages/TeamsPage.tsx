@@ -1,5 +1,4 @@
 // src/pages/TeamsPage.tsx — Tactical OS re-skin (T20)
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTeams } from '../api/teams'
@@ -9,11 +8,8 @@ import { HudPanel } from '../components/hud/HudPanel'
 import { TacticalLabel } from '../components/hud/TacticalLabel'
 import { hudStagger, hudEnter } from '../design/motion'
 
-const REGIONS = ['', 'Asia', 'EU', 'NA', 'CIS']
-
 export default function TeamsPage() {
-  const [region, setRegion] = useState('')
-  const { data: teams, isLoading, error } = useTeams(region || undefined)
+  const { data: teams, isLoading, error } = useTeams()
 
   return (
     <div>
@@ -31,31 +27,6 @@ export default function TeamsPage() {
         >
           参赛战队
         </h1>
-      </div>
-
-      {/* Region filter */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '0 32px', marginBottom: 24 }}>
-        {REGIONS.map(r => (
-          <button
-            key={r}
-            onClick={() => setRegion(r)}
-            style={{
-              padding: '6px 16px',
-              border: `1px solid ${region === r ? 'var(--color-data)' : 'var(--color-line)'}`,
-              borderRadius: 'var(--radius-sm)',
-              background: region === r ? 'rgba(199,255,61,0.1)' : 'transparent',
-              color: region === r ? 'var(--color-data)' : 'var(--color-fg-muted)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-mono-sm)',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              transition: 'all var(--duration-mid) var(--ease-hud)',
-            }}
-          >
-            {r || '全部'}
-          </button>
-        ))}
       </div>
 
       {/* States */}
@@ -91,18 +62,25 @@ export default function TeamsPage() {
                 padding: '0 32px',
               }}
             >
-              {teams.map(t => (
-                <motion.div key={t.id} variants={hudEnter}>
-                  <Link to={`/teams/${t.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+              {teams.map((t, idx) => {
+                const wins = (t as any).wins ?? 0
+                const losses = (t as any).losses ?? 0
+                const isLeader = idx === 0 && wins > 0
+                return (
+                <motion.div key={t.id} variants={hudEnter} style={{ display: 'flex' }}>
+                  <Link to={`/teams/${t.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
                     <HudPanel
-                      watermark={((t as any).rank === 1 || (t as any).is_champion) ? true : undefined}
+                      watermark={isLeader ? true : undefined}
                       style={{
                         padding: 24,
-                        borderColor: (t as any).is_champion ? 'var(--color-gold-2)' : undefined,
+                        borderColor: isLeader ? 'var(--color-gold-2)' : undefined,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        width: '100%',
+                        minHeight: 160,
                       }}
                     >
-                      {/* Champion emblem: rank-1 or is_champion */}
-                      {((t as any).rank === 1 || (t as any).is_champion) && (
+                      {isLeader && (
                         <img
                           src="/trophy.png"
                           width={28}
@@ -117,70 +95,65 @@ export default function TeamsPage() {
                           }}
                         />
                       )}
-                      <header style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        {t.logo_url && (
-                          <img src={t.logo_url} width={40} height={40} alt="" style={{ objectFit: 'contain' }} />
-                        )}
-                        <div>
-                          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, lineHeight: 1, color: 'var(--color-fg)' }}>
+                      <header style={{ display: 'flex', alignItems: 'center', gap: 16, minHeight: 48 }}>
+                        <div style={{
+                          width: 48, height: 48, flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: '1px solid var(--color-line)',
+                          background: 'rgba(255,255,255,0.02)',
+                        }}>
+                          {t.logo_url
+                            ? <img src={t.logo_url} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                            : <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-fg-dim)', letterSpacing: '0.1em' }}>NO LOGO</span>}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: 22,
+                            lineHeight: 1.15,
+                            color: 'var(--color-fg)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}>
                             {t.name}
                           </div>
-                          {(t as any).cn_name && (
-                            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 14, color: 'var(--color-fg-muted)', marginTop: 4 }}>
-                              {(t as any).cn_name}
-                            </div>
-                          )}
-                          {t.short_name && !(t as any).cn_name && (
-                            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 14, color: 'var(--color-fg-muted)', marginTop: 4 }}>
+                          {t.short_name && (
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-fg-muted)', marginTop: 4, letterSpacing: '0.1em' }}>
                               {t.short_name}
                             </div>
                           )}
                         </div>
                       </header>
 
+                      <div style={{ flex: 1 }} />
+
                       <div
                         style={{
                           display: 'flex',
                           justifyContent: 'space-between',
+                          alignItems: 'baseline',
                           marginTop: 16,
+                          paddingTop: 12,
+                          borderTop: '1px solid var(--color-line)',
                           fontFamily: 'var(--font-mono)',
                           fontSize: 'var(--text-mono-sm)',
                           color: 'var(--color-fg-muted)',
                         }}
                       >
                         <span>
-                          {(t as any).wins ?? 0}W-{(t as any).losses ?? 0}L
+                          <span style={{ color: 'var(--color-data)', fontVariantNumeric: 'tabular-nums' }}>{wins}</span>
+                          <span style={{ color: 'var(--color-fg-dim)' }}>W</span>
+                          <span style={{ margin: '0 4px', color: 'var(--color-fg-dim)' }}>·</span>
+                          <span style={{ color: 'var(--color-fire)', fontVariantNumeric: 'tabular-nums' }}>{losses}</span>
+                          <span style={{ color: 'var(--color-fg-dim)' }}>L</span>
                         </span>
-                        {(t as any).rank != null && (
-                          <span>RANK #{(t as any).rank}</span>
-                        )}
-                        {t.region && (
-                          <span style={{ letterSpacing: '0.2em', textTransform: 'uppercase' }}>{t.region}</span>
-                        )}
+                        <span style={{ letterSpacing: '0.2em' }}>#{idx + 1}</span>
                       </div>
-
-                      {(t as any).players?.length ? (
-                        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                          {(t as any).players.slice(0, 5).map((p: any) => (
-                            p.avatar_url
-                              ? (
-                                <img
-                                  key={p.id}
-                                  src={p.avatar_url}
-                                  width={28}
-                                  height={28}
-                                  alt={p.name ?? p.nickname}
-                                  style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
-                                />
-                              )
-                              : null
-                          ))}
-                        </div>
-                      ) : null}
                     </HudPanel>
                   </Link>
                 </motion.div>
-              ))}
+              )})}
             </motion.div>
           )
       )}

@@ -1,7 +1,6 @@
 // src/pages/TeamDetailPage.tsx — Tactical OS re-skin (T21)
 import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import ReactECharts from 'echarts-for-react'
 import { useTeam } from '../api/teams'
 import Spinner from '../components/Spinner'
 import ErrorBox from '../components/ErrorBox'
@@ -13,20 +12,12 @@ import type { Match } from '../types'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-function Label({ children }: { children: string }) {
-  return (
-    <span
-      style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: 'var(--text-mono-sm)',
-        color: 'var(--color-fg-dim)',
-        letterSpacing: '0.2em',
-        textTransform: 'uppercase' as const,
-      }}
-    >
-      {children}
-    </span>
-  )
+const TIER_COLOR: Record<string, string> = {
+  S:    'var(--color-gold-2)',
+  A:    'var(--color-data)',
+  B:    'var(--color-fg)',
+  'C+': 'var(--color-fg-muted)',
+  D:    'var(--color-fg-dim)',
 }
 
 function WLBadge({ win }: { win: boolean }) {
@@ -59,53 +50,18 @@ export default function TeamDetailPage() {
   if (!team)     return null
 
   const t = team as typeof team & {
-    cn_name?: string | null
     wins?: number | null
     losses?: number | null
-    rank?: number | null
-    is_champion?: boolean
-    coach?: string | null
-    founded?: string | null
-    championships?: Array<{ year: number; tournament?: string }>
   }
 
   const wins   = t.wins   ?? 0
   const losses = t.losses ?? 0
-  const rank   = t.rank
 
-  // Recent 5 matches
   const recentMatches = (t.recent_matches ?? []).slice(0, 5)
-
-  // Build radar stats from players' aggregate data if available
-  const players = t.players ?? []
-
-  const hasRadarData = false // No per-team aggregate stat fields in current payload
-
-  const radarOption = {
-    backgroundColor: 'transparent',
-    radar: {
-      indicator: [
-        { name: 'Rating',   max: 2 },
-        { name: 'KDR',      max: 2 },
-        { name: 'Win%',     max: 100 },
-        { name: 'ADR',      max: 120 },
-        { name: 'Clutches', max: 20 },
-      ],
-      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
-      axisLine:  { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
-      splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.04)'] } },
-      name: { textStyle: { color: 'var(--color-fg-muted)', fontFamily: 'JetBrains Mono', fontSize: 11 } },
-    },
-    series: [{
-      type: 'radar',
-      data: [{
-        value: hasRadarData ? [1.1, 1.1, 55, 80, 8] : [0, 0, 0, 0, 0],
-        name: team.name,
-        areaStyle: { color: 'rgba(199,255,61,0.18)' },
-        lineStyle: { color: '#C7FF3D' },
-      }],
-    }],
+  type RosterPlayer = NonNullable<typeof t.players>[number] & {
+    tier?: string | null; is_captain?: boolean; pick_order?: number | null
   }
+  const players: RosterPlayer[] = (t.players ?? []) as RosterPlayer[]
 
   return (
     <div>
@@ -168,96 +124,47 @@ export default function TeamDetailPage() {
             {team.name}
           </h1>
 
-          {t.cn_name && (
-            <div
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: 28,
-                color: 'var(--color-fg-muted)',
-                marginTop: 8,
-              }}
-            >
-              {t.cn_name}
-            </div>
-          )}
-
           {/* Stats row */}
           <div
             style={{
               display: 'flex',
-              gap: 24,
+              gap: 32,
               marginTop: 24,
               fontFamily: 'var(--font-mono)',
               fontSize: 'var(--text-mono-sm)',
               color: 'var(--color-fg-dim)',
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
-              alignItems: 'center',
+              alignItems: 'baseline',
             }}
           >
             <span>
               RECORD&nbsp;
-              <DataReadout value={`${wins}W-${losses}L`} color="var(--color-fg)" />
+              <span style={{ color: 'var(--color-data)', fontVariantNumeric: 'tabular-nums' }}>{wins}</span>
+              <span style={{ color: 'var(--color-fg-dim)' }}>W</span>
+              <span style={{ margin: '0 6px', color: 'var(--color-fg-dim)' }}>·</span>
+              <span style={{ color: 'var(--color-fire)', fontVariantNumeric: 'tabular-nums' }}>{losses}</span>
+              <span style={{ color: 'var(--color-fg-dim)' }}>L</span>
             </span>
-            {rank != null && (
-              <span>
-                RANK&nbsp;
-                <DataReadout value={rank} pad={2} />
-              </span>
-            )}
+            <span>
+              ROSTER&nbsp;
+              <DataReadout value={players.length} pad={2} color="var(--color-fg)" />
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ── Three-column body ───────────────────────────────────────────────── */}
+      {/* ── Body: roster (left) + recent (right) ────────────────────────────── */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '280px 1fr 280px',
+          gridTemplateColumns: '1fr 320px',
           gap: 32,
-          padding: '48px 32px',
+          padding: '48px 32px 64px',
           alignItems: 'start',
         }}
       >
-        {/* Left — team meta */}
-        <HudPanel staticCorners style={{ padding: 24 }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'auto 1fr',
-              gap: '8px 16px',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-mono-sm)',
-            }}
-          >
-            {t.coach != null && (
-              <>
-                <Label>COACH</Label>
-                <span style={{ color: 'var(--color-fg)' }}>{t.coach || '—'}</span>
-              </>
-            )}
-            {t.founded != null && (
-              <>
-                <Label>FOUNDED</Label>
-                <span style={{ color: 'var(--color-fg)' }}>{t.founded || '—'}</span>
-              </>
-            )}
-            {team.region != null && (
-              <>
-                <Label>REGION</Label>
-                <span style={{ color: 'var(--color-fg)' }}>{team.region || '—'}</span>
-              </>
-            )}
-            {team.short_name != null && (
-              <>
-                <Label>CODE</Label>
-                <span style={{ color: 'var(--color-fg)' }}>{team.short_name}</span>
-              </>
-            )}
-          </div>
-        </HudPanel>
-
-        {/* Center — player cards */}
+        {/* Left — player cards */}
         <div>
           {players.length > 0 ? (
             <>
@@ -279,91 +186,112 @@ export default function TeamDetailPage() {
                 animate="show"
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
                   gap: 16,
                 }}
               >
-                {players.map(p => (
-                  <motion.div key={p.id} variants={hudEnter}>
-                    <HudPanel style={{ padding: 16, textAlign: 'center' }}>
-                      {/* Avatar */}
-                      <div
-                        style={{
-                          width: 120,
-                          height: 120,
-                          margin: '0 auto 12px',
-                          borderRadius: 'var(--radius-sm)',
-                          overflow: 'hidden',
-                          background: 'var(--color-surface)',
-                          border: '1px solid var(--color-line)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        {p.avatar_url ? (
-                          <img
-                            src={p.avatar_url}
-                            alt={p.nickname}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <span
-                            style={{
-                              fontFamily: 'var(--font-display)',
-                              fontSize: 32,
-                              color: 'var(--color-fg-dim)',
-                            }}
-                          >
-                            {p.nickname.slice(0, 2).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
+                {players.map(p => {
+                  const tier = p.tier ?? null
+                  const tierColor = tier ? TIER_COLOR[tier] ?? 'var(--color-fg-muted)' : 'var(--color-fg-dim)'
+                  const subLabel = p.is_captain ? 'CAPTAIN' : tier ? `TIER ${tier}` : 'SUBSTITUTE'
+                  return (
+                    <motion.div key={p.id} variants={hudEnter} style={{ display: 'flex' }}>
+                      <HudPanel style={{
+                        padding: 16,
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        width: '100%',
+                        minHeight: 220,
+                        borderColor: p.is_captain ? 'var(--color-gold-2)' : undefined,
+                      }}>
+                        {/* Avatar */}
+                        <div
+                          style={{
+                            width: 96,
+                            height: 96,
+                            margin: '0 auto 12px',
+                            borderRadius: 'var(--radius-sm)',
+                            overflow: 'hidden',
+                            background: 'var(--color-surface)',
+                            border: '1px solid var(--color-line)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {p.avatar_url ? (
+                            <img
+                              src={p.avatar_url}
+                              alt={p.nickname}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <span
+                              style={{
+                                fontFamily: 'var(--font-display)',
+                                fontSize: 28,
+                                color: 'var(--color-fg-dim)',
+                              }}
+                            >
+                              {(p.real_name ?? p.nickname).slice(0, 2)}
+                            </span>
+                          )}
+                        </div>
 
-                      {/* Name */}
-                      <div
-                        style={{
-                          fontFamily: 'var(--font-display)',
-                          fontSize: 22,
-                          lineHeight: 1.1,
-                          color: 'var(--color-fg)',
-                          marginBottom: 4,
-                        }}
-                      >
-                        {p.nickname}
-                      </div>
+                        {/* Real name */}
+                        <div
+                          style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: 18,
+                            lineHeight: 1.15,
+                            color: 'var(--color-fg)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title={p.real_name ?? p.nickname}
+                        >
+                          {p.real_name ?? p.nickname}
+                        </div>
 
-                      {/* Role */}
-                      {p.role && (
+                        {/* Game ID */}
                         <div
                           style={{
                             fontFamily: 'var(--font-mono)',
-                            fontSize: 'var(--text-mono-xs)',
-                            letterSpacing: '0.2em',
-                            textTransform: 'uppercase',
+                            fontSize: 11,
                             color: 'var(--color-fg-muted)',
-                            marginBottom: 8,
+                            marginTop: 4,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title={p.nickname}
+                        >
+                          {p.nickname}
+                        </div>
+
+                        <div style={{ flex: 1 }} />
+
+                        {/* Tier badge */}
+                        <div
+                          style={{
+                            marginTop: 12,
+                            paddingTop: 10,
+                            borderTop: '1px solid var(--color-line)',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: 10,
+                            letterSpacing: '0.2em',
+                            color: tierColor,
                           }}
                         >
-                          {p.role}
+                          {subLabel}
                         </div>
-                      )}
-
-                      {/* Rating placeholder — per-team roster has no rating in current payload */}
-                      <div
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 'var(--text-mono-xs)',
-                          color: 'var(--color-fg-dim)',
-                          letterSpacing: '0.1em',
-                        }}
-                      >
-                        RATING&nbsp;
-                        <DataReadout value={(p as any).rating != null ? (Number((p as any).rating)).toFixed(2) : '-'} />
-                      </div>
-                    </HudPanel>
-                  </motion.div>
-                ))}
+                      </HudPanel>
+                    </motion.div>
+                  )
+                })}
               </motion.div>
             </>
           ) : (
@@ -382,7 +310,7 @@ export default function TeamDetailPage() {
           )}
         </div>
 
-        {/* Right — recent matches + championships */}
+        {/* Right — recent matches */}
         <HudPanel staticCorners style={{ padding: 24 }}>
           {recentMatches.length > 0 && (
             <>
@@ -449,43 +377,7 @@ export default function TeamDetailPage() {
             </>
           )}
 
-          {/* Championships */}
-          {(t.championships ?? []).length > 0 && (
-            <>
-              <div
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 'var(--text-mono-xs)',
-                  letterSpacing: '0.2em',
-                  color: 'var(--color-gold-2)',
-                  textTransform: 'uppercase',
-                  marginTop: recentMatches.length > 0 ? 20 : 0,
-                  marginBottom: 12,
-                }}
-              >
-                CHAMPIONSHIPS
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {(t.championships ?? []).map((c, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 'var(--text-mono-sm)',
-                      color: 'var(--color-gold-1)',
-                    }}
-                  >
-                    <DataReadout value={c.year} />
-                    {c.tournament && (
-                      <span style={{ color: 'var(--color-fg-dim)', marginLeft: 8 }}>{c.tournament}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {recentMatches.length === 0 && (t.championships ?? []).length === 0 && (
+          {recentMatches.length === 0 && (
             <p
               style={{
                 fontFamily: 'var(--font-mono)',
@@ -496,29 +388,6 @@ export default function TeamDetailPage() {
               暂无数据
             </p>
           )}
-        </HudPanel>
-      </div>
-
-      {/* ── Radar chart ────────────────────────────────────────────────────── */}
-      <div style={{ padding: '0 32px 64px' }}>
-        <HudPanel staticCorners style={{ padding: 24 }}>
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-mono-xs)',
-              letterSpacing: '0.2em',
-              color: 'var(--color-fg-dim)',
-              textTransform: 'uppercase',
-              marginBottom: 16,
-            }}
-          >
-            TEAM RADAR
-          </div>
-          <ReactECharts
-            option={radarOption}
-            style={{ height: 320 }}
-            theme={undefined}
-          />
         </HudPanel>
       </div>
     </div>

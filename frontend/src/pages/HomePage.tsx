@@ -425,14 +425,21 @@ function StandingsAndRecent({ tournamentId, recentFinished }: StandingsRecentPro
                       : <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--color-fg-dim)' }}>{idx + 1}</span>}
                   </td>
                   <td style={{ padding: '8px 4px', color: 'var(--color-fg)' }}>
-                    {row.team_logo_url && (
-                      <img
-                        src={row.team_logo_url}
-                        alt=""
-                        style={{ width: 16, height: 16, objectFit: 'contain', display: 'inline', marginRight: 6, verticalAlign: 'middle' }}
-                      />
-                    )}
-                    {row.team_short_name ?? row.team_name}
+                    <Link
+                      to={`/teams/${row.team_id}`}
+                      style={{ color: 'inherit', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-data)')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'inherit')}
+                    >
+                      {row.team_logo_url && (
+                        <img
+                          src={row.team_logo_url}
+                          alt=""
+                          style={{ width: 16, height: 16, objectFit: 'contain', marginRight: 6, verticalAlign: 'middle' }}
+                        />
+                      )}
+                      {row.team_short_name ?? row.team_name}
+                    </Link>
                   </td>
                   <td style={{ textAlign: 'center', padding: '8px 4px' }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--color-data)' }}>{row.wins}</span>
@@ -704,8 +711,12 @@ export default function HomePage() {
         featured.current = upcoming
       } else {
         const finished = allMatches
-          .filter(m => m.status === 'finished' && m.finished_at)
-          .sort((a, b) => new Date(b.finished_at!).getTime() - new Date(a.finished_at!).getTime())[0]
+          .filter(m => m.status === 'finished' && (m.finished_at || m.scheduled_at))
+          .sort((a, b) => {
+            const ta = new Date((a.finished_at ?? a.scheduled_at)!).getTime()
+            const tb = new Date((b.finished_at ?? b.scheduled_at)!).getTime()
+            return tb - ta
+          })[0]
         featured.current = finished ?? null
       }
     }
