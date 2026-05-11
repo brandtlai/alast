@@ -13,7 +13,8 @@
   /* Text */
   --color-fg:          #F2F4F7;
   --color-fg-muted:    rgba(242,244,247,0.62);
-  --color-fg-dim:      rgba(242,244,247,0.38);
+  /* AA-compliant against --color-bg #07090C (≈ 4.7:1). */
+  --color-fg-dim:      rgba(242,244,247,0.56);
 
   /* Info / data */
   --color-data:        #C7FF3D;
