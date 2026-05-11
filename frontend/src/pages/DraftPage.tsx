@@ -48,8 +48,8 @@ export default function DraftPage() {
               <motion.div key={tierKey}
                    variants={fadeUp}
                    className="rounded-md border surface-sheen"
-                   style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
-                <div className="flex items-center gap-4 px-4 py-3 border-b" style={{ borderColor: 'var(--color-data-divider)' }}>
+                   style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
+                <div className="flex items-center gap-4 px-4 py-3 border-b" style={{ borderColor: 'var(--color-line)' }}>
                   <div className="w-10 h-10 rounded flex items-center justify-center font-black text-lg flex-shrink-0"
                        style={{ background: meta.accent + '22', color: meta.accent, border: `1px solid ${meta.accent}66` }}>
                     {tierKey}
@@ -63,7 +63,7 @@ export default function DraftPage() {
                 {hasData ? (
                   tierPlayers.length === 0
                     ? <p className="text-xs text-white/30 px-4 py-3">暂无该等级选手</p>
-                    : <div className="divide-y" style={{ borderColor: 'var(--color-data-divider)' }}>
+                    : <div className="divide-y" style={{ borderColor: 'var(--color-line)' }}>
                         {tierPlayers.map((p, i) => (
                           <motion.div key={p.player_id}
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
@@ -102,7 +102,7 @@ export default function DraftPage() {
       <motion.section variants={panelReveal} initial="hidden" animate="show">
         <h2 className="text-xs font-black uppercase tracking-[0.25em] text-primary mb-4">Pick Order</h2>
         <div className="rounded-md border p-6"
-             style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
+             style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
           <SnakeOrderViz rounds={4} teams={N_TEAMS} players={players ?? []} />
           {!hasData && (
             <p className="text-xs text-white/40 mt-4 text-center">
@@ -139,7 +139,7 @@ function SnakeOrderViz({ rounds, teams, players }: { rounds: number; teams: numb
                   <div key={n}
                        title={p ? p.nickname : `Pick ${globalPick}`}
                        className="aspect-square rounded text-[9px] font-black flex items-center justify-center text-white/55 tabular-nums"
-                       style={{ background: 'var(--color-data-chip)' }}>
+                       style={{ background: 'var(--color-surface-2)' }}>
                     {p ? p.nickname[0] : n}
                   </div>
                 )
