@@ -1,6 +1,5 @@
 // src/components/Layout.tsx
 import { Outlet } from 'react-router-dom'
-import { GridBackground } from '../design/grid'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import LiveBar from './LiveBar'
@@ -8,7 +7,11 @@ import LiveBar from './LiveBar'
 export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)' }}>
-      <GridBackground />
+      <div
+        aria-hidden
+        className="ambient-grid fixed inset-0 pointer-events-none"
+        style={{ zIndex: 0 }}
+      />
 
       <Navbar />
 
