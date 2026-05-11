@@ -25,7 +25,7 @@ DEPRECATED=(
   '--color-data-divider(?![-\w])'
   '--color-data-chip(?![-\w])'
   '--color-data-text-muted(?![-\w])'
-  '--color-neon-pink'
+  '--color-neon-pink(?![-\w])'
 )
 
 bad=0
