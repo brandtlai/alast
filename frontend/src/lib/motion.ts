@@ -4,7 +4,6 @@
 // Prefer importing from `src/design/motion.ts` directly for new code.
 
 import type { Variants } from 'framer-motion'
-import type React from 'react'
 
 export const easeOutQuart = [0.22, 1, 0.36, 1] as const
 export const easeSoft = [0.16, 1, 0.3, 1] as const
@@ -90,11 +89,6 @@ export const rankReveal = (_outcome: Outcome): Variants => ({
     transition: { duration: 0.3, ease: easeSoft },
   },
 })
-
-export const glowPulse = (tone: Outcome) => ({
-  animation: 'glowPulseRank 6.5s ease-in-out infinite',
-  ['--rank-glow' as string]: rankGlow(tone),
-}) as React.CSSProperties
 
 // Heading reveal — replaced clipPath wipe with simple opacity+y to match Tactical OS tone.
 export const headingMask: Variants = {
