@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "bash ../scripts/check-deprecated-tokens.sh && tsc -b && vite build",
     "build:preview": "BUILD_TARGET=preview tsc -b && BUILD_TARGET=preview vite build",
     "preview": "vite preview"
   },
