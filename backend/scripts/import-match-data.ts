@@ -171,10 +171,12 @@ async function importJson(
       return
     }
 
-    // Find the match
+    // Find the match — prefer BO3 / latest scheduled so a new BO3 match wins
+    // over an old BO1 between the same team pair.
     const { rows: matchRows } = await q(`
       SELECT id, team_a_id, team_b_id FROM matches
       WHERE (team_a_id = $1 AND team_b_id = $2) OR (team_a_id = $2 AND team_b_id = $1)
+      ORDER BY best_of DESC, scheduled_at DESC NULLS LAST
     `, [tAId, tBId])
 
     if (matchRows.length === 0) {
