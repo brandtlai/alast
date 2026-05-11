@@ -65,7 +65,7 @@ export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamB
   if (players.length === 0) {
     return (
       <div className="rounded-md border py-8 text-center text-sm text-white/40"
-           style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
+           style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
         详细数据待 CSDM 解析后导入
       </div>
     )
@@ -76,7 +76,7 @@ export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamB
 
   return (
     <div className="rounded-md border overflow-hidden"
-         style={{ background: 'var(--color-data-surface)', borderColor: 'var(--color-data-divider)' }}>
+         style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-line)' }}>
       <table className="w-full text-xs border-collapse">
         <tbody>
           <TeamSection
@@ -88,7 +88,7 @@ export default function Scoreboard({ players, teamAId, teamBId, teamAName, teamB
           />
 
           {/* Half-time divider */}
-          <tr style={{ background: 'var(--color-data-divider)' }}>
+          <tr style={{ background: 'var(--color-line)' }}>
             <td colSpan={8} className="py-1 px-4 text-center">
               <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
                 半场
@@ -160,11 +160,11 @@ function TeamSection({
 }
 
 function PlayerRow({ player: p, isMvp }: { player: MapStatPlayer; isMvp: boolean }) {
-  const ratingColor = (p.rating ?? 0) >= 1.0 ? 'var(--color-primary)' : 'rgba(255,255,255,0.6)'
+  const ratingColor = (p.rating ?? 0) >= 1.0 ? 'var(--color-data)' : 'rgba(255,255,255,0.6)'
 
   return (
     <tr className="border-b transition-colors hover:bg-white/[0.03]"
-        style={{ borderColor: 'var(--color-data-divider)' }}>
+        style={{ borderColor: 'var(--color-line)' }}>
       <td className="py-2 pl-4 pr-2">
         <Link to={`/players/${p.player_id}`} className="flex items-center gap-2 group">
           <div className="w-6 h-6 rounded-full bg-white/10 flex-shrink-0 overflow-hidden">
@@ -179,7 +179,7 @@ function PlayerRow({ player: p, isMvp }: { player: MapStatPlayer; isMvp: boolean
           </span>
           {isMvp && (
             <span className="text-[8px] font-black uppercase tracking-widest px-1 py-0.5 rounded flex-shrink-0"
-                  style={{ background: 'var(--color-gold)22', color: 'var(--color-gold)' }}>MVP</span>
+                  style={{ background: 'var(--color-gold-2)22', color: 'var(--color-gold-2)' }}>MVP</span>
           )}
           {p.is_sub && (
             <span className="text-[8px] font-black uppercase tracking-widest px-1 py-0.5 rounded flex-shrink-0"
