@@ -9,9 +9,35 @@ r.get('/', async (c) => {
   const role = c.req.query('role')
 
   let sql = `
-    SELECT p.*, t.name as team_name, t.logo_url as team_logo_url
+    SELECT p.*, t.name as team_name, t.logo_url as team_logo_url,
+           tpa.tier, tpa.is_captain,
+           CASE WHEN agg.maps_played > 0 THEN
+             jsonb_build_object(
+               'maps_played',  agg.maps_played,
+               'avg_rating',   agg.avg_rating,
+               'avg_adr',      agg.avg_adr,
+               'avg_kast',     agg.avg_kast,
+               'avg_hs_pct',   agg.avg_hs_pct,
+               'total_kills',  agg.total_kills,
+               'total_deaths', agg.total_deaths
+             )
+           END AS career_stats
     FROM players p
     LEFT JOIN teams t ON t.id = p.team_id
+    LEFT JOIN tournament_player_assignment tpa
+      ON tpa.player_id = p.id
+      AND tpa.tournament_id = (SELECT id FROM tournaments WHERE is_current = TRUE LIMIT 1)
+    LEFT JOIN LATERAL (
+      SELECT
+        COUNT(DISTINCT pms.match_map_id)         AS maps_played,
+        ROUND(AVG(pms.rating)::numeric, 2)       AS avg_rating,
+        ROUND(AVG(pms.adr)::numeric, 1)          AS avg_adr,
+        ROUND(AVG(pms.kast)::numeric, 1)         AS avg_kast,
+        ROUND(AVG(pms.headshot_pct)::numeric, 1) AS avg_hs_pct,
+        SUM(pms.kills)::int                      AS total_kills,
+        SUM(pms.deaths)::int                     AS total_deaths
+      FROM player_match_stats pms WHERE pms.player_id = p.id
+    ) agg ON TRUE
     WHERE 1=1
   `
   const params: unknown[] = []
