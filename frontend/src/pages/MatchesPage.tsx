@@ -10,6 +10,7 @@ import { StatusDot } from '../components/hud/StatusDot'
 import type { StatusKind } from '../components/hud/StatusDot'
 import { hudStagger, hudEnter } from '../design/motion'
 import type { Match } from '../types'
+import { BracketView } from '../components/tournament/bracket/BracketView'
 
 // ── Filter definitions ─────────────────────────────────────────────────────────
 
@@ -227,15 +228,17 @@ export default function MatchesPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [bracketFilter, setBracketFilter] = useState('')
 
+  const isKnockout = bracketFilter === 'knockout'
+
   const { data: matches, isLoading, error } = useMatches({
     status: statusFilter || undefined,
     stage:  bracketFilter || undefined,
   })
 
-  const groups = matches ? groupByDate(matches) : []
+  const groups = !isKnockout && matches ? groupByDate(matches) : []
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 32px 64px' }}>
+    <div style={{ maxWidth: isKnockout ? 1680 : 960, margin: '0 auto', padding: '0 32px 64px' }}>
       {/* Header */}
       <div style={{ padding: '64px 0 24px' }}>
         <TacticalLabel text="SECTOR :: MATCH_LOG" typewriter />
@@ -251,7 +254,7 @@ export default function MatchesPage() {
 
       {/* Filter bar */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 32, alignItems: 'center' }}>
-        {STATUS_FILTERS.map(f => (
+        {!isKnockout && STATUS_FILTERS.map(f => (
           <Pill
             key={f.value}
             label={f.label}
@@ -259,7 +262,9 @@ export default function MatchesPage() {
             onClick={() => setStatusFilter(f.value)}
           />
         ))}
-        <span style={{ width: 1, height: 24, background: 'var(--color-line)', margin: '0 4px' }} />
+        {!isKnockout && (
+          <span style={{ width: 1, height: 24, background: 'var(--color-line)', margin: '0 4px' }} />
+        )}
         {BRACKET_FILTERS.map(f => (
           <Pill
             key={f.value}
@@ -271,26 +276,29 @@ export default function MatchesPage() {
         ))}
       </div>
 
+      {/* Knockout: render bracket view in place of date-grouped list */}
+      {isKnockout && <BracketView />}
+
       {/* States */}
-      {isLoading && (
+      {!isKnockout && isLoading && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-sm)', color: 'var(--color-fg-muted)' }}>
           LOADING…
         </p>
       )}
-      {error && (
+      {!isKnockout && error && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-sm)', color: 'var(--color-alert)' }}>
           ERR :: {error.message}
         </p>
       )}
 
       {/* Match list grouped by date */}
-      {matches && matches.length === 0 && (
+      {!isKnockout && matches && matches.length === 0 && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-mono-sm)', color: 'var(--color-fg-dim)' }}>
           NO MATCHES FOUND
         </p>
       )}
 
-      {groups.length > 0 && (
+      {!isKnockout && groups.length > 0 && (
         <motion.div variants={hudStagger} initial="hidden" animate="show">
           {groups.map(g => (
             <motion.section key={g.date} variants={hudEnter}>
