@@ -27,8 +27,12 @@ const TEAM_NAME_ALIASES: Record<string, string> = {
   '牛头人': 'NTR',
   '英特尔科学家': '英特尔首席科学家',
   'country love': 'CountryLove',
+  'Country Love': 'CountryLove',
   'Vitality': 'vitALIty',
   'ShenTiGo': 'ShenT1Go',
+  'ShenTiGou': 'ShenT1Go',
+  '没人除老六': '没有人会一直等你除了老六',
+  '一路吃闪预瞄队': '一路预瞄定吃闪队',
 }
 
 function normalizeTeamName(name: string): string {
@@ -43,6 +47,7 @@ interface DBMatchMap {
   map_order: number
   score_a: number
   score_b: number
+  map_name: string | null
   team_a_id: string
   team_b_id: string
   team_a_name: string
@@ -58,7 +63,7 @@ interface DBPlayer {
 
 async function loadMatchMaps(): Promise<DBMatchMap[]> {
   const { rows } = await q(`
-    SELECT mm.id, mm.match_id, mm.map_order, mm.score_a, mm.score_b,
+    SELECT mm.id, mm.match_id, mm.map_order, mm.score_a, mm.score_b, mm.map_name,
            m.team_a_id, m.team_b_id,
            ta.name AS team_a_name, tb.name AS team_b_name
     FROM match_maps mm
@@ -87,11 +92,19 @@ function findMatchMap(
   jsonTeamBName: string,
   jsonTeamAScore: number,
   jsonTeamBScore: number,
+  jsonMapName: string,
 ): { map: DBMatchMap; jsonAIsTeamA: boolean } | null {
   const normA = normalizeTeamName(jsonTeamAName)
   const normB = normalizeTeamName(jsonTeamBName)
 
   for (const mm of matchMaps) {
+    // Map_name discriminator: legacy seeded rows have NULL / '' / 'unknown'
+    // and accept any incoming JSON; rows that already carry a real map_name
+    // only accept JSONs for that same map (prevents BO3 maps with reversed
+    // scores from colliding onto map 1).
+    const existing = (mm.map_name ?? '').toLowerCase()
+    if (existing && existing !== 'unknown' && existing !== jsonMapName.toLowerCase()) continue
+
     const scores = new Set([mm.score_a, mm.score_b])
     if (!scores.has(jsonTeamAScore) || !scores.has(jsonTeamBScore)) continue
     // Avoid matching if both scores are the same (tie would be ambiguous)
@@ -145,7 +158,7 @@ async function importJson(
   let dbTeamBId: string
   let jsonAIsTeamA: boolean
 
-  const found = findMatchMap(matchMaps, jsonTeamAName, jsonTeamBName, jsonTeamAScore, jsonTeamBScore)
+  const found = findMatchMap(matchMaps, jsonTeamAName, jsonTeamBName, jsonTeamAScore, jsonTeamBScore, raw.mapName)
 
   if (found) {
     matchMapId = found.map.id
@@ -194,9 +207,12 @@ async function importJson(
     const dbScoreB = jsonAIsTeamA ? jsonTeamBScore : jsonTeamAScore
     const winnerTeamId = dbScoreA > dbScoreB ? dbTeamAId : dbTeamBId
 
-    // Count existing maps for map_order
-    const { rows: [{ cnt }] } = await q('SELECT COUNT(*) AS cnt FROM match_maps WHERE match_id = $1', [match.id])
-    const mapOrder = parseInt(cnt) + 1
+    // Next map_order = highest existing + 1 (COUNT+1 would collide after a deletion)
+    const { rows: [{ next_order }] } = await q(
+      'SELECT COALESCE(MAX(map_order), 0) + 1 AS next_order FROM match_maps WHERE match_id = $1',
+      [match.id]
+    )
+    const mapOrder = parseInt(next_order)
 
     const { rows: [mm] } = await q(
       `INSERT INTO match_maps (match_id, map_name, map_order, score_a, score_b, winner_team_id, duration_seconds)
@@ -205,23 +221,33 @@ async function importJson(
     )
     matchMapId = mm.id
 
-    // Update match status and maps_won
+    // Update maps_won; only flip to 'finished' once one team clears the
+    // best-of-N threshold. Mid-series BO3 (e.g. 1-0, 1-1) stay 'live'.
     const { rows: [mapsAgg] } = await q(
       `SELECT SUM(CASE WHEN winner_team_id = $1 THEN 1 ELSE 0 END) AS won_a,
               SUM(CASE WHEN winner_team_id = $2 THEN 1 ELSE 0 END) AS won_b
        FROM match_maps WHERE match_id = $3`,
       [dbTeamAId, dbTeamBId, match.id]
     )
+    const wonA = parseInt(mapsAgg.won_a ?? '0')
+    const wonB = parseInt(mapsAgg.won_b ?? '0')
+    const { rows: [bo] } = await q<{ best_of: number }>(
+      `SELECT best_of FROM matches WHERE id = $1`, [match.id]
+    )
+    const winThreshold = Math.ceil((bo?.best_of ?? 1) / 2)
+    const isFinished = wonA >= winThreshold || wonB >= winThreshold
     await q(
-      `UPDATE matches SET status = 'finished', maps_won_a = $1, maps_won_b = $2 WHERE id = $3`,
-      [mapsAgg.won_a ?? 0, mapsAgg.won_b ?? 0, match.id]
+      `UPDATE matches SET status = $1, maps_won_a = $2, maps_won_b = $3,
+                          finished_at = COALESCE(finished_at, CASE WHEN $1 = 'finished' THEN now() ELSE NULL END)
+       WHERE id = $4`,
+      [isFinished ? 'finished' : 'live', wonA, wonB, match.id]
     )
 
     console.log(`   ✅ Created new match_map ${matchMapId}`)
     // Add to in-memory list for future iterations
     matchMaps.push({
       id: matchMapId, match_id: match.id, map_order: mapOrder,
-      score_a: dbScoreA, score_b: dbScoreB,
+      score_a: dbScoreA, score_b: dbScoreB, map_name: raw.mapName,
       team_a_id: dbTeamAId, team_b_id: dbTeamBId,
       team_a_name: normA, team_b_name: normB,
     })
