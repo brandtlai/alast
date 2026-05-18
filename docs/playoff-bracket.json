@@ -1,0 +1,293 @@
+{
+  "$schema_description": "Tournament bracket configuration for an agent-readable representation of the double-elimination playoffs shown in docs/playoff-bracket-reference.md. Each match references its participants either as a seeded team (initial round) or by feeder (winner/loser of an earlier match), so the bracket can be walked programmatically without consulting the original image.",
+  "tournament": {
+    "name": "ALAST Premier 2026 Playoffs",
+    "format": "double_elimination",
+    "schedule": {
+      "total_weeks": 7,
+      "week_labels": ["第一周", "第二周", "第三周", "第四周", "第五周", "第六周", "第七周"]
+    },
+    "rules": {
+      "default_match_format": "BO3",
+      "grand_final_format": "BO5",
+      "upper_bracket_winner_advances": "winner_bracket_final → grand_final",
+      "upper_bracket_loser_drops_to": "lower_bracket",
+      "lower_bracket_loser_eliminated": true,
+      "lower_bracket_winner_advances": "lower_bracket_final → grand_final"
+    }
+  },
+  "teams": [
+    { "seed": "Team 1",  "name": "蓝色小药丸",            "entry": "winner_bracket" },
+    { "seed": "Team 2",  "name": "包包的",                "entry": "winner_bracket" },
+    { "seed": "Team 3",  "name": "NTR",                  "entry": "winner_bracket" },
+    { "seed": "Team 4",  "name": "干拉八条街",            "entry": "winner_bracket" },
+    { "seed": "Team 5",  "name": "CountryLove",          "entry": "winner_bracket" },
+    { "seed": "Team 6",  "name": "英特尔首席科学家",      "entry": "winner_bracket" },
+    { "seed": "Team 7",  "name": "vitALIty",             "entry": "winner_bracket" },
+    { "seed": "Team 8",  "name": "没有人会一直等你除了老六", "entry": "winner_bracket" },
+    { "seed": "Team 9",  "name": "排子可烂",              "entry": "loser_bracket", "loser_bracket_bye_round1": true },
+    { "seed": "Team 10", "name": "ShenT1Go",             "entry": "loser_bracket" },
+    { "seed": "Team 11", "name": "一路预瞄定吃闪队",      "entry": "loser_bracket" },
+    { "seed": "Team 12", "name": "川姐你说对不队",        "entry": "loser_bracket" },
+    { "seed": "Team 13", "name": "冠军",                 "entry": "loser_bracket" },
+    { "seed": "Team 14", "name": "达哥说的对不队",        "entry": "loser_bracket" },
+    { "seed": "Team 15", "name": "105 Thieves",          "entry": "loser_bracket", "eliminated_in": "M6" }
+  ],
+  "matches": [
+    {
+      "id": "M1",
+      "bracket": "winner",
+      "round": "WB_R1",
+      "week": 1,
+      "team_a": { "type": "seed", "ref": "Team 1" },
+      "team_b": { "type": "seed", "ref": "Team 8" },
+      "winner": "蓝色小药丸",
+      "winner_advances_to": "M8",
+      "loser_advances_to": "M10"
+    },
+    {
+      "id": "M2",
+      "bracket": "winner",
+      "round": "WB_R1",
+      "week": 1,
+      "team_a": { "type": "seed", "ref": "Team 4" },
+      "team_b": { "type": "seed", "ref": "Team 5" },
+      "winner": "CountryLove",
+      "winner_advances_to": "M8",
+      "loser_advances_to": "M11"
+    },
+    {
+      "id": "M3",
+      "bracket": "winner",
+      "round": "WB_R1",
+      "week": 1,
+      "team_a": { "type": "seed", "ref": "Team 3" },
+      "team_b": { "type": "seed", "ref": "Team 6" },
+      "winner": "英特尔首席科学家",
+      "winner_advances_to": "M9",
+      "loser_advances_to": "M13"
+    },
+    {
+      "id": "M4",
+      "bracket": "winner",
+      "round": "WB_R1",
+      "week": 1,
+      "team_a": { "type": "seed", "ref": "Team 2" },
+      "team_b": { "type": "seed", "ref": "Team 7" },
+      "winner": "包包的",
+      "winner_advances_to": "M9",
+      "loser_advances_to": "M12"
+    },
+
+    {
+      "id": "M5",
+      "bracket": "loser",
+      "round": "LB_R1",
+      "week": 1,
+      "team_a": { "type": "seed", "ref": "Team 12" },
+      "team_b": { "type": "seed", "ref": "Team 13" },
+      "winner": "冠军",
+      "winner_advances_to": "M11"
+    },
+    {
+      "id": "M6",
+      "bracket": "loser",
+      "round": "LB_R1",
+      "week": 1,
+      "team_a": { "type": "seed", "ref": "Team 10" },
+      "team_b": { "type": "seed", "ref": "Team 15" },
+      "winner": "ShenT1Go",
+      "loser": "105 Thieves",
+      "winner_advances_to": "M12"
+    },
+    {
+      "id": "M7",
+      "bracket": "loser",
+      "round": "LB_R1",
+      "week": 1,
+      "team_a": { "type": "seed", "ref": "Team 11" },
+      "team_b": { "type": "seed", "ref": "Team 14" },
+      "winner": "一路预瞄定吃闪队",
+      "winner_advances_to": "M13"
+    },
+
+    {
+      "id": "M8",
+      "bracket": "winner",
+      "round": "WB_R2",
+      "week": 3,
+      "team_a": { "type": "feeder", "ref": "M1_winner" },
+      "team_b": { "type": "feeder", "ref": "M2_winner" },
+      "winner": null,
+      "winner_advances_to": "WB_FINAL",
+      "loser_advances_to": "M17"
+    },
+    {
+      "id": "M9",
+      "bracket": "winner",
+      "round": "WB_R2",
+      "week": 3,
+      "team_a": { "type": "feeder", "ref": "M3_winner" },
+      "team_b": { "type": "feeder", "ref": "M4_winner" },
+      "winner": "包包的",
+      "winner_advances_to": "WB_FINAL",
+      "loser_advances_to": "M16",
+      "loser": "英特尔首席科学家"
+    },
+
+    {
+      "id": "M10",
+      "bracket": "loser",
+      "round": "LB_R2",
+      "week": 2,
+      "team_a": { "type": "seed", "ref": "Team 9" },
+      "team_b": { "type": "feeder", "ref": "M1_loser" },
+      "winner": null,
+      "winner_advances_to": "M14"
+    },
+    {
+      "id": "M11",
+      "bracket": "loser",
+      "round": "LB_R2",
+      "week": 2,
+      "team_a": { "type": "feeder", "ref": "M5_winner" },
+      "team_b": { "type": "feeder", "ref": "M2_loser" },
+      "winner": null,
+      "winner_advances_to": "M14"
+    },
+    {
+      "id": "M12",
+      "bracket": "loser",
+      "round": "LB_R2",
+      "week": 2,
+      "team_a": { "type": "feeder", "ref": "M6_winner" },
+      "team_b": { "type": "feeder", "ref": "M4_loser" },
+      "winner": "vitALIty",
+      "loser": "ShenT1Go",
+      "winner_advances_to": "M15"
+    },
+    {
+      "id": "M13",
+      "bracket": "loser",
+      "round": "LB_R2",
+      "week": 2,
+      "team_a": { "type": "feeder", "ref": "M7_winner" },
+      "team_b": { "type": "feeder", "ref": "M3_loser" },
+      "winner": null,
+      "winner_advances_to": "M15"
+    },
+
+    {
+      "id": "M14",
+      "bracket": "loser",
+      "round": "LB_R3",
+      "week": 4,
+      "team_a": { "type": "feeder", "ref": "M10_winner" },
+      "team_b": { "type": "feeder", "ref": "M11_winner" },
+      "winner": null,
+      "winner_advances_to": "M16"
+    },
+    {
+      "id": "M15",
+      "bracket": "loser",
+      "round": "LB_R3",
+      "week": 4,
+      "team_a": { "type": "feeder", "ref": "M12_winner" },
+      "team_b": { "type": "feeder", "ref": "M13_winner" },
+      "winner": null,
+      "winner_advances_to": "M17"
+    },
+
+    {
+      "id": "M16",
+      "bracket": "loser",
+      "round": "LB_R4",
+      "week": 4,
+      "team_a": { "type": "feeder", "ref": "M14_winner" },
+      "team_b": { "type": "feeder", "ref": "M9_loser" },
+      "winner": null,
+      "winner_advances_to": "M18"
+    },
+    {
+      "id": "M17",
+      "bracket": "loser",
+      "round": "LB_R4",
+      "week": 5,
+      "team_a": { "type": "feeder", "ref": "M15_winner" },
+      "team_b": { "type": "feeder", "ref": "M8_loser" },
+      "winner": null,
+      "winner_advances_to": "M18"
+    },
+
+    {
+      "id": "M18",
+      "bracket": "loser",
+      "round": "LB_R5",
+      "week": 5,
+      "team_a": { "type": "feeder", "ref": "M16_winner" },
+      "team_b": { "type": "feeder", "ref": "M17_winner" },
+      "winner": null,
+      "winner_advances_to": "LB_FINAL"
+    },
+
+    {
+      "id": "WB_FINAL",
+      "name": "胜者组决赛",
+      "bracket": "winner",
+      "round": "WB_FINAL",
+      "week": 5,
+      "team_a": { "type": "feeder", "ref": "M8_winner" },
+      "team_b": { "type": "feeder", "ref": "M9_winner" },
+      "winner": null,
+      "winner_advances_to": "GRAND_FINAL",
+      "loser_advances_to": "LB_FINAL"
+    },
+    {
+      "id": "LB_FINAL",
+      "name": "败者组决赛",
+      "bracket": "loser",
+      "round": "LB_FINAL",
+      "week": 6,
+      "team_a": { "type": "feeder", "ref": "M18_winner" },
+      "team_b": { "type": "feeder", "ref": "WB_FINAL_loser" },
+      "winner": null,
+      "winner_advances_to": "GRAND_FINAL"
+    },
+    {
+      "id": "GRAND_FINAL",
+      "name": "最终决赛",
+      "bracket": "final",
+      "round": "GRAND_FINAL",
+      "week": 7,
+      "format": "BO5",
+      "team_a": { "type": "feeder", "ref": "WB_FINAL_winner" },
+      "team_b": { "type": "feeder", "ref": "LB_FINAL_winner" },
+      "winner": null
+    }
+  ],
+  "feeder_legend": {
+    "syntax": "<match_id>_winner | <match_id>_loser",
+    "explanation": "team_a/team_b 的 type 字段为 'seed' 时直接对应 teams[].seed；type 为 'feeder' 时 ref 指向另一场比赛的胜/败者；当该被引用比赛的 winner 字段被填入后，feeder 即可解析。"
+  },
+  "results_recorded": {
+    "winner_bracket": {
+      "M1": "蓝色小药丸",
+      "M2": "CountryLove",
+      "M3": "英特尔首席科学家",
+      "M4": "包包的",
+      "M9": "包包的"
+    },
+    "loser_bracket": {
+      "M5": "冠军",
+      "M6": "ShenT1Go",
+      "M7": "一路预瞄定吃闪队",
+      "M12": "vitALIty"
+    }
+  },
+  "notation": {
+    "strikethrough_meaning": "原图中带删除线的队名表示该队在所在场次被淘汰；据此可逆推出该场胜者。"
+  },
+  "open_questions": [
+    "M16 与 M17 中 WB R2 败者的具体落位（M9 败者→M16、M8 败者→M17）是基于标准双败结构推断，需与官方对齐确认。"
+  ]
+}
